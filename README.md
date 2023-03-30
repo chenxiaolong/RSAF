@@ -53,7 +53,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
         1. The backup mechanism is end-to-end encrypted
         2. The app data is being directly sent to a new device as part of the device setup, without it first being uploaded to the cloud
 
-      This option is disabled by default because there's no way for RSAF to verify that these conditions are actually true. For example, some older OEM Android builds have backup systems that lie about end-to-end encryption. It is important for the backup mechanism itself to be secure because the RSAF backs up its rclone configuration in plain-text.
+      This option is disabled by default because there's no way for RSAF to verify that these conditions are actually true. For example, some older OEM Android builds have backup systems that lie about end-to-end encryption. It is important for the backup mechanism itself to be secure because RSAF backs up its rclone configuration in plain-text.
 
 ## File operation semantics
 
@@ -65,7 +65,7 @@ With POSIX-like semantics, RSAF follows the behavior of the underlying filesyste
 
 * Creating a new file/directory behaves like `touch`/`mkdir -p`. If the path already exists and is the same type, the operation will succeed.
 * Renaming a file on top of an existing file will overwrite the existing file. Otherwise, if the target path alreacy exists, the operation will fail.
-* Copying files/directories behaves like `cp -rT`. Files with the same name in the target will be overwritten. Directories will be merged (but the files within directories are still overwritten).
+* Copying files/directories behaves like `cp -rT`. Files with the same name in the target will be overwritten. Directories will be merged (but conflicting files within directories are still overwritten).
 * Moving paths behaves like copying paths, except that the source is gone once the operation succeeds.
 
 ## Usage
