@@ -1,0 +1,100 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:key="remotes"
+        app:title="@string/pref_header_remotes"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="add_remote"
+            app:persistent="false"
+            app:title="@string/pref_add_remote_name"
+            app:summary="@string/pref_add_remote_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="configuration"
+        app:title="@string/pref_header_configuration"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="import_configuration"
+            app:persistent="false"
+            app:title="@string/pref_import_configuration_name"
+            app:summary="@string/pref_import_configuration_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="export_configuration"
+            app:persistent="false"
+            app:title="@string/pref_export_configuration_name"
+            app:summary="@string/pref_export_configuration_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_header_behavior"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="add_file_extension"
+            app:defaultValue="true"
+            app:title="@string/pref_add_file_extension_name"
+            app:summary="@string/pref_add_file_extension_desc"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="posix_like_semantics"
+            app:title="@string/pref_posix_like_semantics_name"
+            app:summaryOn="@string/pref_posix_like_semantics_desc_on"
+            app:summaryOff="@string/pref_posix_like_semantics_desc_off"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="pretend_local"
+            app:title="@string/pref_pretend_local_name"
+            app:summary="@string/pref_pretend_local_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_header_advanced"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="allow_backup"
+            app:title="@string/pref_allow_backup_name"
+            app:summary="@string/pref_allow_backup_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_header_about"
+        app:iconSpaceReserved="false">
+
+        <com.chiller3.rsaf.LongClickablePreference
+            app:key="version"
+            app:persistent="false"
+            app:title="@string/pref_version_name"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="debug"
+        app:title="@string/pref_header_debug"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="verbose_rclone_logs"
+            app:title="@string/pref_verbose_rclone_logs_name"
+            app:summary="@string/pref_verbose_rclone_logs_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="save_logs"
+            app:persistent="false"
+            app:title="@string/pref_save_logs_name"
+            app:summary="@string/pref_save_logs_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>
