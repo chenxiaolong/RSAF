@@ -14,10 +14,11 @@ open class EditRemoteDialogFragment : DialogFragment() {
         const val RESULT_ACTION = "action"
         const val RESULT_REMOTE = "remote"
         // These must match the indexes in R.array.dialog_edit_remote_actions
-        const val ACTION_CONFIGURE = 0
-        const val ACTION_RENAME = 1
-        const val ACTION_DUPLICATE = 2
-        const val ACTION_DELETE = 3
+        const val ACTION_OPEN = 0
+        const val ACTION_CONFIGURE = 1
+        const val ACTION_RENAME = 2
+        const val ACTION_DUPLICATE = 3
+        const val ACTION_DELETE = 4
 
         fun newInstance(remote: String): EditRemoteDialogFragment =
             EditRemoteDialogFragment().apply {
