@@ -126,7 +126,8 @@ android {
 
         buildConfigField("String", "DOCUMENTS_AUTHORITY",
             "APPLICATION_ID + \".documents\"")
-        resValue("string", "documents_authority", "$applicationId.documents")
+
+        resValue("string", "app_name", "@string/app_name_release")
     }
     sourceSets {
         getByName("main") {
@@ -145,6 +146,12 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+
+            resValue("string", "app_name", "@string/app_name_debug")
+        }
+
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -152,6 +159,10 @@ android {
 
             signingConfig = signingConfigs.getByName("release")
         }
+    }
+    applicationVariants.all {
+        // This is set here so that applicationIdSuffix will be respected
+        resValue("string", "documents_authority", "$applicationId.documents")
     }
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_11)
