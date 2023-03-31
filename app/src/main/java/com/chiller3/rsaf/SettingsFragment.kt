@@ -3,6 +3,7 @@ package com.chiller3.rsaf
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
@@ -224,6 +225,14 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 val remote = bundle.getString(EditRemoteDialogFragment.RESULT_REMOTE)!!
 
                 when (action) {
+                    EditRemoteDialogFragment.ACTION_OPEN -> {
+                        val uri = DocumentsContract.buildRootUri(
+                            BuildConfig.DOCUMENTS_AUTHORITY, remote)
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "vnd.android.document/root")
+                        }
+                        startActivity(intent)
+                    }
                     EditRemoteDialogFragment.ACTION_CONFIGURE -> {
                         InteractiveConfigurationDialogFragment.newInstance(remote, false)
                             .show(parentFragmentManager.beginTransaction(),

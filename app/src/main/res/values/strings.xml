@@ -65,6 +65,7 @@
     <string name="dialog_authorize_title">Waiting for authorization</string>
     <string name="dialog_authorize_message_loading">Waiting for rclone webserver to start.</string>
     <string name="dialog_authorize_message_url">Open the following link to authorize rclone for access to the backend. Once authorized, the token will be automatically inserted in the previous screen.</string>
+    <string name="dialog_edit_remote_open_in_documentsui">Open in DocumentsUI</string>
     <string name="dialog_edit_remote_action_configure">Configure remote</string>
     <string name="dialog_edit_remote_action_rename">Rename remote</string>
     <string name="dialog_edit_remote_action_duplicate">Duplicate remote</string>
