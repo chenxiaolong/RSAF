@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name_release" translatable="false">RSAF</string>
+    <string name="app_name_debug" translatable="false">RSAF (Debug)</string>
+</resources>

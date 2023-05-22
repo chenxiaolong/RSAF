@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name_release">RSAF</string>
-    <string name="app_name_debug">RSAF (Debug)</string>
-
     <!-- Preference headers -->
     <string name="pref_header_remotes">Remotes</string>
     <string name="pref_header_configuration">Configuration</string>
