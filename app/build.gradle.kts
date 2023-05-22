@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import Build_gradle.VersionTriple
 import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
@@ -172,6 +171,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
     splits {
@@ -184,13 +184,13 @@ android {
 }
 
 dependencies {
-    implementation("androidx.activity:activity-ktx:1.7.0")
+    implementation("androidx.activity:activity-ktx:1.7.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.6")
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.fragment:fragment-ktx:1.5.7")
     implementation("androidx.preference:preference-ktx:1.2.0")
-    implementation("androidx.security:security-crypto:1.1.0-alpha05")
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.google.android.material:material:1.9.0")
     implementation(files(rcbridgeAar))
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
