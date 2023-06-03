@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.2
 
 * Update all dependencies ([PR #2 @chenxiaolong], [PR #5 @chenxiaolong])
 * Fix `isChildDocument` returning false for nested children, which caused some apps to crash ([PR #3 @chenxiaolong])
