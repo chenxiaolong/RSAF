@@ -9,7 +9,7 @@
 
 ### Unreleased
 
-* Update all dependencies ([PR #2 @chenxiaolong])
+* Update all dependencies ([PR #2 @chenxiaolong], [PR #5 @chenxiaolong])
 * Fix `isChildDocument` returning false for nested children, which caused some apps to crash ([PR #3 @chenxiaolong])
 
 ### Version 1.1
@@ -24,3 +24,4 @@
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/3
+[PR #5 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/5
