@@ -9,13 +9,12 @@ import org.jetbrains.kotlin.backend.common.pop
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("de.undercouch.download") version "5.3.1"
 }
 
 buildscript {
     dependencies {
-        classpath("org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r")
-        classpath("org.eclipse.jgit:org.eclipse.jgit.archive:6.3.0.202209071007-r")
+        classpath("org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r")
+        classpath("org.eclipse.jgit:org.eclipse.jgit.archive:6.5.0.202303070854-r")
     }
 }
 
@@ -184,7 +183,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.activity:activity-ktx:1.7.1")
+    implementation("androidx.activity:activity-ktx:1.7.2")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.fragment:fragment-ktx:1.5.7")
