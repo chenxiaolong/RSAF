@@ -341,9 +341,30 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
         debugLog("isChildDocument($parentDocumentId, $documentId)")
 
-        val (splitParent, splitName) = splitPath(documentId)
+        // AOSP's FileSystemProvider [1] returns true [2] if parentDocumentId and documentId refer
+        // to the same path, but this conflicts with the documented behavior of isChildDocument(),
+        // which is supposed to test "if a document is descendant (child, grandchild, etc) from the
+        // given parent". We'll go with the documented behavior instead of matching AOSP's
+        // FileSystemProvider.
+        //
+        // [1] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/com/android/internal/content/FileSystemProvider.java;l=141
+        // [2] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/android/os/FileUtils.java;l=917
 
-        return splitName.isNotEmpty() && splitParent == parentDocumentId
+        var currentDoc = documentId
+
+        while (true) {
+            val (splitParent, splitName) = splitPath(currentDoc)
+            if (splitName.isEmpty()) {
+                // Root of the remote
+                break
+            } else if (splitParent == parentDocumentId) {
+                return true
+            }
+
+            currentDoc = splitParent
+        }
+
+        return false
     }
 
     /**
