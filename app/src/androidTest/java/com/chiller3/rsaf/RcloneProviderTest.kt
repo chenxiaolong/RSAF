@@ -256,8 +256,9 @@ class RcloneProviderTest {
         }
 
         assertTrue(isChild(docUriFromRoot(), docUriFromRoot("child")))
-        assertFalse(isChild(docUriFromRoot(), docUriFromRoot("nested", "child")))
+        assertTrue(isChild(docUriFromRoot(), docUriFromRoot("nested", "child")))
         assertTrue(isChild(docUriFromRoot("dir"), docUriFromRoot("dir", "child")))
+        assertTrue(isChild(docUriFromRoot("dir"), docUriFromRoot("dir", "nested", "child")))
         assertFalse(isChild(docUriFromRoot(), docUriFromRoot()))
         assertFalse(isChild(docUriFromRoot("dir"), docUriFromRoot("dir")))
     }
@@ -492,17 +493,22 @@ class RcloneProviderTest {
         testDelete { DocumentsContract.removeDocument(appContext.contentResolver, it, rootDocUri) }
 
         // Try deleting a file from the wrong parent
-        File(rootDir, "dir").apply {
+        File(rootDir, "dir1").apply {
             assertTrue(mkdir())
             File(this, "file").apply {
                 assertTrue(createNewFile())
             }
         }
-
-        val uri = docUriFromRoot("dir", "file")
+        File(rootDir, "dir2").apply {
+            assertTrue(mkdir())
+        }
 
         assertThrows(IllegalArgumentException::class.java) {
-            DocumentsContract.removeDocument(appContext.contentResolver, uri, rootDocUri)
+            DocumentsContract.removeDocument(
+                appContext.contentResolver,
+                docUriFromRoot("dir1", "file"),
+                docUriFromRoot("dir2"),
+            )
         }
     }
 
