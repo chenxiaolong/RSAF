@@ -191,6 +191,11 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("com.google.android.material:material:1.9.0")
     implementation(files(rcbridgeAar))
+
+    // Included only to work around R8 complaining about missing annotation classes referenced by
+    // the Tink transitive dependency
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
