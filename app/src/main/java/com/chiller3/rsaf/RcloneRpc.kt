@@ -247,8 +247,18 @@ object RcloneRpc {
                             put("state", it)
                         }
                         if (!create) {
+                            val result = answer?.let {
+                                // The "obscure" flag is currently ignored for the "result" value:
+                                // https://github.com/rclone/rclone/issues/7069
+                                if (option?.isPassword == true) {
+                                    obscure(it)
+                                } else {
+                                    it
+                                }
+                            }
+
                             put("continue", true)
-                            put("result", answer)
+                            put("result", result)
                         }
                     },
                 ).apply {
@@ -281,5 +291,12 @@ object RcloneRpc {
                 submit("false")
             }
         }
+    }
+
+    /** Convert plain-text password to rclone-obscured password. */
+    private fun obscure(password: String): String {
+        val output = invoke("core/obscure", JSONObject(mapOf("clear" to password)))
+
+        return output.getString("obscured")
     }
 }
