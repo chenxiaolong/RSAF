@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.3
 
 * Fix cache directory being set to non-writable `/data/local/tmp/` in certain contexts ([Issue #11], [PR #12 @chenxiaolong])
 * Work around upstream bug where passwords are not obscured in the config file, breaking password-based authentication (eg. smb, sftp) ([Issue #7], [PR #13 @chenxiaolong])
