@@ -22,11 +22,10 @@ func init() {
 	for *ptr != nil {
 		key_value := C.GoString(*ptr)
 		pieces := strings.SplitN(key_value, "=", 2)
-		if len(pieces) != 2 {
-			continue
-		}
 
-		os.Setenv(pieces[0], pieces[1])
+		if len(pieces) == 2 {
+			os.Setenv(pieces[0], pieces[1])
+		}
 
 		ptr = (**C.char)(unsafe.Add(unsafe.Pointer(ptr), unsafe.Sizeof(ptr)))
 	}
