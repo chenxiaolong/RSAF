@@ -19,11 +19,7 @@ func init() {
 
 	ptr := C.environ
 
-	for {
-		if *ptr == nil {
-			break
-		}
-
+	for *ptr != nil {
 		key_value := C.GoString(*ptr)
 		pieces := strings.SplitN(key_value, "=", 2)
 		if len(pieces) != 2 {
