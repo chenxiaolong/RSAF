@@ -3,6 +3,7 @@ package com.chiller3.rsaf
 import android.app.Application
 import android.app.backup.BackupManager
 import android.content.SharedPreferences
+import android.system.Os
 import android.util.Log
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.color.DynamicColors
@@ -45,7 +46,15 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
     }
 
     private fun initRclone() {
-        Rcbridge.rbInit(File(cacheDir, "rclone").toString())
+        // Some of the rclone backend packages' init() functions set default values based on the
+        // value of config.GetCacheDir(). However, there's no way to call config.SetCacheDir() early
+        // enough that it'll be set before those init() functions. Instead, we'll set the
+        // XDG_CACHE_HOME environment variable to achieve the same effect. Environment variables set
+        // in libc's global environ variable are never read by golang, so rcbridge has an envhack
+        // package to explicitly copy env vars from C land to Go land.
+        Os.setenv("XDG_CACHE_HOME", cacheDir.path, true)
+
+        Rcbridge.rbInit()
         RcloneConfig.init(this)
         updateRcloneVerbosity()
     }
