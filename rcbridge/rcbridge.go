@@ -13,6 +13,9 @@
 package rcbridge
 
 import (
+	// This package's init() MUST run first
+	_ "rcbridge/envhack"
+
 	"context"
 	"io"
 	ioFs "io/fs"
@@ -65,9 +68,8 @@ var (
 )
 
 // Initialize global aspects of the library.
-func RbInit(cacheDir string) {
+func RbInit() {
 	librclone.Initialize()
-	config.SetCacheDir(cacheDir)
 
 	// Don't allow interactive password prompts
 	ci := fs.GetConfig(context.Background())
