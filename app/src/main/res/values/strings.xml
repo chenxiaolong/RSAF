@@ -54,6 +54,7 @@
     <string name="dialog_action_ok">OK</string>
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_authorize">Authorize</string>
+    <string name="dialog_action_reset">Reset</string>
     <string name="dialog_remote_name_message">Enter a name for the remote.</string>
     <string name="dialog_remote_name_hint">Remote name</string>
     <string name="dialog_add_remote_title">Add remote</string>
@@ -77,8 +78,6 @@
     <!-- Interactive configuration -->
     <string name="ic_title_add_remote">Add remote: %1$s</string>
     <string name="ic_title_edit_remote">Edit remote: %1$s</string>
-    <string name="ic_use_default_value">Use default value: \"%1$s\"</string>
-    <string name="ic_use_current_value">Use current value: \"%1$s\"</string>
     <string name="ic_text_box_helper_required">Value must not be empty.</string>
     <string name="ic_text_box_helper_not_required">Value can be empty.</string>
     <string name="ic_header_examples">Example options:</string>

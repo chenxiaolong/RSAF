@@ -32,6 +32,7 @@ import (
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/config"
+	"github.com/rclone/rclone/fs/config/obscure"
 	"github.com/rclone/rclone/fs/fspath"
 	"github.com/rclone/rclone/fs/operations"
 	"github.com/rclone/rclone/fs/sync"
@@ -249,6 +250,22 @@ func RbConfigSave(errOut *RbError) bool {
 	}
 
 	return true
+}
+
+type RbPasswordRevealResult struct {
+	PlainText string
+}
+
+func RbPasswordReveal(obscured string, errOut *RbError) *RbPasswordRevealResult {
+	plainText, err := obscure.Reveal(obscured)
+	if err != nil {
+		assignError(errOut, err, syscall.EINVAL)
+		return nil
+	}
+
+	return &RbPasswordRevealResult{
+		PlainText: plainText,
+	}
 }
 
 // Create an fs instance or get it from the cache if it exists. The path can
