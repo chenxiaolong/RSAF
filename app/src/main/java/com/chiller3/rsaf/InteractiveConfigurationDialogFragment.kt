@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.system.ErrnoException
 import android.text.InputType
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -138,6 +139,10 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             .setCancelable(false)
             .create()
             .apply {
+                if (Preferences(requireContext()).dialogsAtBottom) {
+                    window!!.attributes.gravity = Gravity.BOTTOM
+                }
+
                 setCanceledOnTouchOutside(false)
 
                 // Set click handlers manually because doing it via the alert dialog builder forces

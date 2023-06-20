@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
+import android.view.Gravity
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
@@ -67,6 +68,11 @@ open class TextInputDialogFragment : DialogFragment() {
             }
             .setNegativeButton(R.string.dialog_action_cancel, null)
             .create()
+            .apply {
+                if (Preferences(requireContext()).dialogsAtBottom) {
+                    window!!.attributes.gravity = Gravity.BOTTOM
+                }
+            }
     }
 
     override fun onStart() {

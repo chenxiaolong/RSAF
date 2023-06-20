@@ -13,6 +13,7 @@ class Preferences(context: Context) {
 
         const val PREF_ADD_FILE_EXTENSION = "add_file_extension"
         const val PREF_ALLOW_BACKUP = "allow_backup"
+        const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
         const val PREF_POSIX_LIKE_SEMANTICS = "posix_like_semantics"
         const val PREF_PRETEND_LOCAL = "pretend_local"
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
@@ -57,6 +58,11 @@ class Preferences(context: Context) {
     var pretendLocal: Boolean
         get() = prefs.getBoolean(PREF_PRETEND_LOCAL, false)
         set(enabled) = prefs.edit { putBoolean(PREF_PRETEND_LOCAL, enabled) }
+
+    /** Whether to show dialogs at the bottom of the screen. */
+    var dialogsAtBottom: Boolean
+        get() = prefs.getBoolean(PREF_DIALOGS_AT_BOTTOM, false)
+        set(enabled) = prefs.edit { putBoolean(PREF_DIALOGS_AT_BOTTOM, enabled) }
 
     /** Whether to allow app data backups. */
     var allowBackup: Boolean
