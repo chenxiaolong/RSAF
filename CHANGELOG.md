@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Improve UX for resetting to current/default values and add support for revealing passwords in the interactive configuration dialog ([Issue #8], [PR #14 @chenxiaolong])
+
 ### Version 1.3
 
 * Fix cache directory being set to non-writable `/data/local/tmp/` in certain contexts ([Issue #11], [PR #12 @chenxiaolong])
@@ -27,6 +31,7 @@
 
 <!-- Do not manually edit the lines below. Use `./gradlew changelogUpdateLinks` to regenerate. -->
 [Issue #7]: https://github.com/chenxiaolong/RSAF/issues/7
+[Issue #8]: https://github.com/chenxiaolong/RSAF/issues/8
 [Issue #11]: https://github.com/chenxiaolong/RSAF/issues/11
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
@@ -34,3 +39,4 @@
 [PR #5 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/5
 [PR #12 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/12
 [PR #13 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/13
+[PR #14 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/14
