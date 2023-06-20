@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.4
 
 * Improve UX for resetting to current/default values and add support for revealing passwords in the interactive configuration dialog ([Issue #8], [PR #14 @chenxiaolong])
 * Add option to show all dialogs at the bottom of the screen ([Issue #9], [PR #15 @chenxiaolong])
