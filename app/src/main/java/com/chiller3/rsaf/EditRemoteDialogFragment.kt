@@ -3,6 +3,7 @@ package com.chiller3.rsaf
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.Gravity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -43,6 +44,11 @@ open class EditRemoteDialogFragment : DialogFragment() {
                 dismiss()
             }
             .create()
+            .apply {
+                if (Preferences(requireContext()).dialogsAtBottom) {
+                    window!!.attributes.gravity = Gravity.BOTTOM
+                }
+            }
     }
 
     override fun onDismiss(dialog: DialogInterface) {

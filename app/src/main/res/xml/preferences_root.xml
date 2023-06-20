@@ -58,6 +58,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/pref_header_ui"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="dialogs_at_bottom"
+            app:title="@string/pref_dialogs_at_bottom_name"
+            app:summary="@string/pref_dialogs_at_bottom_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/pref_header_advanced"
         app:iconSpaceReserved="false">
 
