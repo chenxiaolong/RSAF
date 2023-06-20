@@ -223,4 +223,12 @@ object RcloneConfig {
 
     class BadPasswordException(message: String?, cause: Throwable? = null)
         : Exception(message, cause)
+
+    fun revealPassword(obscured: String): String {
+        val error = RbError()
+        val result = Rcbridge.rbPasswordReveal(obscured, error)
+            ?: throw error.toException("rbPasswordReveal")
+
+        return result.plainText
+    }
 }

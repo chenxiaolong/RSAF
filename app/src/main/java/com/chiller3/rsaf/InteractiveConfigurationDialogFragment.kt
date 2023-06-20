@@ -4,14 +4,15 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.system.ErrnoException
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
-import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
@@ -23,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.chiller3.rsaf.databinding.DialogInteractiveConfigurationBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
@@ -49,6 +51,20 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
         /** Replace newlines with spaces unless there are multiple newlines in a row. */
         private fun reflowString(msg: String): String =
             msg.replace("([^\\n])\\n([^\\n]|\$)".toRegex(), "$1 $2")
+
+        private fun tryReveal(text: String, isPassword: Boolean): String {
+            var value = text
+
+            if (isPassword) {
+                try {
+                    value = RcloneConfig.revealPassword(text)
+                } catch (e: ErrnoException) {
+                    Log.w(TAG, "Failed to reveal password", e)
+                }
+            }
+
+            return value
+        }
     }
 
     private var cancelled = true
@@ -57,8 +73,10 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
     private lateinit var binding: DialogInteractiveConfigurationBinding
     private var radioToValue = hashMapOf<Int, String>()
     private var ignoreRadioChanged = false
+    private var currentOrDefault = ""
     private var userInput = ""
     private var lastOptionName: String? = null
+    private var neutralIsAuthorize = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val arguments = requireArguments()
@@ -73,11 +91,6 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
         }
 
         binding = DialogInteractiveConfigurationBinding.inflate(layoutInflater)
-
-        binding.useDefault.setOnCheckedChangeListener { _, _ ->
-            refreshDefaultEnabledState()
-            refreshNextButtonEnabledState()
-        }
 
         binding.text.addTextChangedListener {
             userInput = it.toString()
@@ -120,7 +133,7 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             .setView(binding.root)
             .setPositiveButton(R.string.dialog_action_next, null)
             .setNegativeButton(R.string.dialog_action_cancel, null)
-            .setNeutralButton(R.string.dialog_action_authorize, null)
+            .setNeutralButton("placeholder", null)
             // Don't lose user state unless the user cancels intentionally
             .setCancelable(false)
             .create()
@@ -143,11 +156,16 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
                         dismiss()
                     }
                     getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                        val cmd = viewModel.question.value!!.second.authorizeCmd
+                        if (neutralIsAuthorize) {
+                            val cmd = viewModel.question.value!!.second.authorizeCmd
 
-                        AuthorizeDialogFragment.newInstance(cmd)
-                            .show(parentFragmentManager.beginTransaction(),
-                                AuthorizeDialogFragment.TAG)
+                            AuthorizeDialogFragment.newInstance(cmd)
+                                .show(parentFragmentManager.beginTransaction(),
+                                    AuthorizeDialogFragment.TAG)
+                        } else {
+                            userInput = currentOrDefault
+                            setStateFromInput()
+                        }
                     }
                 }
             }
@@ -157,27 +175,23 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
                 viewModel.question.collect { question ->
                     val (error, option) = question ?: return@collect
 
+                    currentOrDefault = if (option.value.isNotEmpty()) {
+                        tryReveal(option.value, option.isPassword)
+                    } else {
+                        tryReveal(option.default, option.isPassword)
+                    }
+
                     updateMessage(error, option)
                     updateInput(option)
                     updateExamples(option)
-                    updateDefaultToggle(option)
+                    updateNeutralButton(option)
 
-                    refreshDefaultEnabledState()
-
-                    userInput = if (lastOptionName == option.name) {
-                        // Configuration change or repeated question after rejected answer
-                        userInput
-                    } else if (option.value.isNotEmpty()) {
-                        option.value
-                    } else if (option.default.isNotEmpty()) {
-                        option.default
-                    } else {
-                        ""
+                    if (lastOptionName != option.name) {
+                        userInput = currentOrDefault
                     }
+                    // Otherwise, configuration change or repeated question after rejected answer
 
-                    setTextToInput()
-                    setExampleSelectionFromInput()
-                    refreshNextButtonEnabledState()
+                    setStateFromInput()
 
                     lastOptionName = option.name
                 }
@@ -232,6 +246,18 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
     }
 
     /**
+     * Update UI state for the current user input.
+     *
+     * All UI elements must have already been populated with the appropriate data for the current
+     * question.
+     */
+    private fun setStateFromInput() {
+        setTextToInput()
+        setExampleSelectionFromInput()
+        refreshNextButtonEnabledState()
+    }
+
+    /**
      * Update the main dialog message.
      *
      * If [error] is specified, it represents an error with the previously submitted answer. In this
@@ -268,6 +294,12 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             } else {
                 binding.textLayout.helperText =
                     getString(R.string.ic_text_box_helper_not_required)
+            }
+
+            binding.textLayout.endIconMode = if (option.isPassword) {
+                TextInputLayout.END_ICON_PASSWORD_TOGGLE
+            } else {
+                TextInputLayout.END_ICON_NONE
             }
 
             binding.text.inputType = InputType.TYPE_CLASS_TEXT or if (option.isPassword) {
@@ -315,40 +347,17 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
         }
     }
 
-    /**
-     * Update UI state of the the "use default/current" toggle.
-     *
-     * To match the `rclone config` behavior, if there's a current value, it takes precedence over
-     * the default value unless it is equal to the default value. If there's no valid current or
-     * default value, then the toggle's checked state is set to false and the toggle will be hidden.
-     */
-    private fun updateDefaultToggle(option: RcloneRpc.ProviderOption) {
-        if ((option.value.isNotEmpty() && option.value != option.default) || !isNew) {
-            binding.useDefault.text = getString(R.string.ic_use_current_value, option.value)
+    private fun updateNeutralButton(option: RcloneRpc.ProviderOption) {
+        val dialog = dialog as AlertDialog
+        val button = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+
+        neutralIsAuthorize = option.isAuthorize
+
+        button.setText(if (option.isAuthorize) {
+            R.string.dialog_action_authorize
         } else {
-            binding.useDefault.text = getString(R.string.ic_use_default_value, option.default)
-        }
-        binding.useDefault.isVisible =
-            option.value.isNotEmpty() && option.default.isNotEmpty()
-        if (option.name != lastOptionName) {
-            binding.useDefault.isChecked = binding.useDefault.isVisible
-        }
-    }
-
-    /**
-     * Disable all other input elements when the use default checkbox is checked.
-     */
-    private fun refreshDefaultEnabledState() {
-        val isChecked = binding.useDefault.isChecked
-
-        binding.textLayout.isEnabled = !isChecked
-        binding.examplesHeader.isEnabled = !isChecked
-
-        // This can never fail because RadioButtons only work when they are the immediate
-        // children of a RadioGroups
-        binding.examplesGroup.children.forEach {
-            it.isEnabled = !isChecked
-        }
+            R.string.dialog_action_reset
+        })
     }
 
     /**
@@ -361,8 +370,9 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
 
         val dialog = dialog as AlertDialog
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = ok
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).isVisible =
-            viewModel.question.value?.second?.isAuthorize == true
+
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled =
+            neutralIsAuthorize || userInput != currentOrDefault
     }
 
     /**
@@ -374,26 +384,18 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
     private fun getSubmission(): Pair<String?, Boolean> {
         val (_, option) = viewModel.question.value ?: return Pair(null, false)
 
-        if (binding.useDefault.isChecked) {
-            return if (option.value.isNotEmpty()) {
-                Pair(option.value, true)
-            } else {
-                Pair(option.default, true)
-            }
+        val text = if (option.examples.isEmpty()) {
+            binding.text.text.toString()
         } else {
-            val text = if (option.examples.isEmpty()) {
-                binding.text.text.toString()
-            } else {
-                userInput
-            }
+            userInput
+        }
 
-            return if (option.exclusive && !option.examples.any { it.value == text }) {
-                Pair(text, false)
-            } else if (option.required && text.isEmpty()) {
-                Pair(text, false)
-            } else {
-                Pair(text, true)
-            }
+        return if (option.exclusive && !option.examples.any { it.value == text }) {
+            Pair(text, false)
+        } else if (option.required && text.isEmpty()) {
+            Pair(text, false)
+        } else {
+            Pair(text, true)
         }
     }
 }
