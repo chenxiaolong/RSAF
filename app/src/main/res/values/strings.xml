@@ -43,6 +43,10 @@
     <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
     <string name="alert_duplicate_remote_success">Successfully duplicated remote %1$s to %2$s</string>
     <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
+    <string name="alert_hide_remote_success">Successfully hid remote %1$s from DocumentsUI</string>
+    <string name="alert_hide_remote_failure">Failed to hide remote %1$s from DocumentsUI: %2$s</string>
+    <string name="alert_unhide_remote_success">Successfully unhid remote %1$s from DocumentsUI</string>
+    <string name="alert_unhide_remote_failure">Failed to unhide remote %1$s from DocumentsUI: %2$s</string>
     <string name="alert_import_success">Successfully imported configuration</string>
     <string name="alert_import_failure">Failed to import configuration: %1$s</string>
     <string name="alert_import_cancelled">Configuration import cancelled</string>
@@ -67,6 +71,8 @@
     <string name="dialog_authorize_message_loading">Waiting for rclone webserver to start.</string>
     <string name="dialog_authorize_message_url">Open the following link to authorize rclone for access to the backend. Once authorized, the token will be automatically inserted in the previous screen.</string>
     <string name="dialog_edit_remote_open_in_documentsui">Open in DocumentsUI</string>
+    <string name="dialog_edit_remote_hide_from_documentsui">Hide from DocumentsUI</string>
+    <string name="dialog_edit_remote_unhide_from_documentsui">Unhide from DocumentsUI</string>
     <string name="dialog_edit_remote_action_configure">Configure remote</string>
     <string name="dialog_edit_remote_action_rename">Rename remote</string>
     <string name="dialog_edit_remote_action_duplicate">Duplicate remote</string>

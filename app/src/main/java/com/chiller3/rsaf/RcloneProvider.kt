@@ -285,7 +285,12 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 flags = flags or DocumentsContract.Root.FLAG_LOCAL_ONLY
             }
 
-            for (remote in RcloneRpc.remoteNames) {
+            for ((remote, config) in RcloneRpc.remotes) {
+                if (config[RcloneRpc.CUSTOM_OPT_HIDDEN] == "true") {
+                    debugLog("Skipping hidden root: $remote")
+                    continue
+                }
+
                 newRow().apply {
                     // Required
                     add(DocumentsContract.Root.COLUMN_ROOT_ID, remote)

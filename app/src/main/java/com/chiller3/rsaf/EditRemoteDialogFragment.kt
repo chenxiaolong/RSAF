@@ -12,23 +12,49 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 open class EditRemoteDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_REMOTE = "remote"
+        private const val ARG_IS_HIDDEN = "is_hidden"
         const val RESULT_ACTION = "action"
         const val RESULT_REMOTE = "remote"
-        // These must match the indexes in R.array.dialog_edit_remote_actions
-        const val ACTION_OPEN = 0
-        const val ACTION_CONFIGURE = 1
-        const val ACTION_RENAME = 2
-        const val ACTION_DUPLICATE = 3
-        const val ACTION_DELETE = 4
 
-        fun newInstance(remote: String): EditRemoteDialogFragment =
+        fun newInstance(remote: String, remoteHidden: Boolean): EditRemoteDialogFragment =
             EditRemoteDialogFragment().apply {
-                arguments = bundleOf(ARG_REMOTE to remote)
+                arguments = bundleOf(
+                    ARG_REMOTE to remote,
+                    ARG_IS_HIDDEN to remoteHidden,
+                )
             }
     }
 
+    enum class Action {
+        OPEN,
+        HIDE,
+        UNHIDE,
+        CONFIGURE,
+        RENAME,
+        DUPLICATE,
+        DELETE,
+    }
+
     private lateinit var remote: String
-    private var action = -1
+    private val remoteHidden by lazy {
+        requireArguments().getBoolean(ARG_IS_HIDDEN)
+    }
+    private var action: Action? = null
+
+    private val items by lazy {
+        mutableListOf<Pair<Action, String>>().apply {
+            if (remoteHidden) {
+                add(Action.UNHIDE to getString(R.string.dialog_edit_remote_unhide_from_documentsui))
+            } else {
+                add(Action.OPEN to getString(R.string.dialog_edit_remote_open_in_documentsui))
+                add(Action.HIDE to getString(R.string.dialog_edit_remote_hide_from_documentsui))
+            }
+            add(Action.CONFIGURE to getString(R.string.dialog_edit_remote_action_configure))
+            add(Action.RENAME to getString(R.string.dialog_edit_remote_action_rename))
+            add(Action.DUPLICATE to getString(R.string.dialog_edit_remote_action_duplicate))
+            add(Action.DELETE to getString(R.string.dialog_edit_remote_action_delete))
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val arguments = requireArguments()
@@ -36,8 +62,8 @@ open class EditRemoteDialogFragment : DialogFragment() {
 
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(remote)
-            .setItems(R.array.dialog_edit_remote_actions) { _, i ->
-                action = i
+            .setItems(items.map { it.second }.toTypedArray()) { _, i ->
+                action = items[i].first
                 dismiss()
             }
             .setNegativeButton(R.string.dialog_action_cancel) { _, _ ->

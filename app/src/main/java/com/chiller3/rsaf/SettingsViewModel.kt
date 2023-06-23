@@ -46,6 +46,14 @@ data class RemoteDuplicateSucceeded(val oldRemote: String, val newRemote: String
 data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
+
+data class RemoteHideUnhideSucceeded(val remote: String, val hidden: Boolean) : Alert {
+    override val requireNotifyRootsChanged: Boolean = true
+}
+
+data class RemoteHideUnhideFailed(val remote: String, val hidden: Boolean, val error: String) : Alert {
+    override val requireNotifyRootsChanged: Boolean = false
+}
 object ImportSucceeded : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
@@ -133,6 +141,23 @@ class SettingsViewModel : ViewModel() {
     private fun refreshRemotes() {
         viewModelScope.launch {
             refreshRemotesInternal()
+        }
+    }
+
+    fun hideRemote(remote: String, hide: Boolean) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    RcloneRpc.setRemoteOptions(remote, mapOf(
+                        RcloneRpc.CUSTOM_OPT_HIDDEN to hide.toString(),
+                    ))
+                }
+                refreshRemotesInternal()
+                _alerts.update { it + RemoteHideUnhideSucceeded(remote, hide) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to set remote $remote hide state to $hide", e)
+                _alerts.update { it + RemoteHideUnhideFailed(remote, hide, e.toString()) }
+            }
         }
     }
 

@@ -8,6 +8,9 @@ import java.io.IOException
 object RcloneRpc {
     private val TAG = RcloneRpc::class.java.simpleName
 
+    private const val CUSTOM_OPT_PREFIX = "rsaf:"
+    const val CUSTOM_OPT_HIDDEN = CUSTOM_OPT_PREFIX + "hidden"
+
     /**
      * Perform an rclone RPC call.
      *
@@ -291,6 +294,19 @@ object RcloneRpc {
                 submit("false")
             }
         }
+    }
+
+    /** Directly and non-interactively set config key/value pairs for a remote. */
+    fun setRemoteOptions(remote: String, options: Map<String, String>) {
+        invoke("config/update", JSONObject(
+            mutableMapOf<String, Any?>(
+                "name" to remote,
+                "parameters" to options,
+                "opt" to mutableMapOf<String, Any?>(
+                    "obscure" to true,
+                ),
+            ),
+        ))
     }
 
     /** Convert plain-text password to rclone-obscured password. */
