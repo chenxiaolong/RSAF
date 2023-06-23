@@ -2,6 +2,7 @@ package com.chiller3.rsaf
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,7 +12,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.*
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.get
+import androidx.preference.size
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -221,11 +226,18 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 }
             }
             TAG_EDIT_REMOTE -> {
-                val action = bundle.getInt(EditRemoteDialogFragment.RESULT_ACTION, -1)
+                val action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    bundle.getSerializable(EditRemoteDialogFragment.RESULT_ACTION,
+                        EditRemoteDialogFragment.Action::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    bundle.getSerializable(EditRemoteDialogFragment.RESULT_ACTION)
+                            as EditRemoteDialogFragment.Action
+                }
                 val remote = bundle.getString(EditRemoteDialogFragment.RESULT_REMOTE)!!
 
                 when (action) {
-                    EditRemoteDialogFragment.ACTION_OPEN -> {
+                    EditRemoteDialogFragment.Action.OPEN -> {
                         val uri = DocumentsContract.buildRootUri(
                             BuildConfig.DOCUMENTS_AUTHORITY, remote)
                         val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -233,12 +245,18 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                         }
                         startActivity(intent)
                     }
-                    EditRemoteDialogFragment.ACTION_CONFIGURE -> {
+                    EditRemoteDialogFragment.Action.HIDE -> {
+                        viewModel.hideRemote(remote, true)
+                    }
+                    EditRemoteDialogFragment.Action.UNHIDE -> {
+                        viewModel.hideRemote(remote, false)
+                    }
+                    EditRemoteDialogFragment.Action.CONFIGURE -> {
                         InteractiveConfigurationDialogFragment.newInstance(remote, false)
                             .show(parentFragmentManager.beginTransaction(),
                                 InteractiveConfigurationDialogFragment.TAG)
                     }
-                    EditRemoteDialogFragment.ACTION_RENAME -> {
+                    EditRemoteDialogFragment.Action.RENAME -> {
                         showRemoteNameDialog(
                             TAG_RENAME_REMOTE,
                             getString(R.string.dialog_rename_remote_title, remote),
@@ -246,7 +264,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                             it.putString(ARG_OLD_REMOTE_NAME, remote)
                         }
                     }
-                    EditRemoteDialogFragment.ACTION_DUPLICATE -> {
+                    EditRemoteDialogFragment.Action.DUPLICATE -> {
                         showRemoteNameDialog(
                             TAG_DUPLICATE_REMOTE,
                             getString(R.string.dialog_duplicate_remote_title, remote),
@@ -254,8 +272,11 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                             it.putString(ARG_OLD_REMOTE_NAME, remote)
                         }
                     }
-                    EditRemoteDialogFragment.ACTION_DELETE -> {
+                    EditRemoteDialogFragment.Action.DELETE -> {
                         viewModel.deleteRemote(remote)
+                    }
+                    null -> {
+                        // Cancelled
                     }
                 }
             }
@@ -304,7 +325,10 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
             preference.key.startsWith(Preferences.PREF_EDIT_REMOTE_PREFIX) -> {
                 val remote = preference.key.substring(Preferences.PREF_EDIT_REMOTE_PREFIX.length)
-                EditRemoteDialogFragment.newInstance(remote)
+                val isHidden = viewModel.remotes.value.find { it.name == remote }
+                    ?.config?.get(RcloneRpc.CUSTOM_OPT_HIDDEN) == "true"
+
+                EditRemoteDialogFragment.newInstance(remote, isHidden)
                     .show(parentFragmentManager.beginTransaction(), TAG_EDIT_REMOTE)
                 return true
             }
@@ -368,6 +392,16 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 alert.oldRemote, alert.newRemote)
             is RemoteDuplicateFailed -> getString(R.string.alert_duplicate_remote_failure,
                 alert.oldRemote, alert.newRemote, alert.error)
+            is RemoteHideUnhideSucceeded -> if (alert.hidden) {
+                getString(R.string.alert_hide_remote_success, alert.remote)
+            } else {
+                getString(R.string.alert_unhide_remote_success, alert.remote)
+            }
+            is RemoteHideUnhideFailed -> if (alert.hidden) {
+                getString(R.string.alert_hide_remote_failure, alert.remote, alert.error)
+            } else {
+                getString(R.string.alert_unhide_remote_failure, alert.remote, alert.error)
+            }
             ImportSucceeded -> getString(R.string.alert_import_success)
             ExportSucceeded -> getString(R.string.alert_export_success)
             is ImportFailed -> getString(R.string.alert_import_failure, alert.error)
