@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.6
 
 * Fix hang when hiding remotes that use OAuth2 authentication ([Issue #16], [PR #19 @chenxiaolong])
 
