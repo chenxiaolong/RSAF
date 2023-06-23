@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix hang when hiding remotes that use OAuth2 authentication ([Issue #16], [PR #19 @chenxiaolong])
+
 ### Version 1.5
 
 * Add support for hiding remotes from DocumentsUI ([Issue #16], [PR #17 @chenxiaolong])
@@ -51,3 +55,4 @@
 [PR #15 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/15
 [PR #17 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/17
 [PR #18 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/18
+[PR #19 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/19
