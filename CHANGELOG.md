@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.5
 
 * Add support for hiding remotes from DocumentsUI ([Issue #16], [PR #17 @chenxiaolong])
 * Update dependencies ([PR #18 @chenxiaolong])
