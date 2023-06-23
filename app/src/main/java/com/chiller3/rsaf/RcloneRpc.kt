@@ -303,6 +303,9 @@ object RcloneRpc {
                 "name" to remote,
                 "parameters" to options,
                 "opt" to mutableMapOf<String, Any?>(
+                    // This is required or else the rclone authorize flow is triggered, even if we
+                    // don't update any authentication-related options.
+                    "nonInteractive" to true,
                     "obscure" to true,
                 ),
             ),
