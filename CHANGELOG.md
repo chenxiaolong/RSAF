@@ -7,6 +7,11 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add support for hiding remotes from DocumentsUI ([Issue #16], [PR #17 @chenxiaolong])
+* Update dependencies ([PR #18 @chenxiaolong])
+
 ### Version 1.4
 
 * Improve UX for resetting to current/default values and add support for revealing passwords in the interactive configuration dialog ([Issue #8], [PR #14 @chenxiaolong])
@@ -35,6 +40,7 @@
 [Issue #8]: https://github.com/chenxiaolong/RSAF/issues/8
 [Issue #9]: https://github.com/chenxiaolong/RSAF/issues/9
 [Issue #11]: https://github.com/chenxiaolong/RSAF/issues/11
+[Issue #16]: https://github.com/chenxiaolong/RSAF/issues/16
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -43,3 +49,5 @@
 [PR #13 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/13
 [PR #14 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/14
 [PR #15 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/15
+[PR #17 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/17
+[PR #18 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/18
