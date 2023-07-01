@@ -63,6 +63,8 @@ var (
 		fs.ErrorIsDir:                  syscall.EISDIR,
 		fs.ErrorDirectoryNotEmpty:      syscall.ENOTEMPTY,
 		fs.ErrorPermissionDenied:       syscall.EACCES,
+		fs.ErrorNotImplemented:         syscall.ENOSYS,
+		fs.ErrorCommandNotFound:        syscall.ENOENT,
 		fs.ErrorFileNameTooLong:        syscall.ENAMETOOLONG,
 		config.ErrorConfigFileNotFound: syscall.ENOENT,
 	}
@@ -282,23 +284,39 @@ func getFs(remote string) (fs.Fs, error) {
 // the same as cmd.NewFsFile(), except errors are returned instead of making the
 // process exit.
 //
+// If `treatAsFile` is true, then the document is assumed to be a file.
+//
 // Note that this intentionally does not cache the fs instance because unless it
 // points to a root, file operations may invalidate it (eg. a directory is
 // deleted and a file is created in its place).
-func getFsForDoc(doc string) (fs.Fs, string, error) {
-	_, name, err := fspath.Split(doc)
+func getFsForDoc(doc string, treatAsFile bool) (fs.Fs, string, error) {
+	parent, name, err := fspath.Split(doc)
 	if err != nil {
 		return nil, "", err
 	}
 
-	f, err := fs.NewFs(context.Background(), doc)
-	if err == fs.ErrorIsFile {
+	remote := doc
+	if treatAsFile {
+		if name == "" {
+			return nil, "", fs.ErrorIsDir
+		} else if parent == "" {
+			parent = "."
+		}
+		remote = parent
+	}
+
+	f, err := fs.NewFs(context.Background(), remote)
+	if !treatAsFile && err == fs.ErrorIsFile {
 		return f, name, nil
 	} else if err != nil {
 		return nil, "", err
 	}
 
-	return f, "", nil
+	if treatAsFile {
+		return f, name, nil
+	} else {
+		return f, "", nil
+	}
 }
 
 // Create a vfs instance for the given remote. The path can point to the root
@@ -588,12 +606,15 @@ func RbDocCopyOrMove(sourceDoc string, targetDoc string, copy bool, errOut *RbEr
 	// We'll just follow the behavior of rclone's copyto/moveto in assuming that
 	// the source document exists and use filename == "" to decide which code
 	// path to take.
-	sourceFs, sourceFile, err := getFsForDoc(sourceDoc)
+	sourceFs, sourceFile, err := getFsForDoc(sourceDoc, false)
 	if err != nil {
 		assignError(errOut, err, syscall.EINVAL)
 		return false
 	}
-	targetFs, targetFile, err := getFsForDoc(targetDoc)
+
+	// If the source is a file, we want avoid rclone's behavior described above
+	// and make targetFs point to the parent and targetFile to the filename.
+	targetFs, targetFile, err := getFsForDoc(targetDoc, sourceFile != "")
 	if err != nil {
 		assignError(errOut, err, syscall.EINVAL)
 		return false
