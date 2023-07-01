@@ -10,6 +10,8 @@
 ### Unreleased
 
 * Update rclone to 1.63.0 ([PR #20 @chenxiaolong])
+* Reduce directory cache time from 5 minutes to 5 seconds ([PR #21 @chenxiaolong])
+  * After a file copy or move, the files in the target directory will no longer appear as missing for 5 minutes. Due to API limitations, there's no way to manually invalidate the cache after a copy/move operation, so a short timeout is used instead.
 
 ### Version 1.6
 
@@ -61,3 +63,4 @@
 [PR #18 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/18
 [PR #19 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/19
 [PR #20 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/20
+[PR #21 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/21
