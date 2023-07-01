@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.7
 
 * Update rclone to 1.63.0 ([PR #20 @chenxiaolong])
 * Reduce directory cache time from 5 minutes to 5 seconds ([PR #21 @chenxiaolong])
