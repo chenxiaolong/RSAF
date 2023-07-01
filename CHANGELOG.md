@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix race condition in rclone initialization that could lead to crashes when accessing files while RSAF's user interface is closed ([Issue #22], [PR #23 @chenxiaolong])
+
 ### Version 1.7
 
 * Update rclone to 1.63.0 ([PR #20 @chenxiaolong])
@@ -51,6 +55,7 @@
 [Issue #9]: https://github.com/chenxiaolong/RSAF/issues/9
 [Issue #11]: https://github.com/chenxiaolong/RSAF/issues/11
 [Issue #16]: https://github.com/chenxiaolong/RSAF/issues/16
+[Issue #22]: https://github.com/chenxiaolong/RSAF/issues/22
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -64,3 +69,4 @@
 [PR #19 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/19
 [PR #20 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/20
 [PR #21 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/21
+[PR #23 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/23
