@@ -335,6 +335,12 @@ func getVfs(remote string) (*vfs.VFS, error) {
 	v, ok := vfsCache[remote]
 	if !ok {
 		opts := vfscommon.DefaultOpt
+		// Significantly shorten the time that directory entries are cached so
+		// that file listings have a more accurate view after operations that
+		// touch the backend directly, like copying/moving. There's no public
+		// nor internal API for manually invalidating the directory cache, so
+		// reducing the timeout is our only option.
+		opts.DirCacheTime = 5 * time.Second
 		// This is required for O_RDWR
 		opts.CacheMode = vfscommon.CacheModeWrites
 		// Don't let the cache grow too big
