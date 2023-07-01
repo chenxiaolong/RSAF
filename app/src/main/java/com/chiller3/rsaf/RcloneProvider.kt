@@ -11,6 +11,7 @@ import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.system.ErrnoException
+import android.system.Os
 import android.system.OsConstants
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -260,10 +261,37 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     override fun onCreate(): Boolean {
-        prefs = Preferences(context!!)
+        val context = context!!
+
+        prefs = Preferences(context)
         prefs.registerListener(this)
 
+        // Some of the rclone backend packages' init() functions set default values based on the
+        // value of config.GetCacheDir(). However, there's no way to call config.SetCacheDir() early
+        // enough that it'll be set before those init() functions. Instead, we'll set the
+        // XDG_CACHE_HOME environment variable to achieve the same effect. Environment variables set
+        // in libc's global environ variable are never read by golang, so rcbridge has an envhack
+        // package to explicitly copy env vars from C land to Go land.
+        Os.setenv("XDG_CACHE_HOME", context.cacheDir.path, true)
+
+        Rcbridge.rbInit()
+        RcloneConfig.init(context)
+        updateRcloneVerbosity()
+
         return true
+    }
+
+    private fun updateRcloneVerbosity() {
+        val verbosity = if (prefs.isDebugMode) {
+            if (prefs.verboseRcloneLogs) {
+                2L
+            } else {
+                1L
+            }
+        } else {
+            0L
+        }
+        Rcbridge.rbSetLogVerbosity(verbosity)
     }
 
     override fun shutdown() {
@@ -273,6 +301,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             Preferences.PREF_PRETEND_LOCAL -> notifyRootsChanged(context!!.contentResolver)
+            Preferences.PREF_DEBUG_MODE, Preferences.PREF_VERBOSE_RCLONE_LOGS ->
+                updateRcloneVerbosity()
         }
     }
 
