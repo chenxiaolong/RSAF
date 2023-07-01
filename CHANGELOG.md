@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.63.0 ([PR #20 @chenxiaolong])
+
 ### Version 1.6
 
 * Fix hang when hiding remotes that use OAuth2 authentication ([Issue #16], [PR #19 @chenxiaolong])
@@ -56,3 +60,4 @@
 [PR #17 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/17
 [PR #18 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/18
 [PR #19 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/19
+[PR #20 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/20
