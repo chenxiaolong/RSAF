@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix crash when cancelling the Edit Remote dialog on Android <=12 ([Issue #16], [PR #24 @chenxiaolong])
+
 ### Version 1.8
 
 * Fix race condition in rclone initialization that could lead to crashes when accessing files while RSAF's user interface is closed ([Issue #22], [PR #23 @chenxiaolong])
@@ -70,3 +74,4 @@
 [PR #20 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/20
 [PR #21 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/21
 [PR #23 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/23
+[PR #24 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/24
