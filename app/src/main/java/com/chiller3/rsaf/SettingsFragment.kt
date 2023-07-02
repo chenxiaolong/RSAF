@@ -232,7 +232,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 } else {
                     @Suppress("DEPRECATION")
                     bundle.getSerializable(EditRemoteDialogFragment.RESULT_ACTION)
-                            as EditRemoteDialogFragment.Action
+                            as EditRemoteDialogFragment.Action?
                 }
                 val remote = bundle.getString(EditRemoteDialogFragment.RESULT_REMOTE)!!
 
