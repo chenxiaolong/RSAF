@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.9
 
 * Fix crash when cancelling the Edit Remote dialog on Android <=12 ([Issue #16], [PR #24 @chenxiaolong])
 
