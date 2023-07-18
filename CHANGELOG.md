@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.10
 
 * Update rclone to 1.63.1 ([PR #26 @chenxiaolong])
 * Enable checksum validation for all gradle dependencies ([PR #25 @chenxiaolong])
