@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.63.1 ([PR #26 @chenxiaolong])
+
 ### Version 1.9
 
 * Fix crash when cancelling the Edit Remote dialog on Android <=12 ([Issue #16], [PR #24 @chenxiaolong])
@@ -75,3 +79,4 @@
 [PR #21 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/21
 [PR #23 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/23
 [PR #24 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/24
+[PR #26 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/26
