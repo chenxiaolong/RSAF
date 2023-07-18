@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Update rclone to 1.63.1 ([PR #26 @chenxiaolong])
+* Enable checksum validation for all gradle dependencies ([PR #25 @chenxiaolong])
 
 ### Version 1.9
 
@@ -79,4 +80,5 @@
 [PR #21 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/21
 [PR #23 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/23
 [PR #24 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/24
+[PR #25 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/25
 [PR #26 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/26
