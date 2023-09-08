@@ -1,0 +1,32 @@
+[versions]
+activity-ktx = "1.7.2"
+android-gradle-plugin = "8.1.1"
+appcompat = "1.6.1"
+core-ktx = "1.10.1"
+jgit = "6.5.0.202303070854-r"
+espresso-core = "3.5.1"
+fragment-ktx = "1.6.1"
+jsr305 = "3.0.2"
+junit = "1.1.5"
+kotlin = "1.9.10"
+material = "1.9.0"
+preference-ktx = "1.2.1"
+security-crypto = "1.1.0-alpha06"
+
+[libraries]
+activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
+fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment-ktx" }
+jgit-org-eclipse-jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+jgit-org-eclipse-jgit-archive = { module = "org.eclipse.jgit:org.eclipse.jgit.archive", version.ref = "jgit" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
+junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference-ktx" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
