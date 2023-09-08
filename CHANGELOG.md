@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add option to request "all files" permission on Android 11+ to allow wrapper remotes, like `crypt`, to access `/sdcard` ([Issue #28], [PR #29 @chenxiaolong])
+
 ### Version 1.10
 
 * Update rclone to 1.63.1 ([PR #26 @chenxiaolong])
@@ -65,6 +69,7 @@
 [Issue #11]: https://github.com/chenxiaolong/RSAF/issues/11
 [Issue #16]: https://github.com/chenxiaolong/RSAF/issues/16
 [Issue #22]: https://github.com/chenxiaolong/RSAF/issues/22
+[Issue #28]: https://github.com/chenxiaolong/RSAF/issues/28
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -82,3 +87,4 @@
 [PR #24 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/24
 [PR #25 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/25
 [PR #26 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/26
+[PR #29 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/29
