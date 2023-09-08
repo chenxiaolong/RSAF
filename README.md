@@ -22,7 +22,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 * Supports client applications that open entire directories with `ACTION_OPEN_DOCUMENT_TREE`
 * Supports pretending to be local storage for apps that block remote SAF roots
 * Supports both [Android-like and POSIX-like file operation semantics](#file-operation-semantics)
-* [No permissions required besides network access](#permissions)
+* [No required permissions besides network access](#permissions)
 
 ## Limitations
 
@@ -78,9 +78,9 @@ With POSIX-like semantics, RSAF follows the behavior of the underlying filesyste
 
 ## Permissions
 
-The only permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes.
+The only permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
 
-RSAF does not and will never have ads or telemetry.
+On Android 11+, RSAF can optionally request the `MANAGE_EXTERNAL_STORAGE` (All files) permission. This allows rclone to access files in `/sdcard`, which may be useful for wrapper remotes. For example, this allows using a `crypt` remote to transparently encrypt and decrypt files in a local directory.
 
 ## Verifying digital signatures
 
