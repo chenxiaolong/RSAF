@@ -16,6 +16,7 @@ class Preferences(context: Context) {
         const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
         const val PREF_POSIX_LIKE_SEMANTICS = "posix_like_semantics"
         const val PREF_PRETEND_LOCAL = "pretend_local"
+        const val PREF_LOCAL_STORAGE_ACCESS = "local_storage_access"
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
 
         // UI actions only

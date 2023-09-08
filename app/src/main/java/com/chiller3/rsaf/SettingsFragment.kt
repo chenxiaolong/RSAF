@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.DocumentsContract
+import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
@@ -15,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import androidx.preference.size
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
@@ -22,7 +25,8 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
-    Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener {
+    Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,
+    Preference.OnPreferenceChangeListener {
     companion object {
         private val TAG_ADD_REMOTE_NAME =
             "${SettingsFragment::class.java.simpleName}.add_remote_name"
@@ -45,6 +49,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     private lateinit var categoryConfiguration: PreferenceCategory
     private lateinit var categoryDebug: PreferenceCategory
     private lateinit var prefAddRemote: Preference
+    private lateinit var prefLocalStorageAccess: SwitchPreferenceCompat
     private lateinit var prefImportConfiguration: Preference
     private lateinit var prefExportConfiguration: Preference
     private lateinit var prefVersion: LongClickablePreference
@@ -82,6 +87,9 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
 
         prefAddRemote = findPreference(Preferences.PREF_ADD_REMOTE)!!
         prefAddRemote.onPreferenceClickListener = this
+
+        prefLocalStorageAccess = findPreference(Preferences.PREF_LOCAL_STORAGE_ACCESS)!!
+        prefLocalStorageAccess.onPreferenceChangeListener = this
 
         prefImportConfiguration = findPreference(Preferences.PREF_IMPORT_CONFIGURATION)!!
         prefImportConfiguration.onPreferenceClickListener = this
@@ -188,6 +196,16 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            prefLocalStorageAccess.isChecked = Environment.isExternalStorageManager()
+        } else {
+            prefLocalStorageAccess.isVisible = false
+        }
+    }
+
     private fun refreshVersion() {
         prefVersion.summary = buildString {
             append(BuildConfig.VERSION_NAME)
@@ -241,7 +259,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                         val uri = DocumentsContract.buildRootUri(
                             BuildConfig.DOCUMENTS_AUTHORITY, remote)
                         val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(uri, "vnd.android.document/root")
+                            setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM)
                         }
                         startActivity(intent)
                     }
@@ -347,7 +365,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 startActivity(Intent(Intent.ACTION_VIEW, uri))
                 return true
             }
-            preference == prefSaveLogs -> {
+            preference === prefSaveLogs -> {
                 requestSafSaveLogs.launch(Logcat.FILENAME_DEFAULT)
                 return true
             }
@@ -363,6 +381,27 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 refreshVersion()
                 refreshDebugPrefs()
                 return true
+            }
+        }
+
+        return false
+    }
+
+    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
+        when (preference) {
+            prefLocalStorageAccess -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                        Uri.parse("package:${BuildConfig.APPLICATION_ID}"),
+                    )
+
+                    startActivity(intent)
+                }
+
+                // We rely on onPause() to adjust the switch state when the user comes back from the
+                // settings app.
+                return false
             }
         }
 

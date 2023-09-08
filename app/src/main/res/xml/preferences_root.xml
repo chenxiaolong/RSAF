@@ -55,6 +55,13 @@
             app:title="@string/pref_pretend_local_name"
             app:summary="@string/pref_pretend_local_desc"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="local_storage_access"
+            app:persistent="false"
+            app:title="@string/pref_local_storage_access_name"
+            app:summary="@string/pref_local_storage_access_desc"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
