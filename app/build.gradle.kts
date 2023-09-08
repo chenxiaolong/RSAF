@@ -7,14 +7,14 @@ import org.eclipse.jgit.lib.ObjectId
 import org.jetbrains.kotlin.backend.common.pop
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 buildscript {
     dependencies {
-        classpath("org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r")
-        classpath("org.eclipse.jgit:org.eclipse.jgit.archive:6.5.0.202303070854-r")
+        classpath(libs.jgit.org.eclipse.jgit)
+        classpath(libs.jgit.org.eclipse.jgit.archive)
     }
 }
 
@@ -183,21 +183,21 @@ android {
 }
 
 dependencies {
-    implementation("androidx.activity:activity-ktx:1.7.2")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.fragment:fragment-ktx:1.6.0")
-    implementation("androidx.preference:preference-ktx:1.2.0")
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("com.google.android.material:material:1.9.0")
+    implementation(libs.activity.ktx)
+    implementation(libs.appcompat)
+    implementation(libs.core.ktx)
+    implementation(libs.fragment.ktx)
+    implementation(libs.preference.ktx)
+    implementation(libs.security.crypto)
+    implementation(libs.material)
     implementation(files(rcbridgeAar))
 
     // Included only to work around R8 complaining about missing annotation classes referenced by
     // the Tink transitive dependency
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    implementation(libs.jsr305)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.espresso.core)
 }
 
 val archive = tasks.register("archive") {
