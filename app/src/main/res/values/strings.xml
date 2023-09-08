@@ -22,6 +22,8 @@
     <string name="pref_posix_like_semantics_desc_off">Use Android-style file operation behavior. When creating, renaming, copying, or moving paths, add a number to the name to avoid conflicts if the target path already exists.</string>
     <string name="pref_pretend_local_name">Pretend to be local storage</string>
     <string name="pref_pretend_local_desc">Present the rclone remotes as local storage to the Storage Access Framework. This forces compatibility with apps that only allow selecting local files.</string>
+    <string name="pref_local_storage_access_name">Allow local storage access</string>
+    <string name="pref_local_storage_access_desc">Allows wrapper remotes, like <tt>crypt</tt>, to access local storage under <tt>/sdcard</tt>.</string>
     <string name="pref_dialogs_at_bottom_name">Show dialogs at bottom</string>
     <string name="pref_dialogs_at_bottom_desc">Makes one-handed use easier and prevents dialog buttons from shifting.</string>
     <string name="pref_allow_backup_name">Allow Android backups</string>
