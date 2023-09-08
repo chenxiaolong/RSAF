@@ -12,13 +12,6 @@
         which is 60% with 20% of 48px for the padding on all 4 sides.
 
         [1] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r31:frameworks/base/graphics/java/android/graphics/drawable/AdaptiveIconDrawable.java;l=106
-
-
-        The icon in the Android drawable is scaled to 0.4 of the 48px foreground
-        viewport. The mipmap scales by 1.5
-
-         crops centers the foreground drawable and crops out
-        the outer 1/3rd.
     -->
     <g transform="translate(9.6 9.6) scale(0.6 0.6)">
         <path
