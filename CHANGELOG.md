@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Add option to request "all files" permission on Android 11+ to allow wrapper remotes, like `crypt`, to access `/sdcard` ([Issue #28], [PR #29 @chenxiaolong])
+* Update all dependencies ([PR #30 @chenxiaolong])
 
 ### Version 1.10
 
@@ -88,3 +89,4 @@
 [PR #25 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/25
 [PR #26 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/26
 [PR #29 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/29
+[PR #30 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/30
