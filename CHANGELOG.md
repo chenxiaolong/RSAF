@@ -10,6 +10,7 @@
 ### Unreleased
 
 * All external app access to files on hidden remotes is now blocked ([Issue #27], [PR #31 @chenxiaolong])
+* Add option to lock app settings behind biometric/PIN/password unlock ([Issue #27], [PR #32 @chenxiaolong])
 
 ### Version 1.11
 
@@ -96,3 +97,4 @@
 [PR #29 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/29
 [PR #30 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/30
 [PR #31 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/31
+[PR #32 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/32
