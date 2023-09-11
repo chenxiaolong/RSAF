@@ -376,6 +376,24 @@ func getVfsForDoc(doc string) (*vfs.VFS, string, error) {
 	return v, path, nil
 }
 
+type RbRemoteSplitResult struct {
+	Remote string
+	Path   string
+}
+
+func RbRemoteSplit(doc string, errOut *RbError) *RbRemoteSplitResult {
+	remote, path, err := fspath.SplitFs(doc)
+	if err != nil {
+		assignError(errOut, err, syscall.EINVAL)
+		return nil
+	}
+
+	return &RbRemoteSplitResult{
+		Remote: remote,
+		Path:   path,
+	}
+}
+
 type RbPathSplitResult struct {
 	ParentDoc string
 	LeafName  string
