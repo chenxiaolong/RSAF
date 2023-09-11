@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* All external app access to files on hidden remotes is now blocked ([Issue #27], [PR #31 @chenxiaolong])
+
 ### Version 1.11
 
 * Add option to request "all files" permission on Android 11+ to allow wrapper remotes, like `crypt`, to access `/sdcard` ([Issue #28], [PR #29 @chenxiaolong])
@@ -70,6 +74,7 @@
 [Issue #11]: https://github.com/chenxiaolong/RSAF/issues/11
 [Issue #16]: https://github.com/chenxiaolong/RSAF/issues/16
 [Issue #22]: https://github.com/chenxiaolong/RSAF/issues/22
+[Issue #27]: https://github.com/chenxiaolong/RSAF/issues/27
 [Issue #28]: https://github.com/chenxiaolong/RSAF/issues/28
 [PR #1 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/2
@@ -90,3 +95,4 @@
 [PR #26 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/26
 [PR #29 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/29
 [PR #30 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/30
+[PR #31 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/31
