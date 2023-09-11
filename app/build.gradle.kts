@@ -13,8 +13,8 @@ plugins {
 
 buildscript {
     dependencies {
-        classpath(libs.jgit.org.eclipse.jgit)
-        classpath(libs.jgit.org.eclipse.jgit.archive)
+        classpath(libs.jgit)
+        classpath(libs.jgit.archive)
     }
 }
 
@@ -185,6 +185,7 @@ android {
 dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
+    implementation(libs.biometric)
     implementation(libs.core.ktx)
     implementation(libs.fragment.ktx)
     implementation(libs.preference.ktx)
