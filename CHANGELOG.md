@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.64.0 ([PR #33 @chenxiaolong])
+
 ### Version 1.12
 
 * All external app access to files on hidden remotes is now blocked ([Issue #27], [PR #31 @chenxiaolong])
@@ -98,3 +102,4 @@
 [PR #30 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/30
 [PR #31 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/31
 [PR #32 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/32
+[PR #33 @chenxiaolong]: https://github.com/chenxiaolong/RSAF/pull/33
