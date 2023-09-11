@@ -107,6 +107,7 @@ object RcloneRpc {
             "IsPassword" to false,
             "Advanced" to false,
             "Exclusive" to true,
+            "Sensitive" to false,
             "Type" to "string",
         )))
     }
@@ -187,6 +188,7 @@ object RcloneRpc {
         val exclusive = data.getBoolean("Exclusive") ||
             // rclone doesn't mark boolean options as exclusive, so fake it ourselves for better UX
             (type == "bool" && examples.map { it.value }.toSet() == setOf("false", "true"))
+        val sensitive = data.getBoolean("Sensitive")
 
         // To support our custom authorizer
         val isAuthorize = name == "config_token"
