@@ -12,23 +12,23 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 open class EditRemoteDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_REMOTE = "remote"
-        private const val ARG_IS_HIDDEN = "is_hidden"
+        private const val ARG_IS_BLOCKED = "is_blocked"
         const val RESULT_ACTION = "action"
         const val RESULT_REMOTE = "remote"
 
-        fun newInstance(remote: String, remoteHidden: Boolean): EditRemoteDialogFragment =
+        fun newInstance(remote: String, remoteBlocked: Boolean): EditRemoteDialogFragment =
             EditRemoteDialogFragment().apply {
                 arguments = bundleOf(
                     ARG_REMOTE to remote,
-                    ARG_IS_HIDDEN to remoteHidden,
+                    ARG_IS_BLOCKED to remoteBlocked,
                 )
             }
     }
 
     enum class Action {
         OPEN,
-        HIDE,
-        UNHIDE,
+        BLOCK,
+        UNBLOCK,
         CONFIGURE,
         RENAME,
         DUPLICATE,
@@ -36,18 +36,18 @@ open class EditRemoteDialogFragment : DialogFragment() {
     }
 
     private lateinit var remote: String
-    private val remoteHidden by lazy {
-        requireArguments().getBoolean(ARG_IS_HIDDEN)
+    private val remoteBlocked by lazy {
+        requireArguments().getBoolean(ARG_IS_BLOCKED)
     }
     private var action: Action? = null
 
     private val items by lazy {
         mutableListOf<Pair<Action, String>>().apply {
-            if (remoteHidden) {
-                add(Action.UNHIDE to getString(R.string.dialog_edit_remote_unhide_from_documentsui))
+            if (remoteBlocked) {
+                add(Action.UNBLOCK to getString(R.string.dialog_edit_remote_unblock_external_access))
             } else {
                 add(Action.OPEN to getString(R.string.dialog_edit_remote_open_in_documentsui))
-                add(Action.HIDE to getString(R.string.dialog_edit_remote_hide_from_documentsui))
+                add(Action.BLOCK to getString(R.string.dialog_edit_remote_block_external_access))
             }
             add(Action.CONFIGURE to getString(R.string.dialog_edit_remote_action_configure))
             add(Action.RENAME to getString(R.string.dialog_edit_remote_action_rename))

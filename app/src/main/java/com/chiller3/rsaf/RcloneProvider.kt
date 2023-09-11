@@ -89,6 +89,15 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             resolver.notifyChange(rootsUri, null)
         }
 
+        /** Split a document ID into the remote and path. */
+        fun splitRemote(documentId: String): Pair<String, String> {
+            val error = RbError()
+            val split = Rcbridge.rbRemoteSplit(documentId, error)
+                ?: throw error.toException("rbRemoteSplit")
+
+            return Pair(split.remote, split.path)
+        }
+
         /** Split a document ID into the parent document ID and leaf name. */
         fun splitPath(documentId: String): Pair<String, String> {
             val error = RbError()
@@ -306,6 +315,25 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
+    private fun enforceNotBlocked(vararg documentIds: String) {
+        val configs = RcloneRpc.remotes
+
+        for (documentId in documentIds) {
+            val remote = splitRemote(documentId).first.trimEnd(':')
+            if (remote.isEmpty()) {
+                // Local paths are not exposed remotes in SAF.
+                continue
+            }
+
+            val config = configs[remote]
+                ?: throw IllegalArgumentException("Remote does not exist: $remote")
+
+            if (config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true") {
+                throw SecurityException("Access to remote is blocked: $remote")
+            }
+        }
+    }
+
     override fun queryRoots(projection: Array<String>?): Cursor {
         debugLog("queryRoots($projection)")
 
@@ -316,8 +344,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             }
 
             for ((remote, config) in RcloneRpc.remotes) {
-                if (config[RcloneRpc.CUSTOM_OPT_HIDDEN] == "true") {
-                    debugLog("Skipping hidden root: $remote")
+                if (config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true") {
+                    debugLog("Skipping blocked remote: $remote")
                     continue
                 }
 
@@ -339,6 +367,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<String>?,
                                      sortOrder: String?): Cursor {
         debugLog("queryChildDocuments($parentDocumentId, $projection, $sortOrder)")
+        enforceNotBlocked(parentDocumentId)
 
         val error = RbError()
 
@@ -358,6 +387,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
         debugLog("queryDocument($documentId, $projection)")
+        enforceNotBlocked(documentId)
 
         val error = RbError()
         val entry = Rcbridge.rbDocStat(documentId, error)
@@ -375,6 +405,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
         debugLog("isChildDocument($parentDocumentId, $documentId)")
+        enforceNotBlocked(parentDocumentId, documentId)
 
         // AOSP's FileSystemProvider [1] returns true [2] if parentDocumentId and documentId refer
         // to the same path, but this conflicts with the documented behavior of isChildDocument(),
@@ -411,6 +442,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun openDocument(documentId: String, mode: String,
                               signal: CancellationSignal?): ParcelFileDescriptor {
         debugLog("openDocument($documentId, $mode, $signal)")
+        enforceNotBlocked(documentId)
 
         val pfdMode = ParcelFileDescriptor.parseMode(mode)
         val pfdModeHasFlags = { flags: Int ->
@@ -465,6 +497,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun openDocumentThumbnail(documentId: String, sizeHint: Point,
                                        signal: CancellationSignal?): AssetFileDescriptor? {
         debugLog("openDocumentThumbnail($documentId, $sizeHint, $signal)")
+        enforceNotBlocked(documentId)
 
         return null
     }
@@ -489,6 +522,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun createDocument(parentDocumentId: String, mimeType: String,
                                 displayName: String): String {
         debugLog("createDocument($parentDocumentId, $mimeType, $displayName)")
+        enforceNotBlocked(parentDocumentId)
 
         val isDir = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
         var (baseName, ext) = splitExt(displayName, isDir)
@@ -561,6 +595,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun renameDocument(documentId: String, displayName: String): String {
         debugLog("renameDocument($documentId, $displayName)")
+        enforceNotBlocked(documentId)
 
         // The displayName will include the extension because our queryDocument() exposes it
         val (parent, _) = splitPath(documentId)
@@ -584,6 +619,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun deleteDocument(documentId: String) {
         debugLog("deleteDocument($documentId)")
+        enforceNotBlocked(documentId)
 
         val error = RbError()
         if (!Rcbridge.rbDocRemove(documentId, true, error)
@@ -599,6 +635,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun removeDocument(documentId: String, parentDocumentId: String) {
         debugLog("removeDocument($documentId, $parentDocumentId)")
+        enforceNotBlocked(documentId, parentDocumentId)
 
         if (!isChildDocument(parentDocumentId, documentId)) {
             throw IllegalArgumentException("$documentId is not a child of $parentDocumentId")
@@ -640,6 +677,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
         debugLog("copyDocument($sourceDocumentId, $targetParentDocumentId)")
+        enforceNotBlocked(sourceDocumentId, targetParentDocumentId)
 
         return copyOrMove(sourceDocumentId, targetParentDocumentId, true)
     }
@@ -647,6 +685,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String,
                               targetParentDocumentId: String): String {
         debugLog("moveDocument($sourceDocumentId, $sourceParentDocumentId, $targetParentDocumentId)")
+        enforceNotBlocked(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)
 
         return copyOrMove(sourceDocumentId, targetParentDocumentId, false).also {
             revokeGrants(sourceDocumentId)

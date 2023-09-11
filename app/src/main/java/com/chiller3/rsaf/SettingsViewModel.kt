@@ -47,11 +47,11 @@ data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, v
     override val requireNotifyRootsChanged: Boolean = true
 }
 
-data class RemoteHideUnhideSucceeded(val remote: String, val hidden: Boolean) : Alert {
+data class RemoteBlockUnblockSucceeded(val remote: String, val blocked: Boolean) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
 
-data class RemoteHideUnhideFailed(val remote: String, val hidden: Boolean, val error: String) : Alert {
+data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 object ImportSucceeded : Alert {
@@ -144,19 +144,19 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun hideRemote(remote: String, hide: Boolean) {
+    fun blockRemote(remote: String, block: Boolean) {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
                     RcloneRpc.setRemoteOptions(remote, mapOf(
-                        RcloneRpc.CUSTOM_OPT_HIDDEN to hide.toString(),
+                        RcloneRpc.CUSTOM_OPT_BLOCKED to block.toString(),
                     ))
                 }
                 refreshRemotesInternal()
-                _alerts.update { it + RemoteHideUnhideSucceeded(remote, hide) }
+                _alerts.update { it + RemoteBlockUnblockSucceeded(remote, block) }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to set remote $remote hide state to $hide", e)
-                _alerts.update { it + RemoteHideUnhideFailed(remote, hide, e.toString()) }
+                Log.w(TAG, "Failed to set remote $remote block state to $block", e)
+                _alerts.update { it + RemoteBlockUnblockFailed(remote, block, e.toString()) }
             }
         }
     }

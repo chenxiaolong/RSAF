@@ -9,7 +9,8 @@ object RcloneRpc {
     private val TAG = RcloneRpc::class.java.simpleName
 
     private const val CUSTOM_OPT_PREFIX = "rsaf:"
-    const val CUSTOM_OPT_HIDDEN = CUSTOM_OPT_PREFIX + "hidden"
+    // This is called hidden due to backwards compatibility.
+    const val CUSTOM_OPT_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
 
     /**
      * Perform an rclone RPC call.

@@ -263,11 +263,11 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                         }
                         startActivity(intent)
                     }
-                    EditRemoteDialogFragment.Action.HIDE -> {
-                        viewModel.hideRemote(remote, true)
+                    EditRemoteDialogFragment.Action.BLOCK -> {
+                        viewModel.blockRemote(remote, true)
                     }
-                    EditRemoteDialogFragment.Action.UNHIDE -> {
-                        viewModel.hideRemote(remote, false)
+                    EditRemoteDialogFragment.Action.UNBLOCK -> {
+                        viewModel.blockRemote(remote, false)
                     }
                     EditRemoteDialogFragment.Action.CONFIGURE -> {
                         InteractiveConfigurationDialogFragment.newInstance(remote, false)
@@ -343,10 +343,10 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
             preference.key.startsWith(Preferences.PREF_EDIT_REMOTE_PREFIX) -> {
                 val remote = preference.key.substring(Preferences.PREF_EDIT_REMOTE_PREFIX.length)
-                val isHidden = viewModel.remotes.value.find { it.name == remote }
-                    ?.config?.get(RcloneRpc.CUSTOM_OPT_HIDDEN) == "true"
+                val isBlocked = viewModel.remotes.value.find { it.name == remote }
+                    ?.config?.get(RcloneRpc.CUSTOM_OPT_BLOCKED) == "true"
 
-                EditRemoteDialogFragment.newInstance(remote, isHidden)
+                EditRemoteDialogFragment.newInstance(remote, isBlocked)
                     .show(parentFragmentManager.beginTransaction(), TAG_EDIT_REMOTE)
                 return true
             }
@@ -431,15 +431,15 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 alert.oldRemote, alert.newRemote)
             is RemoteDuplicateFailed -> getString(R.string.alert_duplicate_remote_failure,
                 alert.oldRemote, alert.newRemote, alert.error)
-            is RemoteHideUnhideSucceeded -> if (alert.hidden) {
-                getString(R.string.alert_hide_remote_success, alert.remote)
+            is RemoteBlockUnblockSucceeded -> if (alert.blocked) {
+                getString(R.string.alert_block_remote_success, alert.remote)
             } else {
-                getString(R.string.alert_unhide_remote_success, alert.remote)
+                getString(R.string.alert_unblock_remote_success, alert.remote)
             }
-            is RemoteHideUnhideFailed -> if (alert.hidden) {
-                getString(R.string.alert_hide_remote_failure, alert.remote, alert.error)
+            is RemoteBlockUnblockFailed -> if (alert.block) {
+                getString(R.string.alert_block_remote_failure, alert.remote, alert.error)
             } else {
-                getString(R.string.alert_unhide_remote_failure, alert.remote, alert.error)
+                getString(R.string.alert_unblock_remote_failure, alert.remote, alert.error)
             }
             ImportSucceeded -> getString(R.string.alert_import_success)
             ExportSucceeded -> getString(R.string.alert_export_success)
