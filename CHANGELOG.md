@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.12
 
 * All external app access to files on hidden remotes is now blocked ([Issue #27], [PR #31 @chenxiaolong])
 * Add option to lock app settings behind biometric/PIN/password unlock ([Issue #27], [PR #32 @chenxiaolong])
