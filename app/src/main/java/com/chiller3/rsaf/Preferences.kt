@@ -14,9 +14,10 @@ class Preferences(context: Context) {
         const val PREF_ADD_FILE_EXTENSION = "add_file_extension"
         const val PREF_ALLOW_BACKUP = "allow_backup"
         const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
+        const val PREF_LOCAL_STORAGE_ACCESS = "local_storage_access"
         const val PREF_POSIX_LIKE_SEMANTICS = "posix_like_semantics"
         const val PREF_PRETEND_LOCAL = "pretend_local"
-        const val PREF_LOCAL_STORAGE_ACCESS = "local_storage_access"
+        const val PREF_REQUIRE_AUTH = "require_auth"
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
 
         // UI actions only
@@ -64,6 +65,11 @@ class Preferences(context: Context) {
     var dialogsAtBottom: Boolean
         get() = prefs.getBoolean(PREF_DIALOGS_AT_BOTTOM, false)
         set(enabled) = prefs.edit { putBoolean(PREF_DIALOGS_AT_BOTTOM, enabled) }
+
+    /** Whether biometric or device credential auth is required. */
+    var requireAuth: Boolean
+        get() = prefs.getBoolean(PREF_REQUIRE_AUTH, false)
+        set(enabled) = prefs.edit { putBoolean(PREF_REQUIRE_AUTH, enabled) }
 
     /** Whether to allow app data backups. */
     var allowBackup: Boolean

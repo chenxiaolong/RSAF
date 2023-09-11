@@ -26,6 +26,8 @@
     <string name="pref_local_storage_access_desc">Allows wrapper remotes, like <tt>crypt</tt>, to access local storage under <tt>/sdcard</tt>.</string>
     <string name="pref_dialogs_at_bottom_name">Show dialogs at bottom</string>
     <string name="pref_dialogs_at_bottom_desc">Makes one-handed use easier and prevents dialog buttons from shifting.</string>
+    <string name="pref_require_auth_name">Require authentication</string>
+    <string name="pref_require_auth_desc">Require biometric unlock or screen lock PIN/password to view and change RSAF settings.</string>
     <string name="pref_allow_backup_name">Allow Android backups</string>
     <string name="pref_allow_backup_desc">Allow app data to be backed up if Android claims that the transport is end-to-end encrypted or if it is being directly transferred to another device. RSAF cannot know if either of these conditions are actually true.</string>
     <string name="pref_version_name">Version</string>
@@ -57,6 +59,11 @@
     <string name="alert_export_cancelled">Configuration export cancelled</string>
     <string name="alert_logcat_success">Successfully saved logs to %1$s</string>
     <string name="alert_logcat_failure">Failed to save logs to %1$s: %2$s</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Unlock configuration</string>
+    <string name="biometric_error">Biometric authentication error: %1$s</string>
+    <string name="biometric_failure">Biometric authentication failed</string>
 
     <!-- Dialogs -->
     <string name="dialog_action_next">Next</string>

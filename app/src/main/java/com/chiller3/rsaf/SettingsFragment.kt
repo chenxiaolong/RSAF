@@ -7,7 +7,11 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.Settings
+import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager.Authenticators
+import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.viewModels
@@ -23,6 +27,7 @@ import androidx.preference.size
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,
@@ -40,6 +45,11 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             "${SettingsFragment::class.java.simpleName}.import_export_password"
 
         private const val ARG_OLD_REMOTE_NAME = "old_remote_name"
+
+        private const val STATE_AUTHENTICATED = "authenticated"
+        private const val STATE_LAST_PAUSE = "last_pause"
+
+        private const val INACTIVE_TIMEOUT_NS = 60_000_000_000L
     }
 
     private val viewModel: SettingsViewModel by viewModels()
@@ -54,6 +64,9 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     private lateinit var prefExportConfiguration: Preference
     private lateinit var prefVersion: LongClickablePreference
     private lateinit var prefSaveLogs: Preference
+    private lateinit var bioPrompt: BiometricPrompt
+    private var bioAuthenticated = false
+    private var lastPause = 0L
 
     private val requestSafImportConfiguration =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -77,9 +90,14 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_root, rootKey)
 
-        val context = requireContext()
+        if (savedInstanceState != null) {
+            bioAuthenticated = savedInstanceState.getBoolean(STATE_AUTHENTICATED)
+            lastPause = savedInstanceState.getLong(STATE_LAST_PAUSE)
+        }
 
-        prefs = Preferences(context)
+        val activity = requireActivity()
+
+        prefs = Preferences(activity)
 
         categoryRemotes = findPreference(Preferences.CATEGORY_REMOTES)!!
         categoryConfiguration = findPreference(Preferences.CATEGORY_CONFIGURATION)!!
@@ -106,6 +124,35 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
 
         refreshVersion()
         refreshDebugPrefs()
+
+        bioPrompt = BiometricPrompt(
+            this,
+            activity.mainExecutor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    Toast.makeText(
+                        activity,
+                        getString(R.string.biometric_error, errString),
+                        Toast.LENGTH_LONG,
+                    ).show()
+                    activity.finish()
+                }
+
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    bioAuthenticated = true
+                    refreshGlobalVisibility()
+                }
+
+                override fun onAuthenticationFailed() {
+                    Toast.makeText(
+                        activity,
+                        R.string.biometric_failure,
+                        Toast.LENGTH_LONG,
+                    ).show()
+                    activity.finish()
+                }
+            },
+        )
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -137,7 +184,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                             continue
                         }
 
-                        val p = Preference(context).apply {
+                        val p = Preference(activity).apply {
                             key = Preferences.PREF_EDIT_REMOTE_PREFIX + remote.name
                             isPersistent = false
                             title = remote.name
@@ -196,6 +243,13 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putBoolean(STATE_AUTHENTICATED, bioAuthenticated)
+        outState.putLong(STATE_LAST_PAUSE, lastPause)
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -203,6 +257,44 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             prefLocalStorageAccess.isChecked = Environment.isExternalStorageManager()
         } else {
             prefLocalStorageAccess.isVisible = false
+        }
+
+        if (bioAuthenticated && (System.nanoTime() - lastPause) >= INACTIVE_TIMEOUT_NS) {
+            bioAuthenticated = false
+        }
+
+        if (!bioAuthenticated) {
+            if (!prefs.requireAuth) {
+                bioAuthenticated = true
+            } else {
+                startBiometricAuth()
+            }
+        }
+
+        refreshGlobalVisibility()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        lastPause = System.nanoTime()
+    }
+
+    private fun startBiometricAuth() {
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setAllowedAuthenticators(Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL)
+            .setTitle(getString(R.string.biometric_title))
+            .build()
+
+        bioPrompt.authenticate(promptInfo)
+    }
+
+    private fun refreshGlobalVisibility() {
+        view?.visibility = if (bioAuthenticated) {
+            View.VISIBLE
+        } else {
+            // Using View.GONE causes noticeable scrolling jank due to relayout.
+            View.INVISIBLE
         }
     }
 

@@ -73,6 +73,12 @@
             app:title="@string/pref_dialogs_at_bottom_name"
             app:summary="@string/pref_dialogs_at_bottom_desc"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="require_auth"
+            app:title="@string/pref_require_auth_name"
+            app:summary="@string/pref_require_auth_desc"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
