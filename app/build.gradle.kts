@@ -11,6 +11,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 buildscript {
     dependencies {
         classpath(libs.jgit)
@@ -96,22 +102,22 @@ val gitVersionName = getVersionName(git, gitVersionTriple)
 val projectUrl = "https://github.com/chenxiaolong/RSAF"
 val releaseMetadataBranch = "master"
 
-val extraDir = File(buildDir, "extra")
-val archiveDir = File(extraDir, "archive")
-val rcbridgeDir = File(extraDir, "rcbridge")
-val rcbridgeAar = File(rcbridgeDir, "rcbridge.aar")
+val extraDir = layout.buildDirectory.map { it.dir("extra") }
+val archiveDir = extraDir.map { it.dir("archive") }
+val rcbridgeDir = extraDir.map { it.dir("rcbridge") }
+val rcbridgeAar = rcbridgeDir.map { it.file("rcbridge.aar") }
 
 android {
     namespace = "com.chiller3.rsaf"
 
-    compileSdk = 33
-    buildToolsVersion = "33.0.2"
-    ndkVersion = "25.2.9519653"
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
+    ndkVersion = "26.0.10792818"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
         minSdk = 28
-        targetSdk = 33
+        targetSdk = 34
         versionCode = gitVersionCode
         versionName = gitVersionName
 
@@ -163,11 +169,11 @@ android {
         resValue("string", "documents_authority", "$applicationId.documents")
     }
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_11)
-        targetCompatibility(JavaVersion.VERSION_11)
+        sourceCompatibility(JavaVersion.VERSION_17)
+        targetCompatibility(JavaVersion.VERSION_17)
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         buildConfig = true
@@ -204,15 +210,15 @@ dependencies {
 val archive = tasks.register("archive") {
     inputs.property("gitVersionTriple.third", gitVersionTriple.third)
 
-    val outputFile = File(archiveDir, "archive.tar")
+    val outputFile = archiveDir.map { it.file("archive.tar") }
     outputs.file(outputFile)
 
     doLast {
-        val format = "tar_${Thread.currentThread().id}"
+        val format = "tar_for_task_$name"
 
         ArchiveCommand.registerFormat(format, TarFormat())
         try {
-            outputFile.outputStream().use {
+            outputFile.get().asFile.outputStream().use {
                 git.archive()
                     .setTree(git.repository.resolve(gitVersionTriple.third.name))
                     .setFormat(format)
@@ -227,7 +233,7 @@ val archive = tasks.register("archive") {
 
 val rcbridge = tasks.register<Exec>("rcbridge") {
     val rcbridgeSrcDir = File(rootDir, "rcbridge")
-    val tempDir = File(rcbridgeDir, "temp")
+    val tempDir = rcbridgeDir.map { it.dir("temp") }
 
     inputs.files(
         File(rcbridgeSrcDir, "go.mod"),
@@ -241,24 +247,24 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
         "android.ndkDirectory" to android.ndkDirectory,
     )
     outputs.files(
-        File(rcbridgeDir, "rcbridge.aar"),
-        File(rcbridgeDir, "rcbridge-sources.jar")
+        rcbridgeDir.map { it.file("rcbridge.aar") },
+        rcbridgeDir.map { it.file("rcbridge-sources.jar") },
     )
 
     executable = "gomobile"
-    setArgs(listOf(
+    args = listOf(
         "bind",
         "-v",
-        "-o", rcbridgeAar,
+        "-o", rcbridgeAar.get().asFile.absolutePath,
         "-target=android",
         "-androidapi=${android.defaultConfig.minSdk}",
         "-javapkg=${android.namespace}.binding",
         ".",
-    ))
+    )
     environment(
         "ANDROID_HOME" to android.sdkDirectory,
         "ANDROID_NDK_HOME" to android.ndkDirectory,
-        "TMPDIR" to tempDir,
+        "TMPDIR" to tempDir.get().asFile.absolutePath,
     )
 
     if (!environment.containsKey("GOPROXY")) {
@@ -268,13 +274,13 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
     workingDir(rcbridgeSrcDir)
 
     doFirst {
-        tempDir.mkdirs()
+        tempDir.get().asFile.mkdirs()
     }
 
     // gomobile fails to clean up its temp directories after it switched to using go modules. These
     // directories are never reused, so delete them.
     doLast {
-        val subDirs = tempDir.listFiles { _, name: String ->
+        val subDirs = tempDir.get().asFile.listFiles { _, name: String ->
             name.startsWith("gomobile-work-")
         }
         if (subDirs != null) {
@@ -301,26 +307,15 @@ android.applicationVariants.all {
     }
 }
 
-data class LinkRef(val type: String, val number: Int, val user: String?) : Comparable<LinkRef> {
+data class LinkRef(val type: String, val number: Int) : Comparable<LinkRef> {
     override fun compareTo(other: LinkRef): Int = compareValuesBy(
         this,
         other,
         { it.type },
         { it.number },
-        { it.user },
     )
 
-    override fun toString(): String = buildString {
-        append('[')
-        append(type)
-        append(" #")
-        append(number)
-        if (user != null) {
-            append(" @")
-            append(user)
-        }
-        append(']')
-    }
+    override fun toString(): String = "[$type #$number]"
 }
 
 fun checkBrackets(line: String) {
@@ -344,7 +339,7 @@ fun checkBrackets(line: String) {
 fun updateChangelogLinks(baseUrl: String) {
     val file = File(rootDir, "CHANGELOG.md")
     val regexStandaloneLink = Regex("\\[([^\\]]+)\\](?![\\(\\[])")
-    val regexAutoLink = Regex("(Issue|PR) #(\\d+)(?: @([\\w-]+))?")
+    val regexAutoLink = Regex("(Issue|PR) #(\\d+)")
     val links = hashMapOf<LinkRef, String>()
     var skipRemaining = false
     val changelog = mutableListOf<String>()
@@ -362,26 +357,18 @@ fun updateChangelogLinks(baseUrl: String) {
                     val match = regexAutoLink.matchEntire(linkText)
                     require(match != null) { "Invalid link format: $linkText" }
 
-                    val ref = match.groupValues[0]
                     val type = match.groupValues[1]
                     val number = match.groupValues[2].toInt()
-                    val user = match.groups[3]?.value
 
                     val link = when (type) {
-                        "Issue" -> {
-                            require(user == null) { "$ref should not have a username" }
-                            "$baseUrl/issues/$number"
-                        }
-                        "PR" -> {
-                            require(user != null) { "$ref should have a username" }
-                            "$baseUrl/pull/$number"
-                        }
+                        "Issue" -> "$baseUrl/issues/$number"
+                        "PR" -> "$baseUrl/pull/$number"
                         else -> throw IllegalArgumentException("Unknown link type: $type")
                     }
 
                     // #0 is used for examples only
                     if (number != 0) {
-                        links[LinkRef(type, number, user)] = link
+                        links[LinkRef(type, number)] = link
                     }
                 }
 
