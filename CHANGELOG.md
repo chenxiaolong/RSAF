@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.64.1 ([PR #36])
+
 ### Version 1.14
 
 * Update dependencies and target API 34 ([PR #34])
@@ -108,3 +112,4 @@
 [PR #32]: https://github.com/chenxiaolong/RSAF/pull/32
 [PR #33]: https://github.com/chenxiaolong/RSAF/pull/33
 [PR #34]: https://github.com/chenxiaolong/RSAF/pull/34
+[PR #36]: https://github.com/chenxiaolong/RSAF/pull/36
