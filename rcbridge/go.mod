@@ -3,7 +3,7 @@ module rcbridge
 go 1.20
 
 require (
-	github.com/rclone/rclone v1.64.1
+	github.com/rclone/rclone v1.64.2
 	golang.org/x/mobile v0.0.0-20231006135142-2b44d11868fe
 )
 
