@@ -370,8 +370,8 @@ github.com/putdotio/go-putio/putio v0.0.0-20200123120452-16d982cac2b8 h1:Y258uzX
 github.com/putdotio/go-putio/putio v0.0.0-20200123120452-16d982cac2b8/go.mod h1:bSJjRokAHHOhA+XFxplld8w2R/dXLH7Z3BZ532vhFwU=
 github.com/quic-go/qtls-go1-20 v0.3.2 h1:rRgN3WfnKbyik4dBV8A6girlJVxGand/d+jVKbQq5GI=
 github.com/quic-go/quic-go v0.38.0 h1:T45lASr5q/TrVwt+jrVccmqHhPL2XuSyoCLVCpfOSLc=
-github.com/rclone/rclone v1.64.1 h1:nQYfh12Q9zs07MbTYvmJqW3POpw94TgjeWnkJlFZN+g=
-github.com/rclone/rclone v1.64.1/go.mod h1:qvuTiatq811sVjaBRJ8RC4Z/CeZxIGdqahz778/YGJo=
+github.com/rclone/rclone v1.64.2 h1:vF1FiMw5xRpMKRdODme+EyCiit9spcyMkZcDmZXJG5M=
+github.com/rclone/rclone v1.64.2/go.mod h1:qvuTiatq811sVjaBRJ8RC4Z/CeZxIGdqahz778/YGJo=
 github.com/relvacode/iso8601 v1.3.0 h1:HguUjsGpIMh/zsTczGN3DVJFxTU/GX+MMmzcKoMO7ko=
 github.com/relvacode/iso8601 v1.3.0/go.mod h1:FlNp+jz+TXpyRqgmM7tnzHHzBnz776kmAH2h3sZCn0I=
 github.com/rfjakob/eme v1.1.2 h1:SxziR8msSOElPayZNFfQw4Tjx/Sbaeeh3eRvrHVMUs4=
