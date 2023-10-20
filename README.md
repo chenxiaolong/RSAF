@@ -13,7 +13,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 
 ## Features
 
-* Supports Android 9 through 13
+* Supports Android 9 and newer
 * Supports all rclone remote backends, including those that require OAuth 2.0
 * Supports importing and exporting the rclone configuration file
 * Supports random reads and writes
