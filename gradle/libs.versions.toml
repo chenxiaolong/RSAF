@@ -10,7 +10,7 @@ fragment-ktx = "1.6.1"
 jsr305 = "3.0.2"
 junit = "1.1.5"
 kotlin = "1.9.10"
-material = "1.9.0"
+material = "1.10.0"
 preference-ktx = "1.2.1"
 security-crypto = "1.1.0-alpha06"
 
