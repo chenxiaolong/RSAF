@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.17
 
 * Update dependencies ([PR #38])
 * Disable arm64 memory tagging extensions support ([PR #39])
