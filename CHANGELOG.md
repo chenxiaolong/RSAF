@@ -10,6 +10,9 @@
 ### Unreleased
 
 * Update dependencies ([PR #38])
+* Disable arm64 memory tagging extensions support ([PR #39])
+  * Golang's cgo runtime currently does not support MTE and would cause rclone/RSAF to crash.
+  * This workaround only affects people who explicitly enable MTE for user apps on the Pixel 8 series or future ARMv9 devices.
 
 ### Version 1.16
 
@@ -123,3 +126,4 @@
 [PR #36]: https://github.com/chenxiaolong/RSAF/pull/36
 [PR #37]: https://github.com/chenxiaolong/RSAF/pull/37
 [PR #38]: https://github.com/chenxiaolong/RSAF/pull/38
+[PR #39]: https://github.com/chenxiaolong/RSAF/pull/39
