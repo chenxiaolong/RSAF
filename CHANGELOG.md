@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Update rclone to 1.65.0 ([PR #41])
+* Update dependencies ([PR #42])
 
 ### Version 1.17
 
@@ -132,3 +133,4 @@
 [PR #38]: https://github.com/chenxiaolong/RSAF/pull/38
 [PR #39]: https://github.com/chenxiaolong/RSAF/pull/39
 [PR #41]: https://github.com/chenxiaolong/RSAF/pull/41
+[PR #42]: https://github.com/chenxiaolong/RSAF/pull/42
