@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.19
 
 * Normalize paths before comparison in `isChildDocument()` ([Issue #44], [PR #45])
   * Fixes compatibility with apps that directly manipulate SAF URIs
