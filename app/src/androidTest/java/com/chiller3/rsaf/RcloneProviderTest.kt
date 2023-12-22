@@ -259,8 +259,14 @@ class RcloneProviderTest {
         assertTrue(isChild(docUriFromRoot(), docUriFromRoot("nested", "child")))
         assertTrue(isChild(docUriFromRoot("dir"), docUriFromRoot("dir", "child")))
         assertTrue(isChild(docUriFromRoot("dir"), docUriFromRoot("dir", "nested", "child")))
-        assertFalse(isChild(docUriFromRoot(), docUriFromRoot()))
-        assertFalse(isChild(docUriFromRoot("dir"), docUriFromRoot("dir")))
+        assertTrue(isChild(docUriFromRoot(), docUriFromRoot()))
+        assertTrue(isChild(docUriFromRoot("dir"), docUriFromRoot("dir")))
+
+        // Some apps, like X-plore, do their own URI manipulation instead of working with URIs
+        // returned by queryChildDocuments(). In particular, they might add trailing slashes.
+        assertTrue(isChild(docUri("${rootDoc}dir/"), docUriFromRoot("dir", "child")))
+        assertTrue(isChild(docUri("${rootDoc}dir/"), docUri("${rootDoc}dir/child/")))
+        assertTrue(isChild(docUri("${rootDoc}//dir/////"), docUri("${rootDoc}dir///nested//child///")))
     }
 
     @Test
