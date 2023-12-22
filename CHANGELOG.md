@@ -7,6 +7,11 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Normalize paths before comparison in `isChildDocument()` ([Issue #44], [PR #45])
+  * Fixes compatibility with apps that directly manipulate SAF URIs
+
 ### Version 1.18
 
 * Update rclone to 1.65.0 ([PR #41])
@@ -105,6 +110,7 @@
 [Issue #22]: https://github.com/chenxiaolong/RSAF/issues/22
 [Issue #27]: https://github.com/chenxiaolong/RSAF/issues/27
 [Issue #28]: https://github.com/chenxiaolong/RSAF/issues/28
+[Issue #44]: https://github.com/chenxiaolong/RSAF/issues/44
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -134,3 +140,4 @@
 [PR #39]: https://github.com/chenxiaolong/RSAF/pull/39
 [PR #41]: https://github.com/chenxiaolong/RSAF/pull/41
 [PR #42]: https://github.com/chenxiaolong/RSAF/pull/42
+[PR #45]: https://github.com/chenxiaolong/RSAF/pull/45
