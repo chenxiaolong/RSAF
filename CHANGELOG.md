@@ -11,6 +11,7 @@
 
 * Normalize paths before comparison in `isChildDocument()` ([Issue #44], [PR #45])
   * Fixes compatibility with apps that directly manipulate SAF URIs
+* Fix debug logging of `projection` parameter value ([PR #46])
 
 ### Version 1.18
 
@@ -141,3 +142,4 @@
 [PR #41]: https://github.com/chenxiaolong/RSAF/pull/41
 [PR #42]: https://github.com/chenxiaolong/RSAF/pull/42
 [PR #45]: https://github.com/chenxiaolong/RSAF/pull/45
+[PR #46]: https://github.com/chenxiaolong/RSAF/pull/46
