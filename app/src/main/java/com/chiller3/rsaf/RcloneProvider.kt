@@ -359,7 +359,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     override fun queryRoots(projection: Array<String>?): Cursor {
-        debugLog("queryRoots($projection)")
+        debugLog("queryRoots(${projection.contentToString()})")
 
         return MatrixCursor(getRootProjection(projection)).apply {
             var flags = ROOT_FLAGS
@@ -390,7 +390,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<String>?,
                                      sortOrder: String?): Cursor {
-        debugLog("queryChildDocuments($parentDocumentId, $projection, $sortOrder)")
+        debugLog("queryChildDocuments($parentDocumentId, ${projection.contentToString()}, $sortOrder)")
         enforceNotBlocked(parentDocumentId)
 
         val error = RbError()
@@ -410,7 +410,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
-        debugLog("queryDocument($documentId, $projection)")
+        debugLog("queryDocument($documentId, ${projection.contentToString()})")
         enforceNotBlocked(documentId)
 
         val error = RbError()
