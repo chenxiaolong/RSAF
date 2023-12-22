@@ -128,6 +128,30 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             return Pair(Rcbridge.rbPathJoin(parent, baseName), ext)
         }
 
+        /** Normalize a document ID so that there are no duplicate or trailing slashes. */
+        private fun normalize(documentId: String): String {
+            val components = arrayListOf<String>()
+            var currentDoc = documentId
+
+            while (true) {
+                val (parent, name) = splitPath(currentDoc)
+
+                if (name.isNotEmpty()) {
+                    components.add(name)
+                }
+
+                if (parent.isEmpty() || parent.endsWith(':')) {
+                    // Root of the remote
+                    components.add(parent)
+                    break
+                }
+
+                currentDoc = parent
+            }
+
+            return components.asReversed().joinToString("/")
+        }
+
         /**
          * Construct a document ID with a counter.
          *
@@ -410,27 +434,17 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         // AOSP's FileSystemProvider [1] returns true [2] if parentDocumentId and documentId refer
         // to the same path, but this conflicts with the documented behavior of isChildDocument(),
         // which is supposed to test "if a document is descendant (child, grandchild, etc) from the
-        // given parent". We'll go with the documented behavior instead of matching AOSP's
-        // FileSystemProvider.
+        // given parent". We'll match AOSP's behavior because some apps expect providers to behave
+        // this way.
         //
         // [1] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/com/android/internal/content/FileSystemProvider.java;l=141
         // [2] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/android/os/FileUtils.java;l=917
 
-        var currentDoc = documentId
+        val normalizedParentDocumentId = normalize(parentDocumentId)
+        val normalizedDocumentId = normalize(documentId)
 
-        while (true) {
-            val (splitParent, splitName) = splitPath(currentDoc)
-            if (splitName.isEmpty()) {
-                // Root of the remote
-                break
-            } else if (splitParent == parentDocumentId) {
-                return true
-            }
-
-            currentDoc = splitParent
-        }
-
-        return false
+        return normalizedDocumentId == normalizedParentDocumentId
+                || normalizedDocumentId.startsWith("$normalizedParentDocumentId/")
     }
 
     /**
