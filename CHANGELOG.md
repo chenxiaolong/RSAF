@@ -9,6 +9,7 @@
 
 ### Version 1.20
 
+* Update rclone to 1.65.1 ([PR #47])
 * Normalize paths before comparison in `isChildDocument()` ([Issue #44], [PR #45])
   * Fixes compatibility with apps that directly manipulate SAF URIs
 * Fix debug logging of `projection` parameter value ([PR #46])
@@ -143,3 +144,4 @@
 [PR #42]: https://github.com/chenxiaolong/RSAF/pull/42
 [PR #45]: https://github.com/chenxiaolong/RSAF/pull/45
 [PR #46]: https://github.com/chenxiaolong/RSAF/pull/46
+[PR #47]: https://github.com/chenxiaolong/RSAF/pull/47
