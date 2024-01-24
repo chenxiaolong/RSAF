@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Update rclone to 1.65.2 ([PR #48])
+* Update Android gradle plugin to 8.2.2 ([PR #49])
 
 ### Version 1.20
 
@@ -150,3 +151,4 @@
 [PR #46]: https://github.com/chenxiaolong/RSAF/pull/46
 [PR #47]: https://github.com/chenxiaolong/RSAF/pull/47
 [PR #48]: https://github.com/chenxiaolong/RSAF/pull/48
+[PR #49]: https://github.com/chenxiaolong/RSAF/pull/49
