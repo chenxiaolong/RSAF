@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.21
 
 * Update rclone to 1.65.2 ([PR #48])
 * Update Android gradle plugin to 8.2.2 ([PR #49])
