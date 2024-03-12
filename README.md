@@ -64,7 +64,7 @@ With Android-like semantics, when creating, renaming, copying, or moving a file/
 With POSIX-like semantics, RSAF follows the behavior of the underlying filesystem calls. It'll behave more like common CLI utilities, such as `mv`, `cp`, or even `rclone` itself.
 
 * Creating a new file/directory behaves like `touch`/`mkdir -p`. If the path already exists and is the same type, the operation will succeed.
-* Renaming a file on top of an existing file will overwrite the existing file. Otherwise, if the target path alreacy exists, the operation will fail.
+* Renaming a file on top of an existing file will overwrite the existing file. Otherwise, if the target path already exists, the operation will fail.
 * Copying files/directories behaves like `cp -rT`. Files with the same name in the target will be overwritten. Directories will be merged (but conflicting files within directories are still overwritten).
 * Moving paths behaves like copying paths, except that the source is gone once the operation succeeds.
 
