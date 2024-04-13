@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.23
 
 * Fix tests after last rclone update ([PR #52])
 * Update all dependencies ([PR #53])
