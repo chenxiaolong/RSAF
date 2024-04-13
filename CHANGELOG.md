@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix tests after last rclone update ([PR #52])
+
 ### Version 1.22
 
 * Update rclone to 1.66.0 ([PR #51])
