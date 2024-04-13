@@ -11,6 +11,8 @@
 
 * Fix tests after last rclone update ([PR #52])
 * Update all dependencies ([PR #53])
+* Add support for app shortcuts ([PR #54])
+  * Long press RSAF's launcher icon to quickly open remotes in DocumentsUI
 
 ### Version 1.22
 
@@ -164,3 +166,4 @@
 [PR #51]: https://github.com/chenxiaolong/RSAF/pull/51
 [PR #52]: https://github.com/chenxiaolong/RSAF/pull/52
 [PR #53]: https://github.com/chenxiaolong/RSAF/pull/53
+[PR #54]: https://github.com/chenxiaolong/RSAF/pull/54
