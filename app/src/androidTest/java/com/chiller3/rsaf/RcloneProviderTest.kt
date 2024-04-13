@@ -120,7 +120,8 @@ class RcloneProviderTest {
             when (option.name) {
                 "type" -> iq.submit("alias")
                 "remote" -> iq.submit(rootDir.toString())
-                else -> throw IllegalStateException("Unexpected question: $option")
+                "config_fs_advanced" -> iq.submit("false")
+                else -> throw IllegalStateException("Unexpected question: ${option.name}")
             }
         }
 
@@ -464,7 +465,7 @@ class RcloneProviderTest {
 
                 renamedUri = DocumentsContract.renameDocument(
                     appContext.contentResolver, childDirUri2!!, "dir")
-                assertNull(renamedUri)
+                assertEquals(childDirUri, renamedUri)
             }
         }
     }

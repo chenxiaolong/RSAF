@@ -69,7 +69,8 @@ class ImportExportTest {
             when (option.name) {
                 "type" -> iq.submit("alias")
                 "remote" -> iq.submit(target)
-                else -> throw IllegalStateException("Unexpected question: $option")
+                "config_fs_advanced" -> iq.submit("false")
+                else -> throw IllegalStateException("Unexpected question: ${option.name}")
             }
         }
 
