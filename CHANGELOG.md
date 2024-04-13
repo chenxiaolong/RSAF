@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Fix tests after last rclone update ([PR #52])
+* Update all dependencies ([PR #53])
 
 ### Version 1.22
 
@@ -161,3 +162,5 @@
 [PR #48]: https://github.com/chenxiaolong/RSAF/pull/48
 [PR #49]: https://github.com/chenxiaolong/RSAF/pull/49
 [PR #51]: https://github.com/chenxiaolong/RSAF/pull/51
+[PR #52]: https://github.com/chenxiaolong/RSAF/pull/52
+[PR #53]: https://github.com/chenxiaolong/RSAF/pull/53
