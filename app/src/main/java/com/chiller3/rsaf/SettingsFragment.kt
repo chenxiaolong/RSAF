@@ -7,11 +7,15 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators
 import androidx.biometric.BiometricPrompt
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.viewModels
@@ -33,16 +37,13 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,
     Preference.OnPreferenceChangeListener {
     companion object {
-        private val TAG_ADD_REMOTE_NAME =
-            "${SettingsFragment::class.java.simpleName}.add_remote_name"
-        private val TAG_EDIT_REMOTE =
-            "${SettingsFragment::class.java.simpleName}.edit_remote"
-        private val TAG_RENAME_REMOTE =
-            "${SettingsFragment::class.java.simpleName}.rename_remote"
-        private val TAG_DUPLICATE_REMOTE =
-            "${SettingsFragment::class.java.simpleName}.duplicate_remote"
-        private val TAG_IMPORT_EXPORT_PASSWORD =
-            "${SettingsFragment::class.java.simpleName}.import_export_password"
+        private val TAG = SettingsFragment::class.java.simpleName
+
+        private val TAG_ADD_REMOTE_NAME = "$TAG.add_remote_name"
+        private val TAG_EDIT_REMOTE = "$TAG.edit_remote"
+        private val TAG_RENAME_REMOTE = "$TAG.rename_remote"
+        private val TAG_DUPLICATE_REMOTE = "$TAG.duplicate_remote"
+        private val TAG_IMPORT_EXPORT_PASSWORD = "$TAG.import_export_password"
 
         private const val ARG_OLD_REMOTE_NAME = "old_remote_name"
 
@@ -50,6 +51,13 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         private const val STATE_LAST_PAUSE = "last_pause"
 
         private const val INACTIVE_TIMEOUT_NS = 60_000_000_000L
+
+        private fun documentsUiIntent(remote: String): Intent =
+            Intent(Intent.ACTION_VIEW).apply {
+                val uri = DocumentsContract.buildRootUri(
+                    BuildConfig.DOCUMENTS_AUTHORITY, remote)
+                setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM)
+            }
     }
 
     private val viewModel: SettingsViewModel by viewModels()
@@ -194,6 +202,8 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                         }
                         categoryRemotes.addPreference(p)
                     }
+
+                    updateShortcuts(remotes)
                 }
             }
         }
@@ -348,12 +358,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
 
                 when (action) {
                     EditRemoteDialogFragment.Action.OPEN -> {
-                        val uri = DocumentsContract.buildRootUri(
-                            BuildConfig.DOCUMENTS_AUTHORITY, remote)
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM)
-                        }
-                        startActivity(intent)
+                        startActivity(documentsUiIntent(remote))
                     }
                     EditRemoteDialogFragment.Action.BLOCK -> {
                         viewModel.blockRemote(remote, true)
@@ -570,5 +575,34 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 argModifier(requireArguments())
             }
         }.show(parentFragmentManager.beginTransaction(), tag)
+    }
+
+    private fun updateShortcuts(remotes: List<Remote>) {
+        val context = requireContext()
+
+        val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
+        val shortcuts = mutableListOf<ShortcutInfoCompat>()
+        var rank = 0
+
+        for (remote in remotes) {
+            val isBlocked = remote.config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true"
+            if (isBlocked) {
+                continue
+            }
+
+            val shortcut = ShortcutInfoCompat.Builder(context, remote.name)
+                .setShortLabel(remote.name)
+                .setIcon(icon)
+                .setIntent(documentsUiIntent(remote.name))
+                .setRank(rank)
+                .build()
+
+            shortcuts.add(shortcut)
+            rank += 1
+        }
+
+        if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {
+            Log.w(TAG, "Failed to update dynamic shortcuts")
+        }
     }
 }
