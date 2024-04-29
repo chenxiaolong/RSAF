@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.24
 
 * Fix race condition that sometimes causes the OAuth2 authorization dialog to not autofill the token after a successful login ([Issue #55], [PR #56])
 
