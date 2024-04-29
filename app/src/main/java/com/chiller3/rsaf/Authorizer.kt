@@ -69,7 +69,6 @@ object Authorizer {
                 }
 
                 Log.d(TAG, "Stopped authorize server")
-                cancelLogReader()
             }.apply { start() }
 
             try {
@@ -149,12 +148,15 @@ object Authorizer {
                     } else if (line.contains(MARKER_CODE_STOP)) {
                         inCode = false
                         listener.onAuthorizeCode(code.toString())
+                        break
                     } else if (inCode) {
                         code.append(line)
                     }
                 }
             }
         }
+
+        Log.d(TAG, "Stopped log parser")
     }
 
     private fun cancelLogReader() {
