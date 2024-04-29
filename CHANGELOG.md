@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix race condition that sometimes causes the OAuth2 authorization dialog to not autofill the token after a successful login ([Issue #55], [PR #56])
+
 ### Version 1.23
 
 * Fix tests after last rclone update ([PR #52])
@@ -129,6 +133,7 @@
 [Issue #27]: https://github.com/chenxiaolong/RSAF/issues/27
 [Issue #28]: https://github.com/chenxiaolong/RSAF/issues/28
 [Issue #44]: https://github.com/chenxiaolong/RSAF/issues/44
+[Issue #55]: https://github.com/chenxiaolong/RSAF/issues/55
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -167,3 +172,4 @@
 [PR #52]: https://github.com/chenxiaolong/RSAF/pull/52
 [PR #53]: https://github.com/chenxiaolong/RSAF/pull/53
 [PR #54]: https://github.com/chenxiaolong/RSAF/pull/54
+[PR #56]: https://github.com/chenxiaolong/RSAF/pull/56
