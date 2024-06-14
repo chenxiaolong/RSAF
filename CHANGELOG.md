@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.67.0 ([PR #58])
+
 ### Version 1.24
 
 * Fix race condition that sometimes causes the OAuth2 authorization dialog to not autofill the token after a successful login ([Issue #55], [PR #56])
@@ -173,3 +177,4 @@
 [PR #53]: https://github.com/chenxiaolong/RSAF/pull/53
 [PR #54]: https://github.com/chenxiaolong/RSAF/pull/54
 [PR #56]: https://github.com/chenxiaolong/RSAF/pull/56
+[PR #58]: https://github.com/chenxiaolong/RSAF/pull/58
