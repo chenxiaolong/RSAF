@@ -76,6 +76,8 @@ With POSIX-like semantics, RSAF follows the behavior of the underlying filesyste
 
 3. That's it! The configured remotes are now available via the Storage Access Framework.
 
+On some devices, Android may kill RSAF while it is running in the background and streaming data to another app (for example, when playing a large video file). https://dontkillmyapp.com/ has instructions for how to disable battery optimization features for various OEMs.
+
 ## Permissions
 
 The only permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
