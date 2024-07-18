@@ -1,0 +1,85 @@
+---
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  build-app:
+    name: Build app
+    runs-on: ubuntu-latest
+    env:
+      androidApi: 34
+      androidArch: x86_64
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Validate gradle wrapper checksum
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+
+      - name: Install gomobile
+        shell: bash
+        run: |-
+          version=$(grep golang.org/x/mobile rcbridge/go.mod | awk '{print $2}')
+          go install golang.org/x/mobile/cmd/gobind@"${version}"
+          go install golang.org/x/mobile/cmd/gomobile@"${version}"
+
+      - name: Get NDK version
+        id: get_version
+        shell: bash
+        run: |
+          sed -nr 's/^\s*(ndkVersion)\s*(=)\s"(.+)".*$/\1\2\3/p' \
+              app/build.gradle.kts \
+              >> "${GITHUB_OUTPUT}"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.androidApi }}-${{ env.androidArch }}-${{ steps.get_version.outputs.ndkVersion }}
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.androidApi }}
+          arch: ${{ env.androidArch }}
+          ndk: ${{ steps.get_version.outputs.ndkVersion }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Build and test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.androidApi }}
+          arch: ${{ env.androidArch }}
+          ndk: ${{ steps.get_version.outputs.ndkVersion }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          # Debug build only since release builds require a signing key
+          script: ./gradlew --no-daemon build connectedDebugAndroidTest -x assembleRelease
