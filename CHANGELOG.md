@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update checksum for `tensorflow-lite-metadata-0.1.0-rc2.pom` dependency ([PR #60])
+
 ### Version 1.25
 
 * Update rclone to 1.67.0 ([PR #58])
@@ -178,3 +182,4 @@
 [PR #54]: https://github.com/chenxiaolong/RSAF/pull/54
 [PR #56]: https://github.com/chenxiaolong/RSAF/pull/56
 [PR #58]: https://github.com/chenxiaolong/RSAF/pull/58
+[PR #60]: https://github.com/chenxiaolong/RSAF/pull/60
