@@ -453,8 +453,16 @@ type RbDirEntry struct {
 	ModTime int64
 }
 
-type RbDirEntryReceiver interface {
-	Process(entry *RbDirEntry) bool
+type RbDirEntryList struct {
+	items []RbDirEntry
+}
+
+func (list RbDirEntryList) Get(index int) *RbDirEntry {
+	return &list.items[index]
+}
+
+func (list RbDirEntryList) Size() int {
+	return len(list.items)
 }
 
 func fileModeToStatMode(mode os.FileMode) (result int) {
@@ -495,30 +503,29 @@ func newDirEntry(fi os.FileInfo, doc string, docIsParent bool) RbDirEntry {
 	}
 }
 
-// Iterate through the contents of a directory. The directory entries are
-// retrieved all at once before the receiver is invoked. The entries are sorted
-// lexicographically by name.
-func RbDocIterDir(doc string, errOut *RbError, receiver RbDirEntryReceiver) bool {
+// List the contents of a directory. The entries are sorted lexicographically by
+// name.
+func RbDocListDir(doc string, errOut *RbError) *RbDirEntryList {
 	v, path, err := getVfsForDoc(doc)
 	if err != nil {
 		assignError(errOut, err, syscall.EINVAL)
-		return false
+		return nil
 	}
 
 	fis, err := readDir(v, path)
 	if err != nil {
 		assignError(errOut, err, syscall.EIO)
-		return false
+		return nil
 	}
+
+	entries := []RbDirEntry{}
 
 	for _, fi := range fis {
 		entry := newDirEntry(fi, doc, true)
-		if !receiver.Process(&entry) {
-			break
-		}
+		entries = append(entries, entry)
 	}
 
-	return true
+	return &RbDirEntryList{items: entries}
 }
 
 // Stat a single document without following symlinks.

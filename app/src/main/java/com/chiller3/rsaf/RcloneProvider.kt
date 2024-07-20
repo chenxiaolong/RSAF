@@ -396,11 +396,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val error = RbError()
 
         return MatrixCursor(getDocumentProjection(projection)).apply {
-            if (!Rcbridge.rbDocIterDir(parentDocumentId, error) {
-                addRowByDirEntry(newRow(), it)
-                true
-            }) {
-                throw error.toException("rbIterDir")
+            val entries = Rcbridge.rbDocListDir(parentDocumentId, error)
+                ?: throw error.toException("rbDocListDir")
+
+            for (i in 0 until entries.size()) {
+                addRowByDirEntry(newRow(), entries.get(i))
             }
 
             val uri = DocumentsContract.buildChildDocumentsUri(
