@@ -11,6 +11,7 @@
 
 * Update checksum for `tensorflow-lite-metadata-0.1.0-rc2.pom` dependency ([PR #60])
 * Avoid calling Java functions from Go to prevent a panic when built with go 1.22.5 ([PR #62])
+* Update all dependencies ([PR #63])
 
 ### Version 1.25
 
@@ -185,3 +186,4 @@
 [PR #58]: https://github.com/chenxiaolong/RSAF/pull/58
 [PR #60]: https://github.com/chenxiaolong/RSAF/pull/60
 [PR #62]: https://github.com/chenxiaolong/RSAF/pull/62
+[PR #63]: https://github.com/chenxiaolong/RSAF/pull/63
