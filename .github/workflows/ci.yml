@@ -29,6 +29,8 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v5
+        with:
+          go-version-file: rcbridge/go.mod
 
       - name: Install gomobile
         shell: bash
