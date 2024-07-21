@@ -112,7 +112,7 @@ android {
 
     compileSdk = 34
     buildToolsVersion = "34.0.0"
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "26.3.11579264"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
@@ -201,7 +201,7 @@ dependencies {
 
     // Included only to work around R8 complaining about missing annotation classes referenced by
     // the Tink transitive dependency
-    implementation(libs.jsr305)
+    implementation(libs.spotbugs)
 
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)

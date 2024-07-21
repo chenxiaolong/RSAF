@@ -1,18 +1,18 @@
 [versions]
-activity-ktx = "1.8.2"
-android-gradle-plugin = "8.3.2"
-appcompat = "1.6.1"
+activity-ktx = "1.9.0"
+android-gradle-plugin = "8.5.1"
+appcompat = "1.7.0"
 biometric = "1.1.0"
-core-ktx = "1.12.0"
-jgit = "6.9.0.202403050737-r"
-espresso-core = "3.5.1"
-fragment-ktx = "1.6.2"
-jsr305 = "3.0.2"
-junit = "1.1.5"
-kotlin = "1.9.23"
-material = "1.11.0"
+core-ktx = "1.13.1"
+jgit = "6.10.0.202406032230-r"
+espresso-core = "3.6.1"
+fragment-ktx = "1.8.1"
+junit = "1.2.1"
+kotlin = "2.0.0"
+material = "1.12.0"
 preference-ktx = "1.2.1"
 security-crypto = "1.1.0-alpha06"
+spotbugs = "4.8.6"
 
 [libraries]
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
@@ -23,11 +23,11 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
 jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit" }
 jgit-archive = { group = "org.eclipse.jgit", name = "org.eclipse.jgit.archive", version.ref = "jgit" }
-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
 junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference-ktx" }
 security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
+spotbugs = { group = "com.github.spotbugs", name = "spotbugs-annotations", version.ref = "spotbugs" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
