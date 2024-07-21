@@ -31,7 +31,6 @@ import androidx.preference.size
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,

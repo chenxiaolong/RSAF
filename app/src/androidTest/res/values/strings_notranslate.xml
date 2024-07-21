@@ -1,5 +1,5 @@
 <resources>
     <!-- These are needed because build.gradle.kts injects resources that refer to them by @string/<name> -->
-    <string name="app_name_release" translatable="false"></string>
-    <string name="app_name_debug" translatable="false"></string>
+    <string name="app_name_release" translatable="false" />
+    <string name="app_name_debug" translatable="false" />
 </resources>

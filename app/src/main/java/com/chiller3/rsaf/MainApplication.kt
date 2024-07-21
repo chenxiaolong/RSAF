@@ -3,9 +3,7 @@ package com.chiller3.rsaf
 import android.app.Application
 import android.app.backup.BackupManager
 import android.content.SharedPreferences
-import android.system.Os
 import android.util.Log
-import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.color.DynamicColors
 import java.io.File
 

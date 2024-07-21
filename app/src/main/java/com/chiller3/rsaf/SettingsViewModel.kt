@@ -54,10 +54,10 @@ data class RemoteBlockUnblockSucceeded(val remote: String, val blocked: Boolean)
 data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
-object ImportSucceeded : Alert {
+data object ImportSucceeded : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-object ExportSucceeded : Alert {
+data object ExportSucceeded : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 data class ImportFailed(val error: String) : Alert {
@@ -67,10 +67,10 @@ data class ImportFailed(val error: String) : Alert {
 data class ExportFailed(val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
-object ImportCancelled : Alert {
+data object ImportCancelled : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
-object ExportCancelled : Alert {
+data object ExportCancelled : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 data class LogcatSucceeded(val uri: Uri) : Alert {

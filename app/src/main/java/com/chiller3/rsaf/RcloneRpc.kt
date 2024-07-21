@@ -161,7 +161,7 @@ object RcloneRpc {
         val provider: String = data.getString("Provider")
     }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     class ProviderOption(data: JSONObject) {
         val name: String = data.getString("Name")
         val help: String = data.getString("Help")

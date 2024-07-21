@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
