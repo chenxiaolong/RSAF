@@ -365,6 +365,12 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                     EditRemoteDialogFragment.Action.UNBLOCK -> {
                         viewModel.blockRemote(remote, false)
                     }
+                    EditRemoteDialogFragment.Action.ADD_SHORTCUT -> {
+                        viewModel.setShortcut(remote, true)
+                    }
+                    EditRemoteDialogFragment.Action.REMOVE_SHORTCUT -> {
+                        viewModel.setShortcut(remote, true)
+                    }
                     EditRemoteDialogFragment.Action.CONFIGURE -> {
                         InteractiveConfigurationDialogFragment.newInstance(remote, false)
                             .show(parentFragmentManager.beginTransaction(),
@@ -439,10 +445,11 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
             preference.key.startsWith(Preferences.PREF_EDIT_REMOTE_PREFIX) -> {
                 val remote = preference.key.substring(Preferences.PREF_EDIT_REMOTE_PREFIX.length)
-                val isBlocked = viewModel.remotes.value.find { it.name == remote }
-                    ?.config?.get(RcloneRpc.CUSTOM_OPT_BLOCKED) == "true"
+                val config = viewModel.remotes.value.find { it.name == remote }?.config
+                val isBlocked = config?.get(RcloneRpc.CUSTOM_OPT_BLOCKED) == "true"
+                val hasShortcut = config?.get(RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT) == "true"
 
-                EditRemoteDialogFragment.newInstance(remote, isBlocked)
+                EditRemoteDialogFragment.newInstance(remote, isBlocked, hasShortcut)
                     .show(parentFragmentManager.beginTransaction(), TAG_EDIT_REMOTE)
                 return true
             }
@@ -537,6 +544,16 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             } else {
                 getString(R.string.alert_unblock_remote_failure, alert.remote, alert.error)
             }
+            is RemoteShortcutChangeSucceeded -> if (alert.enabled) {
+                getString(R.string.alert_add_shortcut_success, alert.remote)
+            } else {
+                getString(R.string.alert_remove_shortcut_success, alert.remote)
+            }
+            is RemoteShortcutChangeFailed -> if (alert.enable) {
+                getString(R.string.alert_add_shortcut_failure, alert.remote, alert.error)
+            } else {
+                getString(R.string.alert_remove_shortcut_failure, alert.remote, alert.error)
+            }
             ImportSucceeded -> getString(R.string.alert_import_success)
             ExportSucceeded -> getString(R.string.alert_export_success)
             is ImportFailed -> getString(R.string.alert_import_failure, alert.error)
@@ -580,24 +597,32 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         val context = requireContext()
 
         val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
+        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
         val shortcuts = mutableListOf<ShortcutInfoCompat>()
         var rank = 0
 
         for (remote in remotes) {
-            val isBlocked = remote.config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true"
-            if (isBlocked) {
+            if (remote.config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true"
+                || remote.config[RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT] != "true") {
                 continue
             }
 
-            val shortcut = ShortcutInfoCompat.Builder(context, remote.name)
-                .setShortLabel(remote.name)
-                .setIcon(icon)
-                .setIntent(documentsUiIntent(remote.name))
-                .setRank(rank)
-                .build()
+            if (rank < maxShortcuts) {
+                val shortcut = ShortcutInfoCompat.Builder(context, remote.name)
+                    .setShortLabel(remote.name)
+                    .setIcon(icon)
+                    .setIntent(documentsUiIntent(remote.name))
+                    .setRank(rank)
+                    .build()
 
-            shortcuts.add(shortcut)
+                shortcuts.add(shortcut)
+            }
+
             rank += 1
+        }
+
+        if (rank > maxShortcuts) {
+            Log.w(TAG, "Truncating dynamic shortcuts from $rank to $maxShortcuts")
         }
 
         if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {

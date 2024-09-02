@@ -51,6 +51,10 @@
     <string name="alert_block_remote_failure">Failed to block external app access to remote %1$s: %2$s</string>
     <string name="alert_unblock_remote_success">Successfully unblocked external app access to remote %1$s</string>
     <string name="alert_unblock_remote_failure">Failed to unblock external app access to remote %1$s: %2$s</string>
+    <string name="alert_add_shortcut_success">Successfully added launcher shortcut for remote: %1$s</string>
+    <string name="alert_add_shortcut_failure">Failed to add launcher shortcut for remote %1$s: %2$s</string>
+    <string name="alert_remove_shortcut_success">Successfully removed launcher shortcut for remote: %1$s</string>
+    <string name="alert_remove_shortcut_failure">Failed to remove launcher shortcut for remote %1$s: %2$s</string>
     <string name="alert_import_success">Successfully imported configuration</string>
     <string name="alert_import_failure">Failed to import configuration: %1$s</string>
     <string name="alert_import_cancelled">Configuration import cancelled</string>
@@ -82,6 +86,8 @@
     <string name="dialog_edit_remote_open_in_documentsui">Open in DocumentsUI</string>
     <string name="dialog_edit_remote_block_external_access">Block external app access</string>
     <string name="dialog_edit_remote_unblock_external_access">Unblock external app access</string>
+    <string name="dialog_edit_remote_add_dynamic_shortcut">Add to launcher shortcuts</string>
+    <string name="dialog_edit_remote_remove_dynamic_shortcut">Remove from launcher shortcuts</string>
     <string name="dialog_edit_remote_action_configure">Configure remote</string>
     <string name="dialog_edit_remote_action_rename">Rename remote</string>
     <string name="dialog_edit_remote_action_duplicate">Duplicate remote</string>

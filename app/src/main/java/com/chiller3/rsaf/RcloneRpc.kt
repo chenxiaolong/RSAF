@@ -11,6 +11,7 @@ object RcloneRpc {
     private const val CUSTOM_OPT_PREFIX = "rsaf:"
     // This is called hidden due to backwards compatibility.
     const val CUSTOM_OPT_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
+    const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
 
     /**
      * Perform an rclone RPC call.

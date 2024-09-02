@@ -46,12 +46,16 @@ data class RemoteDuplicateSucceeded(val oldRemote: String, val newRemote: String
 data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-
 data class RemoteBlockUnblockSucceeded(val remote: String, val blocked: Boolean) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-
 data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) : Alert {
+    override val requireNotifyRootsChanged: Boolean = false
+}
+data class RemoteShortcutChangeSucceeded(val remote: String, val enabled: Boolean) : Alert {
+    override val requireNotifyRootsChanged: Boolean = false
+}
+data class RemoteShortcutChangeFailed(val remote: String, val enable: Boolean, val error: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 data object ImportSucceeded : Alert {
@@ -157,6 +161,23 @@ class SettingsViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to set remote $remote block state to $block", e)
                 _alerts.update { it + RemoteBlockUnblockFailed(remote, block, e.toString()) }
+            }
+        }
+    }
+
+    fun setShortcut(remote: String, enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    RcloneRpc.setRemoteOptions(remote, mapOf(
+                        RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT to enabled.toString(),
+                    ))
+                }
+                refreshRemotesInternal()
+                _alerts.update { it + RemoteShortcutChangeSucceeded(remote, enabled) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to set remote $remote shortcut state to $enabled", e)
+                _alerts.update { it + RemoteShortcutChangeFailed(remote, enabled, e.toString()) }
             }
         }
     }
