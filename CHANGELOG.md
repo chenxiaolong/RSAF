@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.26
 
 * Update checksum for `tensorflow-lite-metadata-0.1.0-rc2.pom` dependency ([PR #60])
 * Avoid calling Java functions from Go to prevent a panic when built with go 1.22.5 ([PR #62])
