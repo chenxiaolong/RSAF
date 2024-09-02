@@ -13,6 +13,7 @@
 * Avoid calling Java functions from Go to prevent a panic when built with go 1.22.5 ([PR #62])
 * Update all dependencies ([PR #63])
 * Use Material 3 switches for switch preferences ([PR #64])
+* Make dynamic shortcuts configurable and fix crash when there are too many shortcuts ([Issue #65], [PR #66])
 
 ### Version 1.25
 
@@ -145,6 +146,7 @@
 [Issue #28]: https://github.com/chenxiaolong/RSAF/issues/28
 [Issue #44]: https://github.com/chenxiaolong/RSAF/issues/44
 [Issue #55]: https://github.com/chenxiaolong/RSAF/issues/55
+[Issue #65]: https://github.com/chenxiaolong/RSAF/issues/65
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -189,3 +191,4 @@
 [PR #62]: https://github.com/chenxiaolong/RSAF/pull/62
 [PR #63]: https://github.com/chenxiaolong/RSAF/pull/63
 [PR #64]: https://github.com/chenxiaolong/RSAF/pull/64
+[PR #66]: https://github.com/chenxiaolong/RSAF/pull/66
