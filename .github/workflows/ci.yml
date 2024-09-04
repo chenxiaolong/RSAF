@@ -9,7 +9,6 @@ jobs:
     name: Build app
     runs-on: ubuntu-latest
     env:
-      androidApi: 34
       androidArch: x86_64
     steps:
       - name: Check out repository
@@ -43,7 +42,9 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          sed -nr 's/^\s*(ndkVersion)\s*(=)\s"(.+)".*$/\1\2\3/p' \
+          sed -nr \
+              -e 's/^\s*(compileSdk)\s*(=)\s([0-9]+).*$/\1\2\3/p' \
+              -e 's/^\s*(ndkVersion)\s*(=)\s"(.+)".*$/\1\2\3/p' \
               app/build.gradle.kts \
               >> "${GITHUB_OUTPUT}"
 
@@ -60,13 +61,15 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.androidApi }}-${{ env.androidArch }}-${{ steps.get_version.outputs.ndkVersion }}
+          key: avd-${{ steps.get_version.outputs.compileSdk }}-${{ env.androidArch }}-${{ steps.get_version.outputs.ndkVersion }}
 
       - name: Create AVD snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ env.androidApi }}
+          # TODO: Remove after Google publishes AOSP-based image.
+          target: google_apis
+          api-level: ${{ steps.get_version.outputs.compileSdk }}
           arch: ${{ env.androidArch }}
           ndk: ${{ steps.get_version.outputs.ndkVersion }}
           force-avd-creation: false
@@ -77,7 +80,9 @@ jobs:
       - name: Build and test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ env.androidApi }}
+          # TODO: Remove after Google publishes AOSP-based image.
+          target: google_apis
+          api-level: ${{ steps.get_version.outputs.compileSdk }}
           arch: ${{ env.androidArch }}
           ndk: ${{ steps.get_version.outputs.ndkVersion }}
           force-avd-creation: false

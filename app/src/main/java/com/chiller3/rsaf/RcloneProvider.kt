@@ -1,12 +1,17 @@
 package com.chiller3.rsaf
 
 import android.content.ContentResolver
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
-import android.os.*
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
+import android.os.ProxyFileDescriptorCallback
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
@@ -290,7 +295,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     private fun revokeGrants(documentId: String) {
         val uri = DocumentsContract.buildDocumentUri(BuildConfig.DOCUMENTS_AUTHORITY, documentId)
-        context!!.revokeUriPermission(uri, 0.inv())
+        context!!.revokeUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION and Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+        )
     }
 
     override fun onCreate(): Boolean {

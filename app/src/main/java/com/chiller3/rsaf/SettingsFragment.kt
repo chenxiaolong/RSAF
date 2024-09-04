@@ -8,7 +8,9 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators
@@ -16,6 +18,9 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.viewModels
@@ -28,6 +33,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import androidx.preference.size
+import androidx.recyclerview.widget.RecyclerView
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -93,6 +99,37 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 viewModel.saveLogs(it)
             }
         }
+
+    override fun onCreateRecyclerView(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        savedInstanceState: Bundle?
+    ): RecyclerView {
+        val view = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
+
+        view.clipToPadding = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+
+            // This is a little bit ugly in landscape mode because the divider lines for categories
+            // extend into the inset area. However, it's worth applying the left/right padding here
+            // anyway because it allows the inset area to be used for scrolling instead of just
+            // being a useless dead zone.
+            v.updatePadding(
+                bottom = insets.bottom,
+                left = insets.left,
+                right = insets.right,
+            )
+
+            WindowInsetsCompat.CONSUMED
+        }
+
+        return view
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_root, rootKey)

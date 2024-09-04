@@ -108,14 +108,14 @@ val rcbridgeAar = rcbridgeDir.map { it.file("rcbridge.aar") }
 android {
     namespace = "com.chiller3.rsaf"
 
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
-    ndkVersion = "26.3.11579264"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
+    ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = gitVersionCode
         versionName = gitVersionName
 
