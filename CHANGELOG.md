@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Target API 35 ([PR #67])
+
 ### Version 1.26
 
 * Update checksum for `tensorflow-lite-metadata-0.1.0-rc2.pom` dependency ([PR #60])
@@ -192,3 +196,4 @@
 [PR #63]: https://github.com/chenxiaolong/RSAF/pull/63
 [PR #64]: https://github.com/chenxiaolong/RSAF/pull/64
 [PR #66]: https://github.com/chenxiaolong/RSAF/pull/66
+[PR #67]: https://github.com/chenxiaolong/RSAF/pull/67
