@@ -9,7 +9,7 @@
 
 ### Unreleased
 
-* Target API 35 ([PR #67])
+* Target API 35 ([PR #67], [PR #68])
 
 ### Version 1.26
 
@@ -197,3 +197,4 @@
 [PR #64]: https://github.com/chenxiaolong/RSAF/pull/64
 [PR #66]: https://github.com/chenxiaolong/RSAF/pull/66
 [PR #67]: https://github.com/chenxiaolong/RSAF/pull/67
+[PR #68]: https://github.com/chenxiaolong/RSAF/pull/68
