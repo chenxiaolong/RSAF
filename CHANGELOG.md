@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Target API 35 ([PR #67], [PR #68], [PR #69])
+* Update rclone to 1.68.0 ([PR #70])
 
 ### Version 1.26
 
@@ -199,3 +200,4 @@
 [PR #67]: https://github.com/chenxiaolong/RSAF/pull/67
 [PR #68]: https://github.com/chenxiaolong/RSAF/pull/68
 [PR #69]: https://github.com/chenxiaolong/RSAF/pull/69
+[PR #70]: https://github.com/chenxiaolong/RSAF/pull/70
