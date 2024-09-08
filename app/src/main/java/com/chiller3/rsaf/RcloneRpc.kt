@@ -2,6 +2,7 @@ package com.chiller3.rsaf
 
 import android.util.Log
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
@@ -37,7 +38,7 @@ object RcloneRpc {
     val remoteNames: Array<String>
         get() {
             val output = invoke("config/listremotes", JSONObject())
-            val remotes = output.getJSONArray("remotes")
+            val remotes = output.optJSONArray("remotes") ?: return emptyArray()
 
             return Array(remotes.length()) {
                 remotes.getString(it)
@@ -88,29 +89,31 @@ object RcloneRpc {
      * This is computed once and cached forever.
      */
     private val providerQuestion by lazy {
-        ProviderOption(JSONObject(mapOf(
-            "Name" to "type",
+        ProviderOption(JSONObject()
+            .put("Name", "type")
+            .put("FieldName", "")
             // Same string as in `rclone config`
-            "Help" to "Type of storage to configure.",
-            "DefaultStr" to "",
-            "ValueStr" to "",
-            "Examples" to mutableListOf<Map<String, Any?>>().apply {
+            .put("Help", "Type of storage to configure.")
+            .put("DefaultStr", "")
+            .put("ValueStr", "")
+            .put("Examples", JSONArray().apply {
                 providers.forEach {
-                    add(mapOf(
-                        "Value" to it.key,
-                        "Help" to it.value.description,
-                        "Provider" to "",
-                    ))
+                    put(JSONObject()
+                        .put("Value", it.key)
+                        .put("Help", it.value.description)
+                        .put("Provider", "")
+                    )
                 }
-            },
-            "Hide" to 0,
-            "Required" to true,
-            "IsPassword" to false,
-            "Advanced" to false,
-            "Exclusive" to true,
-            "Sensitive" to false,
-            "Type" to "string",
-        )))
+            })
+            .put("Hide", 0)
+            .put("Required", true)
+            .put("IsPassword", false)
+            .put("NoPrefix", false)
+            .put("Advanced", false)
+            .put("Exclusive", true)
+            .put("Sensitive", false)
+            .put("Type", "string")
+        )
     }
 
     /**
@@ -119,16 +122,16 @@ object RcloneRpc {
      */
     private val booleanExamples by lazy {
         listOf(
-            ProviderOptionExample(JSONObject(mapOf<String, Any?>(
-                "Value" to "false",
-                "Help" to "false",
-                "Provider" to "",
-            ))),
-            ProviderOptionExample(JSONObject(mapOf<String, Any?>(
-                "Value" to "true",
-                "Help" to "true",
-                "Provider" to "",
-            ))),
+            ProviderOptionExample(JSONObject()
+                .put("Value", "false")
+                .put("Help", "false")
+                .put("Provider", "")
+            ),
+            ProviderOptionExample(JSONObject()
+                .put("Value", "true")
+                .put("Help", "true")
+                .put("Provider", "")
+            ),
         )
     }
 
@@ -142,9 +145,44 @@ object RcloneRpc {
     }
 
     @Suppress("unused")
+    class CommandHelp(data: JSONObject) {
+        val name: String = data.getString("Name")
+        val short: String = data.getString("Short")
+        val long: String = data.getString("Long")
+        val opts: Map<String, String> = mutableMapOf<String, String>().apply {
+            data.optJSONObject("Opts")?.let { jsonOpts ->
+                for (key in jsonOpts.keys()) {
+                    put(key, jsonOpts.getString(key))
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
+    class MetadataHelp(data: JSONObject) {
+        val help: String = data.getString("Help")
+        val type: String = data.getString("Type")
+        val example: String = data.getString("Example")
+        val readOnly = data.getBoolean("ReadOnly")
+    }
+
+    @Suppress("unused")
+    class MetadataInfo(data: JSONObject) {
+        val system: Map<String, MetadataHelp> = mutableMapOf<String, MetadataHelp>().apply {
+            data.optJSONObject("System")?.let { jsonSystem ->
+                for (key in jsonSystem.keys()) {
+                    put(key, MetadataHelp(jsonSystem.getJSONObject(key)))
+                }
+            }
+        }
+        val help: String = data.getString("Help")
+    }
+
+    @Suppress("unused")
     class Provider(data: JSONObject) {
         val name: String = data.getString("Name")
         val description: String = data.getString("Description")
+        val prefix: String = data.getString("Prefix")
         val options: List<ProviderOption> = mutableListOf<ProviderOption>().apply {
             val jsonOptions = data.getJSONArray("Options")
 
@@ -152,31 +190,49 @@ object RcloneRpc {
                 add(ProviderOption(jsonOptions.getJSONObject(i)))
             }
         }
+        val commandHelp: List<CommandHelp> = mutableListOf<CommandHelp>().apply {
+            data.optJSONArray("CommandHelp")?.let { jsonCommandHelp ->
+                for (i in 0 until jsonCommandHelp.length()) {
+                    add(CommandHelp(jsonCommandHelp.getJSONObject(i)))
+                }
+            }
+        }
+        val aliases: List<String> = mutableListOf<String>().apply {
+            data.optJSONArray("Aliases")?.let { jsonAliases ->
+                for (i in 0 until jsonAliases.length()) {
+                    add(jsonAliases.getString(i))
+                }
+            }
+        }
         val hide = data.getBoolean("Hide")
+        val metadataInfo = data.optJSONObject("MetadataInfo")?.let { MetadataInfo(it) }
     }
 
     @Suppress("unused")
     class ProviderOptionExample(data: JSONObject) {
         val value: String = data.getString("Value")
         val help: String = data.getString("Help")
-        val provider: String = data.getString("Provider")
+        val provider: String = data.optString("Provider")
     }
 
     @Suppress("unused")
     class ProviderOption(data: JSONObject) {
         val name: String = data.getString("Name")
+        val fieldName: String = data.getString("FieldName")
         val help: String = data.getString("Help")
+        val groups: String = data.optString("Groups")
+        val provider: String = data.optString("Provider")
         val default: String = data.getString("DefaultStr")
         val value: String = data.getString("ValueStr")
+        val shortOpt: String = data.optString("ShortOpt")
         val hide = data.getInt("Hide") != 0
         val required = data.getBoolean("Required")
         val isPassword = data.getBoolean("IsPassword")
+        val noPrefix = data.getBoolean("NoPrefix")
         val advanced = data.getBoolean("Advanced")
         val type: String = data.getString("Type")
         val examples: List<ProviderOptionExample> = mutableListOf<ProviderOptionExample>().apply {
-            if (data.has("Examples")) {
-                val jsonExamples = data.getJSONArray("Examples")
-
+            data.optJSONArray("Examples")?.let { jsonExamples ->
                 for (i in 0 until jsonExamples.length()) {
                     add(ProviderOptionExample(jsonExamples.getJSONObject(i)))
                 }
@@ -240,16 +296,15 @@ object RcloneRpc {
             get() = option?.let { Pair(error, it) }
 
         fun submit(answer: String?) {
-            val input = JSONObject(
-                mutableMapOf<String, Any?>(
-                    "name" to remote,
-                    // The parameters field is required to exist even in interactive mode
-                    "parameters" to JSONObject(),
-                    "opt" to mutableMapOf<String, Any?>(
-                        "nonInteractive" to true,
-                        "all" to true,
-                        "obscure" to true,
-                    ).apply {
+            val input = JSONObject()
+                .put("name", remote)
+                // The parameters field is required to exist even in interactive mode.
+                .put("parameters", JSONObject())
+                .put("opt", JSONObject()
+                    .put("nonInteractive", true)
+                    .put("all", true)
+                    .put("obscure", true)
+                    .apply {
                         state?.let {
                             put("state", it)
                         }
@@ -267,13 +322,13 @@ object RcloneRpc {
                             put("continue", true)
                             put("result", result)
                         }
-                    },
-                ).apply {
+                    }
+                )
+                .apply {
                     if (create) {
                         put("type", answer)
                     }
                 }
-            )
 
             val method = if (create) {
                 "config/create"
@@ -302,18 +357,22 @@ object RcloneRpc {
 
     /** Directly and non-interactively set config key/value pairs for a remote. */
     fun setRemoteOptions(remote: String, options: Map<String, String>) {
-        invoke("config/update", JSONObject(
-            mutableMapOf<String, Any?>(
-                "name" to remote,
-                "parameters" to options,
-                "opt" to mutableMapOf<String, Any?>(
-                    // This is required or else the rclone authorize flow is triggered, even if we
-                    // don't update any authentication-related options.
-                    "nonInteractive" to true,
-                    "obscure" to true,
-                ),
-            ),
-        ))
+        invoke("config/update", JSONObject()
+            .put("name", remote)
+            .put("parameters", JSONObject()
+                .apply {
+                    for ((k, v) in options.entries) {
+                        put(k, v)
+                    }
+                }
+            )
+            // This is required or else the rclone authorize flow is triggered, even if we don't
+            // update any authentication-related options.
+            .put("opt", JSONObject()
+                .put("nonInteractive", true)
+                .put("obscure", true)
+            )
+        )
     }
 
     /** Convert plain-text password to rclone-obscured password. */

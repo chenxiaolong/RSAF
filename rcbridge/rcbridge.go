@@ -334,17 +334,18 @@ func getVfs(remote string) (*vfs.VFS, error) {
 
 	v, ok := vfsCache[remote]
 	if !ok {
-		opts := vfscommon.DefaultOpt
+		opts := vfscommon.Opt
 		// Significantly shorten the time that directory entries are cached so
-		// that file listings have a more accurate view after operations that
-		// touch the backend directly, like copying/moving. There's no public
-		// nor internal API for manually invalidating the directory cache, so
-		// reducing the timeout is our only option.
-		opts.DirCacheTime = 5 * time.Second
+		// that file listings are more likely to reflect reality after external
+		// file operations made outside of rclone or local operations that touch
+		// the backend directly, like copying/moving. There's no public nor
+		// internal API for just invalidating the directory cache. The RC API
+		// has vfs/refresh but that forces an unnecessary reread of directories.
+		opts.DirCacheTime = fs.Duration(5 * time.Second)
 		// This is required for O_RDWR
 		opts.CacheMode = vfscommon.CacheModeWrites
 		// Don't let the cache grow too big
-		opts.CacheMaxAge = 60 * time.Second
+		opts.CacheMaxAge = fs.Duration(60 * time.Second)
 		// Adjust read buffering to be more appropriate for a mobile app.
 		// Maybe make this configurable in the future.
 		opts.ChunkSize = 2 * fs.Mebi
