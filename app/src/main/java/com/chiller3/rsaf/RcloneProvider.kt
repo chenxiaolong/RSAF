@@ -30,6 +30,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     companion object {
         private val TAG = RcloneProvider::class.java.simpleName
 
+        const val MIME_TYPE_BINARY = "application/octet-stream"
+
         const val ANDROID_SEMANTICS_ATTEMPTS = 32
 
         private val DEFAULT_ROOT_PROJECTION: Array<String> = arrayOf(
@@ -249,7 +251,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
          * Add a cursor row corresponding to a document directory entry.
          *
          * If the MIME type cannot be determined from the filename, then it is set to
-         * `application/octet-stream`.
+         * [MIME_TYPE_BINARY].
          */
         private fun addRowByDirEntry(row: MatrixCursor.RowBuilder, entry: RbDirEntry) {
             var flags = DOCUMENT_FLAGS
@@ -262,7 +264,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 val ext = entry.name.substringAfterLast('.', "")
                 mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: ""
                 if (mimeType.isEmpty()) {
-                    mimeType = "application/octet-stream"
+                    mimeType = MIME_TYPE_BINARY
                 }
             }
 
@@ -547,8 +549,12 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         enforceNotBlocked(parentDocumentId)
 
         val isDir = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
+        // Adding a .bin extension is allowed, but AOSP's FileSystemProvider does not do it and
+        // some applications rely on that being the case.
+        val allowExt = !isDir && mimeType != MIME_TYPE_BINARY
+
         var (baseName, ext) = splitExt(displayName, isDir)
-        val expectedExt = if (!isDir && prefs.addFileExtension) {
+        val expectedExt = if (allowExt && prefs.addFileExtension) {
             MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
         } else {
             null

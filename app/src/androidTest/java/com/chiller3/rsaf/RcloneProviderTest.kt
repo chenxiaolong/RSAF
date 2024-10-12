@@ -29,6 +29,7 @@ import kotlin.reflect.KMutableProperty0
 @RunWith(AndroidJUnit4::class)
 class RcloneProviderTest {
     companion object {
+        private const val MIME_BINARY = RcloneProvider.MIME_TYPE_BINARY
         private const val MIME_TEXT = "text/plain"
         private const val MIME_DIR = DocumentsContract.Document.MIME_TYPE_DIR
 
@@ -336,12 +337,14 @@ class RcloneProviderTest {
             val expected: String,
         )
         val testCases = listOf(
-            TestCase(false, MIME_TEXT, "file1", "file1"),
-            TestCase(false, MIME_TEXT, "file2.txt", "file2.txt"),
+            TestCase(false, MIME_BINARY, "file1", "file1"),
+            TestCase(false, MIME_TEXT, "file2", "file2"),
+            TestCase(false, MIME_TEXT, "file3.txt", "file3.txt"),
             TestCase(false, MIME_DIR, "dir1", "dir1"),
-            TestCase(true, MIME_TEXT, "file3", "file3.txt"),
-            TestCase(true, MIME_TEXT, "file4.txt", "file4.txt"),
-            TestCase(true, MIME_TEXT, "file5.mp4", "file5.mp4.txt"),
+            TestCase(true, MIME_BINARY, "file4", "file4"),
+            TestCase(true, MIME_TEXT, "file5", "file5.txt"),
+            TestCase(true, MIME_TEXT, "file6.txt", "file6.txt"),
+            TestCase(true, MIME_TEXT, "file7.mp4", "file7.mp4.txt"),
             TestCase(true, MIME_DIR, "dir2", "dir2"),
         )
 
