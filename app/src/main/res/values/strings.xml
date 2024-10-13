@@ -1,3 +1,7 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-License-Identifier: GPL-3.0-only
+-->
 <resources>
     <!-- Preference headers -->
     <string name="pref_header_permissions">Permissions</string>

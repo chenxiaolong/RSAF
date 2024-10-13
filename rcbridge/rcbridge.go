@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+// SPDX-License-Identifier: GPL-3.0-only
+
 // This is a thin wrapper around rclone's RPC calls and VFS system.
 //
 // The RPC calls rely on librclone, which has a stable API, but the VFS parts
