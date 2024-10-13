@@ -12,6 +12,7 @@
 * Avoid appending `.bin` file extension for the `application/octet-stream` MIME type ([Issue #73], [PR #74])
 * Show notification when files are being uploaded in the background and try to keep process alive ([PR #75])
 * Update dependencies ([PR #76])
+* Minor code improvements in tests ([PR #77])
 
 ### Version 1.28
 
@@ -216,3 +217,4 @@
 [PR #74]: https://github.com/chenxiaolong/RSAF/pull/74
 [PR #75]: https://github.com/chenxiaolong/RSAF/pull/75
 [PR #76]: https://github.com/chenxiaolong/RSAF/pull/76
+[PR #77]: https://github.com/chenxiaolong/RSAF/pull/77
