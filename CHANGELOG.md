@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Organize source code files into packages ([PR #78])
+
 ### Version 1.29
 
 * Avoid appending `.bin` file extension for the `application/octet-stream` MIME type ([Issue #73], [PR #74])
@@ -218,3 +222,4 @@
 [PR #75]: https://github.com/chenxiaolong/RSAF/pull/75
 [PR #76]: https://github.com/chenxiaolong/RSAF/pull/76
 [PR #77]: https://github.com/chenxiaolong/RSAF/pull/77
+[PR #78]: https://github.com/chenxiaolong/RSAF/pull/78
