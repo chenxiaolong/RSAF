@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Avoid appending `.bin` file extension for the `application/octet-stream` MIME type ([Issue #73], [PR #74])
+
 ### Version 1.28
 
 * Update rclone to 1.68.1 ([PR #71])
@@ -156,6 +160,7 @@
 [Issue #44]: https://github.com/chenxiaolong/RSAF/issues/44
 [Issue #55]: https://github.com/chenxiaolong/RSAF/issues/55
 [Issue #65]: https://github.com/chenxiaolong/RSAF/issues/65
+[Issue #73]: https://github.com/chenxiaolong/RSAF/issues/73
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -206,3 +211,4 @@
 [PR #69]: https://github.com/chenxiaolong/RSAF/pull/69
 [PR #70]: https://github.com/chenxiaolong/RSAF/pull/70
 [PR #71]: https://github.com/chenxiaolong/RSAF/pull/71
+[PR #74]: https://github.com/chenxiaolong/RSAF/pull/74
