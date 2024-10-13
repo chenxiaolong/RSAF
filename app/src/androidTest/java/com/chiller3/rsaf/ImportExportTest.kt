@@ -6,6 +6,8 @@
 package com.chiller3.rsaf
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.chiller3.rsaf.rclone.RcloneConfig
+import com.chiller3.rsaf.rclone.RcloneRpc
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

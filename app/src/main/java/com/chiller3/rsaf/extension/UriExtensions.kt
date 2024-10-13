@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.extension
 
 import android.content.ContentResolver
 import android.net.Uri

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.backup
 
 import android.app.backup.BackupAgentHelper
 import android.app.backup.BackupDataInput
@@ -11,6 +11,7 @@ import android.app.backup.BackupDataOutput
 import android.app.backup.SharedPreferencesBackupHelper
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.chiller3.rsaf.Preferences
 
 class ConfigBackupAgent : BackupAgentHelper() {
     companion object {

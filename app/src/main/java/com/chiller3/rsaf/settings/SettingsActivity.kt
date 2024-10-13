@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.settings
 
 import android.os.Bundle
 import android.view.ViewGroup
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.chiller3.rsaf.R
 import com.chiller3.rsaf.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {

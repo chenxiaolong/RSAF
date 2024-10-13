@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.view
 
 import android.content.Context
 import android.util.AttributeSet

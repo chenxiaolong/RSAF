@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.dialog
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -12,6 +12,8 @@ import android.view.Gravity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import com.chiller3.rsaf.Preferences
+import com.chiller3.rsaf.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 open class EditRemoteDialogFragment : DialogFragment() {

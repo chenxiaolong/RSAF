@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.settings
 
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chiller3.rsaf.Logcat
+import com.chiller3.rsaf.rclone.RcloneConfig
+import com.chiller3.rsaf.rclone.RcloneRpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,26 +44,30 @@ data class RemoteDeleteFailed(val remote: String, val error: String) : Alert {
 data class RemoteRenameSucceeded(val oldRemote: String, val newRemote: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-data class RemoteRenameFailed(val oldRemote: String, val newRemote: String, val error: String) : Alert {
+data class RemoteRenameFailed(val oldRemote: String, val newRemote: String, val error: String) :
+    Alert {
     // In case the failure occurred after creating the new remote and before deleting the old one
     override val requireNotifyRootsChanged: Boolean = true
 }
 data class RemoteDuplicateSucceeded(val oldRemote: String, val newRemote: String) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, val error: String) : Alert {
+data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, val error: String) :
+    Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
 data class RemoteBlockUnblockSucceeded(val remote: String, val blocked: Boolean) : Alert {
     override val requireNotifyRootsChanged: Boolean = true
 }
-data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) : Alert {
+data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) :
+    Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 data class RemoteShortcutChangeSucceeded(val remote: String, val enabled: Boolean) : Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
-data class RemoteShortcutChangeFailed(val remote: String, val enable: Boolean, val error: String) : Alert {
+data class RemoteShortcutChangeFailed(val remote: String, val enable: Boolean, val error: String) :
+    Alert {
     override val requireNotifyRootsChanged: Boolean = false
 }
 data object ImportSucceeded : Alert {
@@ -157,9 +164,11 @@ class SettingsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(remote, mapOf(
-                        RcloneRpc.CUSTOM_OPT_BLOCKED to block.toString(),
-                    ))
+                    RcloneRpc.setRemoteOptions(
+                        remote, mapOf(
+                            RcloneRpc.CUSTOM_OPT_BLOCKED to block.toString(),
+                        )
+                    )
                 }
                 refreshRemotesInternal()
                 _alerts.update { it + RemoteBlockUnblockSucceeded(remote, block) }
@@ -174,9 +183,11 @@ class SettingsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(remote, mapOf(
-                        RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT to enabled.toString(),
-                    ))
+                    RcloneRpc.setRemoteOptions(
+                        remote, mapOf(
+                            RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT to enabled.toString(),
+                        )
+                    )
                 }
                 refreshRemotesInternal()
                 _alerts.update { it + RemoteShortcutChangeSucceeded(remote, enabled) }

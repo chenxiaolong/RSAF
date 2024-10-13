@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.dialog
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -28,6 +28,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.chiller3.rsaf.Preferences
+import com.chiller3.rsaf.R
+import com.chiller3.rsaf.rclone.RcloneConfig
+import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.databinding.DialogInteractiveConfigurationBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout

@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.dialog
 
 import android.app.Dialog
 import android.os.Bundle
+import com.chiller3.rsaf.rclone.RcloneConfig
 
 class RemoteNameDialogFragment : TextInputDialogFragment() {
     companion object {

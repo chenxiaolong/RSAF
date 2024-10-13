@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.rclone
 
 import android.app.backup.BackupManager
 import android.content.Context
@@ -14,8 +14,11 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.chiller3.rsaf.RandomUtils
 import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.extension.toException
+import com.chiller3.rsaf.withTempFile
 import java.io.File
 import java.io.IOException
 import java.io.InputStream

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.settings
 
 import android.content.Intent
 import android.net.Uri
@@ -39,7 +39,21 @@ import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import androidx.preference.size
 import androidx.recyclerview.widget.RecyclerView
+import com.chiller3.rsaf.BuildConfig
+import com.chiller3.rsaf.dialog.EditRemoteDialogFragment
+import com.chiller3.rsaf.Logcat
+import com.chiller3.rsaf.Permissions
+import com.chiller3.rsaf.Preferences
+import com.chiller3.rsaf.R
+import com.chiller3.rsaf.rclone.RcloneConfig
+import com.chiller3.rsaf.rclone.RcloneProvider
+import com.chiller3.rsaf.rclone.RcloneRpc
+import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
+import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
+import com.chiller3.rsaf.extension.formattedString
+import com.chiller3.rsaf.view.LongClickablePreference
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 

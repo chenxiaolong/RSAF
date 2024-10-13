@@ -18,7 +18,7 @@ Hopefully, most issues can be found just by trying to compile rcbridge with `./g
 
 ### librclone
 
-If librclone gained new functionality that can replace current uses of internal APIs, then that new functionality should be used. librclone RPC-related tasks should be done purely on the Android side in [`RcloneRpc`](./app/src/main/java/com/chiller3/rsaf/RcloneRpc.kt), not in go.
+If librclone gained new functionality that can replace current uses of internal APIs, then that new functionality should be used. librclone RPC-related tasks should be done purely on the Android side in [`RcloneRpc`](./app/src/main/java/com/chiller3/rsaf/rclone/RcloneRpc.kt), not in go.
 
 ### `RbDocMkdir`
 
@@ -40,7 +40,7 @@ Check if there is a more library-friendly API for doing what `rclone authorize` 
 
 In addition, the URL and token are sent to stdout (or the logs). RSAF currently has to resort to parsing the logcat output to retrieve that information.
 
-## [`Authorizer.kt`](./app/src/main/java/com/chiller3/rsaf/Authorizer.kt)
+## [`Authorizer.kt`](./app/src/main/java/com/chiller3/rsaf/rclone/Authorizer.kt)
 
 ### Log markers
 
@@ -56,7 +56,7 @@ Check the `oauthutil.ConfigOAuth()` implementation to see if the way that the in
 
 Currently, the only way to stop the `rclone authorize` server is by sending it a bad request. Check that this mechanism still works. This can be done on the command line by running `rclone authorize <backend>` and then making a GET request to http://localhost:53682/.
 
-## [`RcloneConfig.kt`](./app/src/main/java/com/chiller3/rsaf/RcloneConfig.kt)
+## [`RcloneConfig.kt`](./app/src/main/java/com/chiller3/rsaf/rclone/RcloneConfig.kt)
 
 ### Error messages
 
@@ -70,7 +70,7 @@ Check if there are new APIs for loading/saving the configuration without setting
 
 Check if there are new APIs for loading/saving config files from/to in-memory buffers.
 
-## [`RcloneRpc.kt`](./app/src/main/java/com/chiller3/rsaf/RcloneRpc.kt)
+## [`RcloneRpc.kt`](./app/src/main/java/com/chiller3/rsaf/rclone/RcloneRpc.kt)
 
 ### Providers question
 

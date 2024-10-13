@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.rclone
 
 import android.app.Service
 import android.content.Context
@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
+import com.chiller3.rsaf.Notifications
 
 class BackgroundUploadMonitorService : Service() {
     companion object {

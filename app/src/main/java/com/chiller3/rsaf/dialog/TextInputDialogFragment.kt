@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.dialog
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -15,6 +15,8 @@ import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import com.chiller3.rsaf.Preferences
+import com.chiller3.rsaf.R
 import com.chiller3.rsaf.databinding.DialogTextInputBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 

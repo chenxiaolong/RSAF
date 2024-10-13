@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.backup
 
 import android.app.backup.BackupDataInputStream
 import android.app.backup.BackupDataOutput
@@ -11,6 +11,7 @@ import android.app.backup.BackupHelper
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.util.Log
+import com.chiller3.rsaf.rclone.RcloneConfig
 import java.io.ByteArrayOutputStream
 import java.io.EOFException
 import java.io.InputStream

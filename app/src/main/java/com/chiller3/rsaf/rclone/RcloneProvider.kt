@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf
+package com.chiller3.rsaf.rclone
 
 import android.content.ContentResolver
 import android.content.Intent
@@ -25,10 +25,17 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.chiller3.rsaf.BuildConfig
+import com.chiller3.rsaf.Notifications
+import com.chiller3.rsaf.Permissions
+import com.chiller3.rsaf.Preferences
+import com.chiller3.rsaf.R
 import com.chiller3.rsaf.binding.rcbridge.RbDirEntry
 import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.RbFile
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.extension.toException
+import com.chiller3.rsaf.extension.toSingleLineString
 import java.io.IOException
 
 class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreferenceChangeListener {

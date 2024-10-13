@@ -14,6 +14,8 @@ import android.system.OsConstants
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.rclone.RcloneProvider
+import com.chiller3.rsaf.rclone.RcloneRpc
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

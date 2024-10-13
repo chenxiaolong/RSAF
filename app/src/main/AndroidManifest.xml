@@ -18,7 +18,7 @@
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
-        android:backupAgent=".ConfigBackupAgent"
+        android:backupAgent=".backup.ConfigBackupAgent"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:memtagMode="off"
@@ -30,7 +30,7 @@
             android:value="unused" />
 
         <provider
-            android:name=".RcloneProvider"
+            android:name=".rclone.RcloneProvider"
             android:authorities="@string/documents_authority"
             android:grantUriPermissions="true"
             android:exported="true"
@@ -41,7 +41,7 @@
         </provider>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,7 +50,7 @@
         </activity>
 
         <service
-            android:name=".BackgroundUploadMonitorService"
+            android:name=".rclone.BackgroundUploadMonitorService"
             android:foregroundServiceType="specialUse"
             android:exported="false" />
     </application>
