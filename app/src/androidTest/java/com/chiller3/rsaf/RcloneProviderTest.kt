@@ -33,16 +33,8 @@ class RcloneProviderTest {
         private const val MIME_TEXT = "text/plain"
         private const val MIME_DIR = DocumentsContract.Document.MIME_TYPE_DIR
 
-        private fun Cursor.iterate(): Iterator<Cursor> = iterator {
-            if (moveToFirst()) {
-                while (true) {
-                    yield(this@iterate)
-
-                    if (!moveToNext()) {
-                        break
-                    }
-                }
-            }
+        private fun Cursor.asSequence() = generateSequence(seed = takeIf { it.moveToFirst() }) {
+            takeIf { it.moveToNext() }
         }
 
         private fun <R> retryTimeout(timeoutMs: Long, intervalMs: Long = 100, block: () -> R): R {
@@ -150,7 +142,7 @@ class RcloneProviderTest {
             val indexDocumentId = cursor.getColumnIndexOrThrow(
                 DocumentsContract.Root.COLUMN_DOCUMENT_ID)
 
-            for (row in cursor.iterate()) {
+            for (row in cursor.asSequence()) {
                 if (row.getString(indexRootId) == remote) {
                     assertEquals(docFromRoot(), row.getString(indexDocumentId))
 
@@ -203,7 +195,7 @@ class RcloneProviderTest {
             val indexLastModified = cursor.getColumnIndexOrThrow(
                 DocumentsContract.Document.COLUMN_LAST_MODIFIED)
 
-            for (row in cursor.iterate()) {
+            for (row in cursor.asSequence()) {
                 val documentId = row.getString(indexDocumentId)
                 val mimeType = row.getString(indexMimeType)
                 val displayName = row.getString(indexDisplayName)
