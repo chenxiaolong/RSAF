@@ -68,9 +68,12 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     private val viewModel: SettingsViewModel by viewModels()
 
     private lateinit var prefs: Preferences
+    private lateinit var categoryPermissions: PreferenceCategory
     private lateinit var categoryRemotes: PreferenceCategory
     private lateinit var categoryConfiguration: PreferenceCategory
     private lateinit var categoryDebug: PreferenceCategory
+    private lateinit var prefInhibitBatteryOpt: Preference
+    private lateinit var prefMissingNotifications: Preference
     private lateinit var prefAddRemote: Preference
     private lateinit var prefLocalStorageAccess: SwitchPreferenceCompat
     private lateinit var prefImportConfiguration: Preference
@@ -81,6 +84,18 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     private var bioAuthenticated = false
     private var lastPause = 0L
 
+    private val requestInhibitBatteryOpt =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            refreshPermissions()
+        }
+    private val requestPermissionRequired =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+            if (granted.all { it.value }) {
+                refreshPermissions()
+            } else {
+                startActivity(Permissions.getAppInfoIntent(requireContext()))
+            }
+        }
     private val requestSafImportConfiguration =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let {
@@ -143,9 +158,16 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
 
         prefs = Preferences(activity)
 
+        categoryPermissions = findPreference(Preferences.CATEGORY_PERMISSIONS)!!
         categoryRemotes = findPreference(Preferences.CATEGORY_REMOTES)!!
         categoryConfiguration = findPreference(Preferences.CATEGORY_CONFIGURATION)!!
         categoryDebug = findPreference(Preferences.CATEGORY_DEBUG)!!
+
+        prefInhibitBatteryOpt = findPreference(Preferences.PREF_INHIBIT_BATTERY_OPT)!!
+        prefInhibitBatteryOpt.onPreferenceClickListener = this
+
+        prefMissingNotifications = findPreference(Preferences.PREF_MISSING_NOTIFICATIONS)!!
+        prefMissingNotifications.onPreferenceClickListener = this
 
         prefAddRemote = findPreference(Preferences.PREF_ADD_REMOTE)!!
         prefAddRemote.onPreferenceClickListener = this
@@ -318,6 +340,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         }
 
         refreshGlobalVisibility()
+        refreshPermissions()
     }
 
     override fun onPause() {
@@ -342,6 +365,18 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             // Using View.GONE causes noticeable scrolling jank due to relayout.
             View.INVISIBLE
         }
+    }
+
+    private fun refreshPermissions() {
+        val context = requireContext()
+
+        val allowedInhibitBatteryOpt = Permissions.isInhibitingBatteryOpt(context)
+        prefInhibitBatteryOpt.isVisible = !allowedInhibitBatteryOpt
+
+        val allowedNotifications = Permissions.haveRequired(context)
+        prefMissingNotifications.isVisible = !allowedNotifications
+
+        categoryPermissions.isVisible = !(allowedInhibitBatteryOpt && allowedNotifications)
     }
 
     private fun refreshVersion() {
@@ -475,6 +510,15 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
 
     override fun onPreferenceClick(preference: Preference): Boolean {
         when {
+            preference === prefInhibitBatteryOpt -> {
+                requestInhibitBatteryOpt.launch(
+                    Permissions.getInhibitBatteryOptIntent(requireContext()))
+                return true
+            }
+            preference === prefMissingNotifications -> {
+                requestPermissionRequired.launch(Permissions.REQUIRED)
+                return true
+            }
             preference === prefAddRemote -> {
                 showRemoteNameDialog(TAG_ADD_REMOTE_NAME,
                     getString(R.string.dialog_add_remote_title))

@@ -1,5 +1,6 @@
 <resources>
     <!-- Preference headers -->
+    <string name="pref_header_permissions">Permissions</string>
     <string name="pref_header_remotes">Remotes</string>
     <string name="pref_header_configuration">Configuration</string>
     <string name="pref_header_behavior">Behavior</string>
@@ -9,6 +10,10 @@
     <string name="pref_header_debug">Debug</string>
 
     <!-- Preferences -->
+    <string name="pref_inhibit_battery_opt_name">Disable battery optimization</string>
+    <string name="pref_inhibit_battery_opt_desc">Needed to upload files in the background.</string>
+    <string name="pref_missing_notifications_name">Missing notification permission</string>
+    <string name="pref_missing_notifications_desc">Needed to show when files are being uploaded in the background.</string>
     <string name="pref_add_remote_name">Add a remote</string>
     <string name="pref_add_remote_desc">Add a new rclone remote configuration.</string>
     <string name="pref_import_configuration_name">Import configuration</string>
@@ -105,4 +110,15 @@
     <string name="ic_text_box_helper_required">Value must not be empty.</string>
     <string name="ic_text_box_helper_not_required">Value can be empty.</string>
     <string name="ic_header_examples">Example options:</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_background_uploads_name">Background uploads</string>
+    <string name="notification_channel_background_uploads_desc">Show in-progress background uploads</string>
+    <string name="notification_channel_failure_name">Failure alerts</string>
+    <string name="notification_channel_failure_desc">Alerts for errors during background uploads</string>
+    <plurals name="notification_background_uploads_in_progress_title">
+        <item quantity="one">Uploading %d file to remote</item>
+        <item quantity="other">Uploading %d files to remotes</item>
+    </plurals>
+    <string name="notification_background_upload_failed_title">Failed to upload file to remote</string>
 </resources>

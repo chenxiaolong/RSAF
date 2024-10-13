@@ -37,6 +37,8 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
 
         Logcat.init(this)
 
+        Notifications(this).updateChannels()
+
         // Enable Material You colors
         DynamicColors.applyToActivitiesIfAvailable(this)
     }

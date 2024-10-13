@@ -5,8 +5,9 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 
-class Preferences(context: Context) {
+class Preferences(private val context: Context) {
     companion object {
+        const val CATEGORY_PERMISSIONS = "permissions"
         const val CATEGORY_CONFIGURATION = "configuration"
         const val CATEGORY_DEBUG = "debug"
         const val CATEGORY_REMOTES = "remotes"
@@ -21,6 +22,8 @@ class Preferences(context: Context) {
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
 
         // UI actions only
+        const val PREF_INHIBIT_BATTERY_OPT = "inhibit_battery_opt"
+        const val PREF_MISSING_NOTIFICATIONS = "missing_notifications"
         const val PREF_ADD_REMOTE = "add_remote"
         const val PREF_EDIT_REMOTE_PREFIX = "edit_remote_"
         const val PREF_IMPORT_CONFIGURATION = "import_configuration"
@@ -30,6 +33,7 @@ class Preferences(context: Context) {
 
         // Not associated with a UI preference
         const val PREF_DEBUG_MODE = "debug_mode"
+        private const val PREF_NEXT_NOTIFICATION_ID = "next_notification_id"
     }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -80,4 +84,12 @@ class Preferences(context: Context) {
     var verboseRcloneLogs: Boolean
         get() = prefs.getBoolean(PREF_VERBOSE_RCLONE_LOGS, false)
         set(enabled) = prefs.edit { putBoolean(PREF_VERBOSE_RCLONE_LOGS, enabled) }
+
+    /** Get a unique notification ID that increments on every call. */
+    val nextNotificationId: Int
+        get() = synchronized(context.applicationContext) {
+            val nextId = prefs.getInt(PREF_NEXT_NOTIFICATION_ID, 0)
+            prefs.edit { putInt(PREF_NEXT_NOTIFICATION_ID, nextId + 1) }
+            nextId
+        }
 }

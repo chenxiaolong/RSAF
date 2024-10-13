@@ -278,6 +278,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     private lateinit var prefs: Preferences
+    private lateinit var notifications: Notifications
     private val ioThread = HandlerThread(javaClass.simpleName).apply { start() }
     private val ioHandler = Handler(ioThread.looper)
 
@@ -308,6 +309,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         prefs = Preferences(context)
         prefs.registerListener(this)
+
+        notifications = Notifications(context)
 
         // Some of the rclone backend packages' init() functions set default values based on the
         // value of config.GetCacheDir(). However, there's no way to call config.SetCacheDir() early
@@ -777,11 +780,31 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         override fun onRelease() {
             debugLog("onRelease()")
 
+            val context = context!!
+
+            if (Permissions.isInhibitingBatteryOpt(context)) {
+                context.startForegroundService(
+                    BackgroundUploadMonitorService.createAddIntent(context, documentId),
+                )
+            }
+
             val error = RbError()
             if (!handle.close(error)) {
+                val exception = error.toException("RbFile.close")
+
                 // This method is not supposed to throw
-                Log.w(TAG, "Error when closing file", error.toException("RbFile.close"))
+                Log.w(TAG, "Error when closing file", exception)
+
+                notifications.notifyBackgroundUploadFailed(documentId, exception.toSingleLineString())
             }
+
+            if (Permissions.isInhibitingBatteryOpt(context)) {
+                context.startForegroundService(
+                    BackgroundUploadMonitorService.createRemoveIntent(context, documentId),
+                )
+            }
+
+            debugLog("onRelease() complete")
         }
     }
 }

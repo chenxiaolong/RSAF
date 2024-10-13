@@ -32,7 +32,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 
 * Although RSAF always allows random writes, not all backends support it.
 
-    * In this situation, files may be temporarily buffered to disk before they are uploaded. This is the same behavior as with `rclone mount --vfs-cache-mode writes`.
+    * In this situation, files are temporarily buffered to disk before they are uploaded. This is the same behavior as with `rclone mount --vfs-cache-mode writes`.
 
 * Fancier file descriptor system calls are not supported.
 
@@ -76,11 +76,11 @@ With POSIX-like semantics, RSAF follows the behavior of the underlying filesyste
 
 3. That's it! The configured remotes are now available via the Storage Access Framework.
 
-On some devices, Android may kill RSAF while it is running in the background and streaming data to another app (for example, when playing a large video file). https://dontkillmyapp.com/ has instructions for how to disable battery optimization features for various OEMs.
-
 ## Permissions
 
 The only permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
+
+Allowing notifications and disabling battery optimizations are optional, but strongly recommended. These are needed to allow RSAF to reliably run in the background after a client app closes a file, which is when file uploads actually begin.
 
 On Android 11+, RSAF can optionally request the `MANAGE_EXTERNAL_STORAGE` (All files) permission. This allows rclone to access files in `/sdcard`, which may be useful for wrapper remotes. For example, this allows using a `crypt` remote to transparently encrypt and decrypt files in a local directory.
 

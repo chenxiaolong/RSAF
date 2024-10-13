@@ -1,5 +1,25 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
+        app:key="permissions"
+        app:title="@string/pref_header_permissions"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="inhibit_battery_opt"
+            app:persistent="false"
+            app:title="@string/pref_inhibit_battery_opt_name"
+            app:summary="@string/pref_inhibit_battery_opt_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="missing_notifications"
+            app:persistent="false"
+            app:title="@string/pref_missing_notifications_name"
+            app:summary="@string/pref_missing_notifications_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:key="remotes"
         app:title="@string/pref_header_remotes"
         app:iconSpaceReserved="false">
