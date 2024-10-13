@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 1.29
 
 * Avoid appending `.bin` file extension for the `application/octet-stream` MIME type ([Issue #73], [PR #74])
 * Show notification when files are being uploaded in the background and try to keep process alive ([PR #75])
