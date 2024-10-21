@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Organize source code files into packages ([PR #78])
+* Make a proper settings screen for editing remotes instead of just using a dialog box ([PR #80])
 
 ### Version 1.29
 
@@ -223,3 +224,4 @@
 [PR #76]: https://github.com/chenxiaolong/RSAF/pull/76
 [PR #77]: https://github.com/chenxiaolong/RSAF/pull/77
 [PR #78]: https://github.com/chenxiaolong/RSAF/pull/78
+[PR #80]: https://github.com/chenxiaolong/RSAF/pull/80
