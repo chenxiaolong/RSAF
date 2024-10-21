@@ -26,7 +26,6 @@ open class TextInputDialogFragment : DialogFragment() {
         private const val ARG_MESSAGE = "message"
         private const val ARG_HINT = "hint"
         private const val ARG_IS_PASSWORD = "is_password"
-        const val RESULT_ARGS = "args"
         const val RESULT_SUCCESS = "success"
         const val RESULT_INPUT = "input"
 
@@ -91,7 +90,6 @@ open class TextInputDialogFragment : DialogFragment() {
         super.onDismiss(dialog)
 
         setFragmentResult(tag!!, bundleOf(
-            RESULT_ARGS to arguments,
             RESULT_SUCCESS to success,
             RESULT_INPUT to input,
         ))

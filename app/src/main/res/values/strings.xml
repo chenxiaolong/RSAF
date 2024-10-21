@@ -6,6 +6,7 @@
     <!-- Preference headers -->
     <string name="pref_header_permissions">Permissions</string>
     <string name="pref_header_remotes">Remotes</string>
+    <string name="pref_header_remote">Remote</string>
     <string name="pref_header_configuration">Configuration</string>
     <string name="pref_header_behavior">Behavior</string>
     <string name="pref_header_ui">UI</string>
@@ -13,7 +14,7 @@
     <string name="pref_header_about">About</string>
     <string name="pref_header_debug">Debug</string>
 
-    <!-- Preferences -->
+    <!-- Main preferences -->
     <string name="pref_inhibit_battery_opt_name">Disable battery optimization</string>
     <string name="pref_inhibit_battery_opt_desc">Needed to upload files in the background.</string>
     <string name="pref_missing_notifications_name">Missing notification permission</string>
@@ -45,25 +46,26 @@
     <string name="pref_save_logs_name">Save logs</string>
     <string name="pref_save_logs_desc">Save logcat logs to a file. Note that the logs may contain names of remote files that have been accessed.</string>
 
-    <!-- Alerts -->
+    <!-- Remote preferences -->
+    <string name="pref_edit_remote_open_name">Open remote</string>
+    <string name="pref_edit_remote_open_desc">Open this remote in the system file manager.</string>
+    <string name="pref_edit_remote_configure_name">Configure remote</string>
+    <string name="pref_edit_remote_configure_desc">Rerun the rclone configuration wizard.</string>
+    <string name="pref_edit_remote_rename_name">Rename remote</string>
+    <string name="pref_edit_remote_rename_desc">Change the name of the remote. If other remotes depends on this one, they will need to be manually updated with the new name.</string>
+    <string name="pref_edit_remote_duplicate_name">Duplicate remote</string>
+    <string name="pref_edit_remote_duplicate_desc">Create a copy of this remote with identical configuration.</string>
+    <string name="pref_edit_remote_delete_name">Delete remote</string>
+    <string name="pref_edit_remote_delete_desc">Remove this remote from the configuration.</string>
+    <string name="pref_edit_remote_allow_external_access_name">Allow external app access</string>
+    <string name="pref_edit_remote_allow_external_access_desc">Allow external apps to access this remote via the system file manager. Access is not needed if this remote is just a backend for another remote.</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">Show in launcher shortcuts</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">Include this remote in the list of shortcuts when long pressing RSAF\'s launcher icon.</string>
+
+    <!-- Main alerts -->
     <string name="alert_list_remotes_failure">Failed to get list of remotes: %1$s</string>
     <string name="alert_add_remote_success">Successfully added new remote %1$s</string>
     <string name="alert_add_remote_partial">Partially added new remote %1$s due to interruption</string>
-    <string name="alert_edit_remote_success">Successfully edited remote %1$s</string>
-    <string name="alert_delete_remote_success">Successfully deleted remote %1$s</string>
-    <string name="alert_delete_remote_failure">Failed to delete %1$s: %2$s</string>
-    <string name="alert_rename_remote_success">Successfully renamed remote %1$s to %2$s</string>
-    <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
-    <string name="alert_duplicate_remote_success">Successfully duplicated remote %1$s to %2$s</string>
-    <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
-    <string name="alert_block_remote_success">Successfully blocked external app access to remote %1$s</string>
-    <string name="alert_block_remote_failure">Failed to block external app access to remote %1$s: %2$s</string>
-    <string name="alert_unblock_remote_success">Successfully unblocked external app access to remote %1$s</string>
-    <string name="alert_unblock_remote_failure">Failed to unblock external app access to remote %1$s: %2$s</string>
-    <string name="alert_add_shortcut_success">Successfully added launcher shortcut for remote: %1$s</string>
-    <string name="alert_add_shortcut_failure">Failed to add launcher shortcut for remote %1$s: %2$s</string>
-    <string name="alert_remove_shortcut_success">Successfully removed launcher shortcut for remote: %1$s</string>
-    <string name="alert_remove_shortcut_failure">Failed to remove launcher shortcut for remote %1$s: %2$s</string>
     <string name="alert_import_success">Successfully imported configuration</string>
     <string name="alert_import_failure">Failed to import configuration: %1$s</string>
     <string name="alert_import_cancelled">Configuration import cancelled</string>
@@ -72,6 +74,14 @@
     <string name="alert_export_cancelled">Configuration export cancelled</string>
     <string name="alert_logcat_success">Successfully saved logs to %1$s</string>
     <string name="alert_logcat_failure">Failed to save logs to %1$s: %2$s</string>
+
+    <!-- Edit remote alerts -->
+    <string name="alert_edit_remote_success">Successfully edited remote %1$s</string>
+    <string name="alert_delete_remote_failure">Failed to delete %1$s: %2$s</string>
+    <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
+    <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
+    <string name="alert_update_external_access_failure">Failed to update external app access to remote %1$s: %2$s</string>
+    <string name="alert_update_dynamic_shortcut_failure">Failed to update launcher shortcut for remote %1$s: %2$s</string>
 
     <!-- Biometric -->
     <string name="biometric_title">Unlock configuration</string>
@@ -92,15 +102,6 @@
     <string name="dialog_authorize_title">Waiting for authorization</string>
     <string name="dialog_authorize_message_loading">Waiting for rclone webserver to start.</string>
     <string name="dialog_authorize_message_url">Open the following link to authorize rclone for access to the backend. Once authorized, the token will be automatically inserted in the previous screen.</string>
-    <string name="dialog_edit_remote_open_in_documentsui">Open in DocumentsUI</string>
-    <string name="dialog_edit_remote_block_external_access">Block external app access</string>
-    <string name="dialog_edit_remote_unblock_external_access">Unblock external app access</string>
-    <string name="dialog_edit_remote_add_dynamic_shortcut">Add to launcher shortcuts</string>
-    <string name="dialog_edit_remote_remove_dynamic_shortcut">Remove from launcher shortcuts</string>
-    <string name="dialog_edit_remote_action_configure">Configure remote</string>
-    <string name="dialog_edit_remote_action_rename">Rename remote</string>
-    <string name="dialog_edit_remote_action_duplicate">Duplicate remote</string>
-    <string name="dialog_edit_remote_action_delete">Delete remote</string>
     <string name="dialog_import_password_title">Config import</string>
     <string name="dialog_import_password_message">The selected config file is encrypted. Enter the decryption password to import it.</string>
     <string name="dialog_import_password_hint">Decryption password</string>

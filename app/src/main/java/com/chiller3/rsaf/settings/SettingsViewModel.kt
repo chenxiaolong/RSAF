@@ -14,87 +14,10 @@ import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-sealed interface Alert {
-    val requireNotifyRootsChanged: Boolean
-}
-
-data class ListRemotesFailed(val error: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class RemoteAddSucceeded(val remote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteAddPartiallySucceeded(val remote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteEditSucceeded(val remote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class RemoteDeleteSucceeded(val remote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteDeleteFailed(val remote: String, val error: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteRenameSucceeded(val oldRemote: String, val newRemote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteRenameFailed(val oldRemote: String, val newRemote: String, val error: String) :
-    Alert {
-    // In case the failure occurred after creating the new remote and before deleting the old one
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteDuplicateSucceeded(val oldRemote: String, val newRemote: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteDuplicateFailed(val oldRemote: String, val newRemote: String, val error: String) :
-    Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteBlockUnblockSucceeded(val remote: String, val blocked: Boolean) : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class RemoteBlockUnblockFailed(val remote: String, val block: Boolean, val error: String) :
-    Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class RemoteShortcutChangeSucceeded(val remote: String, val enabled: Boolean) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class RemoteShortcutChangeFailed(val remote: String, val enable: Boolean, val error: String) :
-    Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data object ImportSucceeded : Alert {
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data object ExportSucceeded : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class ImportFailed(val error: String) : Alert {
-    // In case reloading the original config didn't work
-    override val requireNotifyRootsChanged: Boolean = true
-}
-data class ExportFailed(val error: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data object ImportCancelled : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data object ExportCancelled : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class LogcatSucceeded(val uri: Uri) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
-data class LogcatFailed(val uri: Uri, val error: String) : Alert {
-    override val requireNotifyRootsChanged: Boolean = false
-}
 
 data class Remote(
     val name: String,
@@ -119,19 +42,26 @@ data class ImportExportState(
     }
 }
 
+data class SettingsActivityActions(
+    val refreshRoots: Boolean,
+)
+
 class SettingsViewModel : ViewModel() {
     companion object {
         private val TAG = SettingsViewModel::class.java.simpleName
     }
 
     private val _remotes = MutableStateFlow<List<Remote>>(emptyList())
-    val remotes: StateFlow<List<Remote>> = _remotes
+    val remotes = _remotes.asStateFlow()
 
-    private val _alerts = MutableStateFlow<List<Alert>>(emptyList())
-    val alerts: StateFlow<List<Alert>> = _alerts
+    private val _alerts = MutableStateFlow<List<SettingsAlert>>(emptyList())
+    val alerts = _alerts.asStateFlow()
 
     private val _importExportState = MutableStateFlow<ImportExportState?>(null)
-    val importExportState: StateFlow<ImportExportState?> = _importExportState
+    val importExportState = _importExportState.asStateFlow()
+
+    private val _activityActions = MutableStateFlow(SettingsActivityActions(false))
+    val activityActions = _activityActions.asStateFlow()
 
     init {
         refreshRemotes()
@@ -150,7 +80,7 @@ class SettingsViewModel : ViewModel() {
             _remotes.update { r }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to refresh remotes", e)
-            _alerts.update { it + ListRemotesFailed(e.toString()) }
+            _alerts.update { it + SettingsAlert.ListRemotesFailed(e.toString()) }
         }
     }
 
@@ -160,93 +90,8 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun blockRemote(remote: String, block: Boolean) {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(
-                        remote, mapOf(
-                            RcloneRpc.CUSTOM_OPT_BLOCKED to block.toString(),
-                        )
-                    )
-                }
-                refreshRemotesInternal()
-                _alerts.update { it + RemoteBlockUnblockSucceeded(remote, block) }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to set remote $remote block state to $block", e)
-                _alerts.update { it + RemoteBlockUnblockFailed(remote, block, e.toString()) }
-            }
-        }
-    }
-
-    fun setShortcut(remote: String, enabled: Boolean) {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(
-                        remote, mapOf(
-                            RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT to enabled.toString(),
-                        )
-                    )
-                }
-                refreshRemotesInternal()
-                _alerts.update { it + RemoteShortcutChangeSucceeded(remote, enabled) }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to set remote $remote shortcut state to $enabled", e)
-                _alerts.update { it + RemoteShortcutChangeFailed(remote, enabled, e.toString()) }
-            }
-        }
-    }
-
-    fun deleteRemote(remote: String) {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneRpc.deleteRemote(remote)
-                }
-                refreshRemotesInternal()
-                _alerts.update { it + RemoteDeleteSucceeded(remote) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to delete remote $remote", e)
-                _alerts.update { it + RemoteDeleteFailed(remote, e.toString()) }
-            }
-        }
-    }
-
-    private fun copyRemote(oldRemote: String, newRemote: String, delete: Boolean) {
-        if (oldRemote == newRemote) {
-            throw IllegalStateException("Old and new remote names are the same")
-        }
-
-        val (success, failure) = if (delete) {
-            Pair(::RemoteRenameSucceeded, ::RemoteRenameFailed)
-        } else {
-            Pair(::RemoteDuplicateSucceeded, ::RemoteDuplicateFailed)
-        }
-
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneConfig.copyRemote(oldRemote, newRemote)
-                    if (delete) {
-                        RcloneRpc.deleteRemote(oldRemote)
-                    }
-                }
-                refreshRemotesInternal()
-                _alerts.update { it + success(oldRemote, newRemote) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to rename remote $oldRemote to $newRemote", e)
-                _alerts.update { it + failure(oldRemote, newRemote, e.toString()) }
-            }
-        }
-    }
-
-    fun renameRemote(oldRemote: String, newRemote: String) {
-        copyRemote(oldRemote, newRemote, true)
-    }
-
-    fun duplicateRemote(oldRemote: String, newRemote: String) {
-        copyRemote(oldRemote, newRemote, false)
+    fun remoteEdited() {
+        refreshRemotes()
     }
 
     fun startImportExport(mode: ImportExportMode, uri: Uri) {
@@ -289,8 +134,8 @@ class SettingsViewModel : ViewModel() {
         }
 
         val alert = when (state.mode) {
-            ImportExportMode.IMPORT -> ImportCancelled
-            ImportExportMode.EXPORT -> ExportCancelled
+            ImportExportMode.IMPORT -> SettingsAlert.ImportCancelled
+            ImportExportMode.EXPORT -> SettingsAlert.ExportCancelled
         }
 
         _alerts.update { it + alert }
@@ -305,10 +150,16 @@ class SettingsViewModel : ViewModel() {
         }
 
         val (operation, success, failure) = when (state.mode) {
-            ImportExportMode.IMPORT ->
-                Triple(RcloneConfig::importConfigurationUri, ImportSucceeded, ::ImportFailed)
-            ImportExportMode.EXPORT ->
-                Triple(RcloneConfig::exportConfigurationUri, ExportSucceeded, ::ExportFailed)
+            ImportExportMode.IMPORT -> Triple(
+                RcloneConfig::importConfigurationUri,
+                SettingsAlert.ImportSucceeded,
+                SettingsAlert::ImportFailed,
+            )
+            ImportExportMode.EXPORT -> Triple(
+                RcloneConfig::exportConfigurationUri,
+                SettingsAlert.ExportSucceeded,
+                SettingsAlert::ExportFailed,
+            )
         }
 
         viewModelScope.launch {
@@ -319,6 +170,7 @@ class SettingsViewModel : ViewModel() {
 
                 _alerts.update { it + success }
                 _importExportState.update { null }
+                _activityActions.update { it.copy(refreshRoots = true) }
 
                 if (state.mode == ImportExportMode.IMPORT) {
                     refreshRemotes()
@@ -332,6 +184,11 @@ class SettingsViewModel : ViewModel() {
                 Log.e(TAG, "Failed to perform import/export", e)
                 _alerts.update { it + failure(e.toString()) }
                 _importExportState.update { null }
+
+                if (state.mode == ImportExportMode.IMPORT) {
+                    // In case reloading the original config didn't work.
+                    _activityActions.update { it.copy(refreshRoots = true) }
+                }
             }
         }
     }
@@ -340,23 +197,21 @@ class SettingsViewModel : ViewModel() {
         _alerts.update { it.drop(1) }
     }
 
-    fun interactiveConfigurationCompleted(remote: String, new: Boolean, cancelled: Boolean) {
+    fun interactiveConfigurationCompleted(remote: String, cancelled: Boolean) {
         viewModelScope.launch {
             refreshRemotesInternal()
 
-            if (new) {
-                if (cancelled) {
-                    if (remotes.value.any { it.name == remote }) {
-                        _alerts.update { it + RemoteAddPartiallySucceeded(remote) }
-                    } else {
-                        // No need to notify if cancelled prior to the remote being created
-                    }
+            if (cancelled) {
+                if (remotes.value.any { it.name == remote }) {
+                    _alerts.update { it + SettingsAlert.RemoteAddPartiallySucceeded(remote) }
                 } else {
-                    _alerts.update { it + RemoteAddSucceeded(remote) }
+                    // No need to notify if cancelled prior to the remote being created
                 }
             } else {
-                _alerts.update { it + RemoteEditSucceeded(remote) }
+                _alerts.update { it + SettingsAlert.RemoteAddSucceeded(remote) }
             }
+
+            _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 
@@ -366,11 +221,15 @@ class SettingsViewModel : ViewModel() {
                 withContext(Dispatchers.IO) {
                     Logcat.dump(uri)
                 }
-                _alerts.update { it + LogcatSucceeded(uri) }
+                _alerts.update { it + SettingsAlert.LogcatSucceeded(uri) }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to dump logs to $uri", e)
-                _alerts.update { it + LogcatFailed(uri, e.toString()) }
+                _alerts.update { it + SettingsAlert.LogcatFailed(uri, e.toString()) }
             }
         }
+    }
+
+    fun activityActionCompleted() {
+        _activityActions.update { SettingsActivityActions(false) }
     }
 }

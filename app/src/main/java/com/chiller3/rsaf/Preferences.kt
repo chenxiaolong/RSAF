@@ -17,6 +17,7 @@ class Preferences(private val context: Context) {
         const val CATEGORY_DEBUG = "debug"
         const val CATEGORY_REMOTES = "remotes"
 
+        // Main preferences
         const val PREF_ADD_FILE_EXTENSION = "add_file_extension"
         const val PREF_ALLOW_BACKUP = "allow_backup"
         const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
@@ -26,7 +27,7 @@ class Preferences(private val context: Context) {
         const val PREF_REQUIRE_AUTH = "require_auth"
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
 
-        // UI actions only
+        // Main UI actions only
         const val PREF_INHIBIT_BATTERY_OPT = "inhibit_battery_opt"
         const val PREF_MISSING_NOTIFICATIONS = "missing_notifications"
         const val PREF_ADD_REMOTE = "add_remote"
@@ -35,6 +36,15 @@ class Preferences(private val context: Context) {
         const val PREF_EXPORT_CONFIGURATION = "export_configuration"
         const val PREF_SAVE_LOGS = "save_logs"
         const val PREF_VERSION = "version"
+
+        // Edit remote UI actions
+        const val PREF_OPEN_REMOTE = "open_remote"
+        const val PREF_CONFIGURE_REMOTE = "configure_remote"
+        const val PREF_RENAME_REMOTE = "rename_remote"
+        const val PREF_DUPLICATE_REMOTE = "duplicate_remote"
+        const val PREF_DELETE_REMOTE = "delete_remote"
+        const val PREF_ALLOW_EXTERNAL_ACCESS = "allow_external_access"
+        const val PREF_DYNAMIC_SHORTCUT = "dynamic_shortcut"
 
         // Not associated with a UI preference
         const val PREF_DEBUG_MODE = "debug_mode"

@@ -1,0 +1,64 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:title="@string/pref_header_remote"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="open_remote"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_open_name"
+            app:summary="@string/pref_edit_remote_open_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="configure_remote"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_configure_name"
+            app:summary="@string/pref_edit_remote_configure_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="rename_remote"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_rename_name"
+            app:summary="@string/pref_edit_remote_rename_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="duplicate_remote"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_duplicate_name"
+            app:summary="@string/pref_edit_remote_duplicate_desc"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="delete_remote"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_delete_name"
+            app:summary="@string/pref_edit_remote_delete_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_header_behavior"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="allow_external_access"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_allow_external_access_name"
+            app:summary="@string/pref_edit_remote_allow_external_access_desc"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="dynamic_shortcut"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_dynamic_shortcut_name"
+            app:summary="@string/pref_edit_remote_dynamic_shortcut_desc"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

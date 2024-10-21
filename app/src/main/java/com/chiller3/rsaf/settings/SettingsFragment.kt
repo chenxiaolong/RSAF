@@ -13,19 +13,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricManager.Authenticators
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.viewModels
@@ -34,49 +22,37 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import androidx.preference.size
-import androidx.recyclerview.widget.RecyclerView
 import com.chiller3.rsaf.BuildConfig
-import com.chiller3.rsaf.dialog.EditRemoteDialogFragment
 import com.chiller3.rsaf.Logcat
 import com.chiller3.rsaf.Permissions
+import com.chiller3.rsaf.PreferenceBaseFragment
 import com.chiller3.rsaf.Preferences
 import com.chiller3.rsaf.R
-import com.chiller3.rsaf.rclone.RcloneConfig
-import com.chiller3.rsaf.rclone.RcloneProvider
-import com.chiller3.rsaf.rclone.RcloneRpc
-import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
-import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
+import com.chiller3.rsaf.dialog.RemoteNameDialogAction
+import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
+import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.extension.formattedString
+import com.chiller3.rsaf.rclone.RcloneConfig
+import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.view.LongClickablePreference
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
-class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
+class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
     Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,
     Preference.OnPreferenceChangeListener {
     companion object {
         private val TAG = SettingsFragment::class.java.simpleName
 
         private val TAG_ADD_REMOTE_NAME = "$TAG.add_remote_name"
-        private val TAG_EDIT_REMOTE = "$TAG.edit_remote"
-        private val TAG_RENAME_REMOTE = "$TAG.rename_remote"
-        private val TAG_DUPLICATE_REMOTE = "$TAG.duplicate_remote"
         private val TAG_IMPORT_EXPORT_PASSWORD = "$TAG.import_export_password"
 
-        private const val ARG_OLD_REMOTE_NAME = "old_remote_name"
-
-        private const val STATE_AUTHENTICATED = "authenticated"
-        private const val STATE_LAST_PAUSE = "last_pause"
-
-        private const val INACTIVE_TIMEOUT_NS = 60_000_000_000L
-
-        private fun documentsUiIntent(remote: String): Intent =
+        fun documentsUiIntent(remote: String): Intent =
             Intent(Intent.ACTION_VIEW).apply {
                 val uri = DocumentsContract.buildRootUri(
                     BuildConfig.DOCUMENTS_AUTHORITY, remote)
@@ -84,9 +60,10 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
     }
 
+    override val requestTag: String = TAG
+
     private val viewModel: SettingsViewModel by viewModels()
 
-    private lateinit var prefs: Preferences
     private lateinit var categoryPermissions: PreferenceCategory
     private lateinit var categoryRemotes: PreferenceCategory
     private lateinit var categoryConfiguration: PreferenceCategory
@@ -99,10 +76,14 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
     private lateinit var prefExportConfiguration: Preference
     private lateinit var prefVersion: LongClickablePreference
     private lateinit var prefSaveLogs: Preference
-    private lateinit var bioPrompt: BiometricPrompt
-    private var bioAuthenticated = false
-    private var lastPause = 0L
 
+    private val requestEditRemote =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it.data?.extras?.getString(EditRemoteActivity.RESULT_NEW_REMOTE)?.let { newRemote ->
+                editRemote(newRemote)
+            }
+            viewModel.remoteEdited()
+        }
     private val requestInhibitBatteryOpt =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             refreshPermissions()
@@ -134,48 +115,10 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
         }
 
-    override fun onCreateRecyclerView(
-        inflater: LayoutInflater,
-        parent: ViewGroup,
-        savedInstanceState: Bundle?
-    ): RecyclerView {
-        val view = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
-
-        view.clipToPadding = false
-
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
-            val insets = windowInsets.getInsets(
-                WindowInsetsCompat.Type.systemBars()
-                        or WindowInsetsCompat.Type.displayCutout()
-            )
-
-            // This is a little bit ugly in landscape mode because the divider lines for categories
-            // extend into the inset area. However, it's worth applying the left/right padding here
-            // anyway because it allows the inset area to be used for scrolling instead of just
-            // being a useless dead zone.
-            v.updatePadding(
-                bottom = insets.bottom,
-                left = insets.left,
-                right = insets.right,
-            )
-
-            WindowInsetsCompat.CONSUMED
-        }
-
-        return view
-    }
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_root, rootKey)
 
-        if (savedInstanceState != null) {
-            bioAuthenticated = savedInstanceState.getBoolean(STATE_AUTHENTICATED)
-            lastPause = savedInstanceState.getLong(STATE_LAST_PAUSE)
-        }
-
-        val activity = requireActivity()
-
-        prefs = Preferences(activity)
+        val context = requireContext()
 
         categoryPermissions = findPreference(Preferences.CATEGORY_PERMISSIONS)!!
         categoryRemotes = findPreference(Preferences.CATEGORY_REMOTES)!!
@@ -210,35 +153,6 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         refreshVersion()
         refreshDebugPrefs()
 
-        bioPrompt = BiometricPrompt(
-            this,
-            activity.mainExecutor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    Toast.makeText(
-                        activity,
-                        getString(R.string.biometric_error, errString),
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    activity.finish()
-                }
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    bioAuthenticated = true
-                    refreshGlobalVisibility()
-                }
-
-                override fun onAuthenticationFailed() {
-                    Toast.makeText(
-                        activity,
-                        R.string.biometric_failure,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    activity.finish()
-                }
-            },
-        )
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.alerts.collect {
@@ -269,7 +183,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                             continue
                         }
 
-                        val p = Preference(activity).apply {
+                        val p = Preference(context).apply {
                             key = Preferences.PREF_EDIT_REMOTE_PREFIX + remote.name
                             isPersistent = false
                             title = remote.name
@@ -279,8 +193,6 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                         }
                         categoryRemotes.addPreference(p)
                     }
-
-                    updateShortcuts(remotes)
                 }
             }
         }
@@ -318,23 +230,25 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             }
         }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.activityActions.collect {
+                    if (it.refreshRoots) {
+                        Log.d(TAG, "Notifying system of new SAF roots")
+                        RcloneProvider.notifyRootsChanged(requireContext().contentResolver)
+                    }
+                    viewModel.activityActionCompleted()
+                }
+            }
+        }
+
         for (key in arrayOf(
             TAG_ADD_REMOTE_NAME,
-            TAG_EDIT_REMOTE,
-            TAG_RENAME_REMOTE,
-            TAG_DUPLICATE_REMOTE,
             TAG_IMPORT_EXPORT_PASSWORD,
             InteractiveConfigurationDialogFragment.TAG,
         )) {
             parentFragmentManager.setFragmentResultListener(key, this, this)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putBoolean(STATE_AUTHENTICATED, bioAuthenticated)
-        outState.putLong(STATE_LAST_PAUSE, lastPause)
     }
 
     override fun onResume() {
@@ -346,44 +260,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             prefLocalStorageAccess.isVisible = false
         }
 
-        if (bioAuthenticated && (System.nanoTime() - lastPause) >= INACTIVE_TIMEOUT_NS) {
-            bioAuthenticated = false
-        }
-
-        if (!bioAuthenticated) {
-            if (!prefs.requireAuth) {
-                bioAuthenticated = true
-            } else {
-                startBiometricAuth()
-            }
-        }
-
-        refreshGlobalVisibility()
         refreshPermissions()
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        lastPause = System.nanoTime()
-    }
-
-    private fun startBiometricAuth() {
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setAllowedAuthenticators(Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL)
-            .setTitle(getString(R.string.biometric_title))
-            .build()
-
-        bioPrompt.authenticate(promptInfo)
-    }
-
-    private fun refreshGlobalVisibility() {
-        view?.visibility = if (bioAuthenticated) {
-            View.VISIBLE
-        } else {
-            // Using View.GONE causes noticeable scrolling jank due to relayout.
-            View.INVISIBLE
-        }
     }
 
     private fun refreshPermissions() {
@@ -435,80 +312,6 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                             InteractiveConfigurationDialogFragment.TAG)
                 }
             }
-            TAG_EDIT_REMOTE -> {
-                val action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    bundle.getSerializable(EditRemoteDialogFragment.RESULT_ACTION,
-                        EditRemoteDialogFragment.Action::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    bundle.getSerializable(EditRemoteDialogFragment.RESULT_ACTION)
-                            as EditRemoteDialogFragment.Action?
-                }
-                val remote = bundle.getString(EditRemoteDialogFragment.RESULT_REMOTE)!!
-
-                when (action) {
-                    EditRemoteDialogFragment.Action.OPEN -> {
-                        startActivity(documentsUiIntent(remote))
-                    }
-                    EditRemoteDialogFragment.Action.BLOCK -> {
-                        viewModel.blockRemote(remote, true)
-                    }
-                    EditRemoteDialogFragment.Action.UNBLOCK -> {
-                        viewModel.blockRemote(remote, false)
-                    }
-                    EditRemoteDialogFragment.Action.ADD_SHORTCUT -> {
-                        viewModel.setShortcut(remote, true)
-                    }
-                    EditRemoteDialogFragment.Action.REMOVE_SHORTCUT -> {
-                        viewModel.setShortcut(remote, true)
-                    }
-                    EditRemoteDialogFragment.Action.CONFIGURE -> {
-                        InteractiveConfigurationDialogFragment.newInstance(remote, false)
-                            .show(parentFragmentManager.beginTransaction(),
-                                InteractiveConfigurationDialogFragment.TAG)
-                    }
-                    EditRemoteDialogFragment.Action.RENAME -> {
-                        showRemoteNameDialog(
-                            TAG_RENAME_REMOTE,
-                            getString(R.string.dialog_rename_remote_title, remote),
-                        ) {
-                            it.putString(ARG_OLD_REMOTE_NAME, remote)
-                        }
-                    }
-                    EditRemoteDialogFragment.Action.DUPLICATE -> {
-                        showRemoteNameDialog(
-                            TAG_DUPLICATE_REMOTE,
-                            getString(R.string.dialog_duplicate_remote_title, remote),
-                        ) {
-                            it.putString(ARG_OLD_REMOTE_NAME, remote)
-                        }
-                    }
-                    EditRemoteDialogFragment.Action.DELETE -> {
-                        viewModel.deleteRemote(remote)
-                    }
-                    null -> {
-                        // Cancelled
-                    }
-                }
-            }
-            TAG_RENAME_REMOTE -> {
-                if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
-                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
-                    val oldRemote = bundle.getBundle(RemoteNameDialogFragment.RESULT_ARGS)!!
-                        .getString(ARG_OLD_REMOTE_NAME)!!
-
-                    viewModel.renameRemote(oldRemote, newRemote)
-                }
-            }
-            TAG_DUPLICATE_REMOTE -> {
-                if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
-                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
-                    val oldRemote = bundle.getBundle(RemoteNameDialogFragment.RESULT_ARGS)!!
-                        .getString(ARG_OLD_REMOTE_NAME)!!
-
-                    viewModel.duplicateRemote(oldRemote, newRemote)
-                }
-            }
             TAG_IMPORT_EXPORT_PASSWORD -> {
                 if (bundle.getBoolean(TextInputDialogFragment.RESULT_SUCCESS)) {
                     val password = bundle.getString(TextInputDialogFragment.RESULT_INPUT)!!
@@ -520,7 +323,6 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
             InteractiveConfigurationDialogFragment.TAG -> {
                 viewModel.interactiveConfigurationCompleted(
                     bundle.getString(InteractiveConfigurationDialogFragment.RESULT_REMOTE)!!,
-                    bundle.getBoolean(InteractiveConfigurationDialogFragment.RESULT_NEW),
                     bundle.getBoolean(InteractiveConfigurationDialogFragment.RESULT_CANCELLED),
                 )
             }
@@ -539,18 +341,16 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 return true
             }
             preference === prefAddRemote -> {
-                showRemoteNameDialog(TAG_ADD_REMOTE_NAME,
-                    getString(R.string.dialog_add_remote_title))
+                RemoteNameDialogFragment.newInstance(
+                    requireContext(),
+                    RemoteNameDialogAction.Add,
+                    viewModel.remotes.value.map { it.name }.toTypedArray(),
+                ).show(parentFragmentManager.beginTransaction(), TAG_ADD_REMOTE_NAME)
                 return true
             }
             preference.key.startsWith(Preferences.PREF_EDIT_REMOTE_PREFIX) -> {
                 val remote = preference.key.substring(Preferences.PREF_EDIT_REMOTE_PREFIX.length)
-                val config = viewModel.remotes.value.find { it.name == remote }?.config
-                val isBlocked = config?.get(RcloneRpc.CUSTOM_OPT_BLOCKED) == "true"
-                val hasShortcut = config?.get(RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT) == "true"
-
-                EditRemoteDialogFragment.newInstance(remote, isBlocked, hasShortcut)
-                    .show(parentFragmentManager.beginTransaction(), TAG_EDIT_REMOTE)
+                editRemote(remote)
                 return true
             }
             preference === prefImportConfiguration -> {
@@ -611,59 +411,24 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
         return false
     }
 
-    private fun notifyRootsChanged() {
-        RcloneProvider.notifyRootsChanged(requireContext().contentResolver)
-    }
-
-    private fun onAlert(alert: Alert) {
+    private fun onAlert(alert: SettingsAlert) {
         val msg = when (alert) {
-            is ListRemotesFailed -> getString(R.string.alert_list_remotes_failure, alert.error)
-            is RemoteAddSucceeded -> getString(R.string.alert_add_remote_success, alert.remote)
-            is RemoteAddPartiallySucceeded -> getString(R.string.alert_add_remote_partial,
-                alert.remote)
-            is RemoteEditSucceeded -> getString(R.string.alert_edit_remote_success, alert.remote)
-            is RemoteDeleteSucceeded -> getString(R.string.alert_delete_remote_success,
-                alert.remote)
-            is RemoteDeleteFailed -> getString(R.string.alert_delete_remote_failure,
-                alert.remote, alert.error)
-            is RemoteRenameSucceeded -> getString(R.string.alert_rename_remote_success,
-                alert.oldRemote, alert.newRemote)
-            is RemoteRenameFailed -> getString(R.string.alert_rename_remote_failure,
-                alert.oldRemote, alert.newRemote, alert.error)
-            is RemoteDuplicateSucceeded -> getString(R.string.alert_duplicate_remote_success,
-                alert.oldRemote, alert.newRemote)
-            is RemoteDuplicateFailed -> getString(R.string.alert_duplicate_remote_failure,
-                alert.oldRemote, alert.newRemote, alert.error)
-            is RemoteBlockUnblockSucceeded -> if (alert.blocked) {
-                getString(R.string.alert_block_remote_success, alert.remote)
-            } else {
-                getString(R.string.alert_unblock_remote_success, alert.remote)
-            }
-            is RemoteBlockUnblockFailed -> if (alert.block) {
-                getString(R.string.alert_block_remote_failure, alert.remote, alert.error)
-            } else {
-                getString(R.string.alert_unblock_remote_failure, alert.remote, alert.error)
-            }
-            is RemoteShortcutChangeSucceeded -> if (alert.enabled) {
-                getString(R.string.alert_add_shortcut_success, alert.remote)
-            } else {
-                getString(R.string.alert_remove_shortcut_success, alert.remote)
-            }
-            is RemoteShortcutChangeFailed -> if (alert.enable) {
-                getString(R.string.alert_add_shortcut_failure, alert.remote, alert.error)
-            } else {
-                getString(R.string.alert_remove_shortcut_failure, alert.remote, alert.error)
-            }
-            ImportSucceeded -> getString(R.string.alert_import_success)
-            ExportSucceeded -> getString(R.string.alert_export_success)
-            is ImportFailed -> getString(R.string.alert_import_failure, alert.error)
-            is ExportFailed -> getString(R.string.alert_export_failure, alert.error)
-            ImportCancelled -> getString(R.string.alert_import_cancelled)
-            ExportCancelled -> getString(R.string.alert_export_cancelled)
-            is LogcatSucceeded -> getString(R.string.alert_logcat_success,
-                alert.uri.formattedString)
-            is LogcatFailed -> getString(R.string.alert_logcat_failure,
-                alert.uri.formattedString, alert.error)
+            is SettingsAlert.ListRemotesFailed ->
+                getString(R.string.alert_list_remotes_failure, alert.error)
+            is SettingsAlert.RemoteAddSucceeded ->
+                getString(R.string.alert_add_remote_success, alert.remote)
+            is SettingsAlert.RemoteAddPartiallySucceeded ->
+                getString(R.string.alert_add_remote_partial, alert.remote)
+            SettingsAlert.ImportSucceeded -> getString(R.string.alert_import_success)
+            SettingsAlert.ExportSucceeded -> getString(R.string.alert_export_success)
+            is SettingsAlert.ImportFailed -> getString(R.string.alert_import_failure, alert.error)
+            is SettingsAlert.ExportFailed -> getString(R.string.alert_export_failure, alert.error)
+            SettingsAlert.ImportCancelled -> getString(R.string.alert_import_cancelled)
+            SettingsAlert.ExportCancelled -> getString(R.string.alert_export_cancelled)
+            is SettingsAlert.LogcatSucceeded ->
+                getString(R.string.alert_logcat_success, alert.uri.formattedString)
+            is SettingsAlert.LogcatFailed ->
+                getString(R.string.alert_logcat_failure, alert.uri.formattedString, alert.error)
         }
 
         Snackbar.make(requireView(), msg, Snackbar.LENGTH_LONG)
@@ -673,60 +438,9 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentResultListener,
                 }
             })
             .show()
-
-        if (alert.requireNotifyRootsChanged) {
-            notifyRootsChanged()
-        }
     }
 
-    private fun showRemoteNameDialog(tag: String, title: String,
-                                     argModifier: ((Bundle) -> Unit)? = null) {
-        RemoteNameDialogFragment.newInstance(
-            title,
-            getString(R.string.dialog_remote_name_message),
-            getString(R.string.dialog_remote_name_hint),
-            viewModel.remotes.value.map { it.name }.toTypedArray(),
-        ).apply {
-            if (argModifier != null) {
-                argModifier(requireArguments())
-            }
-        }.show(parentFragmentManager.beginTransaction(), tag)
-    }
-
-    private fun updateShortcuts(remotes: List<Remote>) {
-        val context = requireContext()
-
-        val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
-        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
-        val shortcuts = mutableListOf<ShortcutInfoCompat>()
-        var rank = 0
-
-        for (remote in remotes) {
-            if (remote.config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true"
-                || remote.config[RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT] != "true") {
-                continue
-            }
-
-            if (rank < maxShortcuts) {
-                val shortcut = ShortcutInfoCompat.Builder(context, remote.name)
-                    .setShortLabel(remote.name)
-                    .setIcon(icon)
-                    .setIntent(documentsUiIntent(remote.name))
-                    .setRank(rank)
-                    .build()
-
-                shortcuts.add(shortcut)
-            }
-
-            rank += 1
-        }
-
-        if (rank > maxShortcuts) {
-            Log.w(TAG, "Truncating dynamic shortcuts from $rank to $maxShortcuts")
-        }
-
-        if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {
-            Log.w(TAG, "Failed to update dynamic shortcuts")
-        }
+    private fun editRemote(remote: String) {
+        requestEditRemote.launch(EditRemoteActivity.createIntent(requireContext(), remote))
     }
 }
