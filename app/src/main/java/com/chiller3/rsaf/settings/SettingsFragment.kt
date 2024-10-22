@@ -64,6 +64,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
 
     private val viewModel: SettingsViewModel by viewModels()
 
+    private lateinit var prefs: Preferences
     private lateinit var categoryPermissions: PreferenceCategory
     private lateinit var categoryRemotes: PreferenceCategory
     private lateinit var categoryConfiguration: PreferenceCategory
@@ -119,6 +120,8 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         setPreferencesFromResource(R.xml.preferences_root, rootKey)
 
         val context = requireContext()
+
+        prefs = Preferences(context)
 
         categoryPermissions = findPreference(Preferences.CATEGORY_PERMISSIONS)!!
         categoryRemotes = findPreference(Preferences.CATEGORY_REMOTES)!!

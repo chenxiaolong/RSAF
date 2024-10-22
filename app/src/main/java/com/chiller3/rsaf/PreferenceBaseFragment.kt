@@ -7,11 +7,7 @@ package com.chiller3.rsaf
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.biometric.BiometricManager.Authenticators
-import androidx.biometric.BiometricPrompt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -19,56 +15,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 
 abstract class PreferenceBaseFragment : PreferenceFragmentCompat() {
-    companion object {
-        private const val INACTIVE_TIMEOUT_NS = 60_000_000_000L
-
-        // These are intentionally global to ensure that the prompt does not appear when navigating
-        // within the app.
-        private var bioAuthenticated = false
-        private var lastPause = 0L
-    }
-
     abstract val requestTag: String
-
-    protected lateinit var prefs: Preferences
-    private lateinit var bioPrompt: BiometricPrompt
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val activity = requireActivity()
-
-        prefs = Preferences(activity)
-
-        bioPrompt = BiometricPrompt(
-            this,
-            activity.mainExecutor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    Toast.makeText(
-                        activity,
-                        getString(R.string.biometric_error, errString),
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    activity.finish()
-                }
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    bioAuthenticated = true
-                    refreshGlobalVisibility()
-                }
-
-                override fun onAuthenticationFailed() {
-                    Toast.makeText(
-                        activity,
-                        R.string.biometric_failure,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    activity.finish()
-                }
-            },
-        )
-
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateRecyclerView(
         inflater: LayoutInflater,
@@ -99,47 +46,5 @@ abstract class PreferenceBaseFragment : PreferenceFragmentCompat() {
         }
 
         return view
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (bioAuthenticated && (System.nanoTime() - lastPause) >= INACTIVE_TIMEOUT_NS) {
-            bioAuthenticated = false
-        }
-
-        if (!bioAuthenticated) {
-            if (!prefs.requireAuth) {
-                bioAuthenticated = true
-            } else {
-                startBiometricAuth()
-            }
-        }
-
-        refreshGlobalVisibility()
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        lastPause = System.nanoTime()
-    }
-
-    private fun startBiometricAuth() {
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setAllowedAuthenticators(Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL)
-            .setTitle(getString(R.string.biometric_title))
-            .build()
-
-        bioPrompt.authenticate(promptInfo)
-    }
-
-    private fun refreshGlobalVisibility() {
-        view?.visibility = if (bioAuthenticated) {
-            View.VISIBLE
-        } else {
-            // Using View.GONE causes noticeable scrolling jank due to relayout.
-            View.INVISIBLE
-        }
     }
 }

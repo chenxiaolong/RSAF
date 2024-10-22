@@ -48,6 +48,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
     private val viewModel: EditRemoteViewModel by viewModels()
 
+    private lateinit var prefs: Preferences
     private lateinit var prefOpenRemote: Preference
     private lateinit var prefConfigureRemote: Preference
     private lateinit var prefRenameRemote: Preference
@@ -60,6 +61,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_edit_remote, rootKey)
+
+        prefs = Preferences(requireContext())
 
         prefOpenRemote = findPreference(Preferences.PREF_OPEN_REMOTE)!!
         prefOpenRemote.onPreferenceClickListener = this
