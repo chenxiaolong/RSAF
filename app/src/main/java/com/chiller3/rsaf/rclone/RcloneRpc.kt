@@ -102,7 +102,7 @@ object RcloneRpc {
             .put("DefaultStr", "")
             .put("ValueStr", "")
             .put("Examples", JSONArray().apply {
-                providers.forEach {
+                providers.entries.sortedBy { it.value.description }.forEach {
                     put(JSONObject()
                         .put("Value", it.key)
                         .put("Help", it.value.description)
