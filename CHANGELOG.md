@@ -13,6 +13,7 @@
 * Make a proper settings screen for editing remotes instead of just using a dialog box ([PR #80])
 * Enable predictive back gestures ([PR #82])
 * Make biometric authentication option more robust ([PR #83])
+* Fix UI jank when rotating the device due to hiding already-granted permission requests too late ([PR #84])
 
 ### Version 1.29
 
@@ -229,3 +230,4 @@
 [PR #80]: https://github.com/chenxiaolong/RSAF/pull/80
 [PR #82]: https://github.com/chenxiaolong/RSAF/pull/82
 [PR #83]: https://github.com/chenxiaolong/RSAF/pull/83
+[PR #84]: https://github.com/chenxiaolong/RSAF/pull/84
