@@ -14,6 +14,7 @@
 * Enable predictive back gestures ([PR #82])
 * Make biometric authentication option more robust ([PR #83])
 * Fix UI jank when rotating the device due to hiding already-granted permission requests too late ([PR #84])
+* Sort remote types by description when adding a new remote to match the rclone CLI ([PR #85])
 
 ### Version 1.29
 
@@ -231,3 +232,4 @@
 [PR #82]: https://github.com/chenxiaolong/RSAF/pull/82
 [PR #83]: https://github.com/chenxiaolong/RSAF/pull/83
 [PR #84]: https://github.com/chenxiaolong/RSAF/pull/84
+[PR #85]: https://github.com/chenxiaolong/RSAF/pull/85
