@@ -153,6 +153,10 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefSaveLogs = findPreference(Preferences.PREF_SAVE_LOGS)!!
         prefSaveLogs.onPreferenceClickListener = this
 
+        // Call this once first to avoid UI jank from elements shifting. We call it again in
+        // onResume() because allowing the permissions does not restart the activity.
+        refreshPermissions()
+
         refreshVersion()
         refreshDebugPrefs()
 
