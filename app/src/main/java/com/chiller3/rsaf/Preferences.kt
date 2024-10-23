@@ -45,6 +45,7 @@ class Preferences(private val context: Context) {
         const val PREF_DELETE_REMOTE = "delete_remote"
         const val PREF_ALLOW_EXTERNAL_ACCESS = "allow_external_access"
         const val PREF_DYNAMIC_SHORTCUT = "dynamic_shortcut"
+        const val PREF_VFS_CACHING = "vfs_caching"
 
         // Not associated with a UI preference
         const val PREF_DEBUG_MODE = "debug_mode"

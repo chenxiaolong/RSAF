@@ -377,7 +377,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             val config = configs[remote]
                 ?: throw IllegalArgumentException("Remote does not exist: $remote")
 
-            if (config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true") {
+            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_BLOCKED)) {
                 throw SecurityException("Access to remote is blocked: $remote")
             }
         }
@@ -393,7 +393,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             }
 
             for ((remote, config) in RcloneRpc.remotes) {
-                if (config[RcloneRpc.CUSTOM_OPT_BLOCKED] == "true") {
+                if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_BLOCKED)) {
                     debugLog("Skipping blocked remote: $remote")
                     continue
                 }

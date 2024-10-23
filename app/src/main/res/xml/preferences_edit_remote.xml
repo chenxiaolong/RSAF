@@ -52,7 +52,8 @@
             app:persistent="false"
             app:title="@string/pref_edit_remote_allow_external_access_name"
             app:summary="@string/pref_edit_remote_allow_external_access_desc"
-            app:iconSpaceReserved="false" />
+            app:iconSpaceReserved="false"
+            app:defaultValue="true" />
 
         <SwitchPreferenceCompat
             app:key="dynamic_shortcut"
@@ -60,5 +61,12 @@
             app:title="@string/pref_edit_remote_dynamic_shortcut_name"
             app:summary="@string/pref_edit_remote_dynamic_shortcut_desc"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="vfs_caching"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_vfs_caching_name"
+            app:iconSpaceReserved="false"
+            app:defaultValue="true" />
     </PreferenceCategory>
 </PreferenceScreen>

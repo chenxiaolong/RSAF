@@ -18,6 +18,11 @@ object RcloneRpc {
     // This is called hidden due to backwards compatibility.
     const val CUSTOM_OPT_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
     const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
+    const val CUSTOM_OPT_VFS_CACHING = CUSTOM_OPT_PREFIX + "vfs_caching"
+
+    private const val DEFAULT_BLOCKED = false
+    private const val DEFAULT_DYNAMIC_SHORTCUT = false
+    private const val DEFAULT_VFS_CACHING = true
 
     /**
      * Perform an rclone RPC call.
@@ -385,5 +390,17 @@ object RcloneRpc {
         val output = invoke("core/obscure", JSONObject(mapOf("clear" to password)))
 
         return output.getString("obscured")
+    }
+
+    /** Get the custom option boolean value or return the default if unset or invalid. */
+    fun getCustomBoolOpt(config: Map<String, String>, opt: String): Boolean {
+        val default = when (opt) {
+            CUSTOM_OPT_BLOCKED -> DEFAULT_BLOCKED
+            CUSTOM_OPT_DYNAMIC_SHORTCUT -> DEFAULT_DYNAMIC_SHORTCUT
+            CUSTOM_OPT_VFS_CACHING -> DEFAULT_VFS_CACHING
+            else -> throw IllegalArgumentException("Invalid custom option: $opt")
+        }
+
+        return config[opt]?.toBooleanStrictOrNull() ?: default
     }
 }

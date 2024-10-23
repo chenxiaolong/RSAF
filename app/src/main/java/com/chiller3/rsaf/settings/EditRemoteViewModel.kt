@@ -8,6 +8,7 @@ package com.chiller3.rsaf.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +25,10 @@ data class EditRemoteActivityActions(
 )
 
 data class RemoteConfigState(
-    val allowExternalAccess: Boolean,
-    val dynamicShortcut: Boolean,
+    val allowExternalAccess: Boolean? = null,
+    val dynamicShortcut: Boolean? = null,
+    val vfsCaching: Boolean? = null,
+    val canStream: Boolean? = null,
 )
 
 class EditRemoteViewModel : ViewModel() {
@@ -38,7 +41,7 @@ class EditRemoteViewModel : ViewModel() {
     private val _remotes = MutableStateFlow<Map<String, Map<String, String>>>(emptyMap())
     val remotes = _remotes.asStateFlow()
 
-    private val _remoteConfig = MutableStateFlow<RemoteConfigState?>(null)
+    private val _remoteConfig = MutableStateFlow(RemoteConfigState())
     val remoteConfig = _remoteConfig.asStateFlow()
 
     private val _alerts = MutableStateFlow<List<EditRemoteAlert>>(emptyList())
@@ -55,25 +58,43 @@ class EditRemoteViewModel : ViewModel() {
     private suspend fun refreshRemotesInternal(force: Boolean) {
         try {
             if (_remotes.value.isEmpty() || force) {
-                val r = withContext(Dispatchers.IO) {
-                    RcloneRpc.remotes
+                withContext(Dispatchers.IO) {
+                    _remotes.update { RcloneRpc.remotes }
                 }
-
-                _remotes.update { r }
             }
 
             val config = remotes.value[remote]
 
             if (config != null) {
                 _remoteConfig.update {
-                    RemoteConfigState(
-                        allowExternalAccess = config[RcloneRpc.CUSTOM_OPT_BLOCKED] != "true",
-                        dynamicShortcut = config[RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT] == "true",
+                    it.copy(
+                        allowExternalAccess = !RcloneRpc.getCustomBoolOpt(
+                            config,
+                            RcloneRpc.CUSTOM_OPT_BLOCKED,
+                        ),
+                        dynamicShortcut = RcloneRpc.getCustomBoolOpt(
+                            config,
+                            RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT,
+                        ),
+                        vfsCaching = RcloneRpc.getCustomBoolOpt(
+                            config,
+                            RcloneRpc.CUSTOM_OPT_VFS_CACHING,
+                        ),
                     )
+                }
+
+                // Only calculate this once since the value can't change and it requires
+                // initializing the backend, which may perform network calls.
+                if (_remoteConfig.value.canStream == null) {
+                    withContext(Dispatchers.IO) {
+                        _remoteConfig.update {
+                            it.copy(canStream = Rcbridge.rbCanStream("$remote:"))
+                        }
+                    }
                 }
             } else {
                 // This will happen after renaming or deleting the remote.
-                _remoteConfig.update { null }
+                _remoteConfig.update { RemoteConfigState() }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to refresh remotes", e)
@@ -120,6 +141,24 @@ class EditRemoteViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to set remote $remote shortcut state to $enabled", e)
                 _alerts.update { it + EditRemoteAlert.UpdateDynamicShortcutFailed(remote, e.toString()) }
+            }
+        }
+    }
+
+    fun setVfsCaching(remote: String, enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    RcloneRpc.setRemoteOptions(
+                        remote, mapOf(
+                            RcloneRpc.CUSTOM_OPT_VFS_CACHING to enabled.toString(),
+                        )
+                    )
+                }
+                refreshRemotesInternal(true)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to set remote $remote VFS caching state to $enabled", e)
+                _alerts.update { it + EditRemoteAlert.UpdateVfsCachingFailed(remote, e.toString()) }
             }
         }
     }

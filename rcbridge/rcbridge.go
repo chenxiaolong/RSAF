@@ -18,6 +18,7 @@ package rcbridge
 import (
 	// This package's init() MUST run first
 	_ "rcbridge/envhack"
+	"strconv"
 
 	"context"
 	"io"
@@ -45,10 +46,19 @@ import (
 	"github.com/rclone/rclone/vfs/vfscommon"
 )
 
+const (
+	rsafVfsCaching = "rsaf:vfs_caching"
+)
+
 var (
-	vfsLock  goSync.Mutex
-	vfsCache = make(map[string]*vfs.VFS)
-	errMap   = map[error]syscall.Errno{
+	// The same remote may exist in both vfsStreaming and vfsCaching if the user
+	// toggled the option after performing a VFS operation at least once. This
+	// is preferable to forcing the user to wait for ongoing uploads to complete
+	// before enabling the toggle and is simpler to implement.
+	vfsLock      goSync.Mutex
+	vfsStreaming = make(map[string]*vfs.VFS)
+	vfsCaching   = make(map[string]*vfs.VFS)
+	errMap       = map[error]syscall.Errno{
 		vfs.ENOTEMPTY:                  syscall.ENOTEMPTY,
 		vfs.ESPIPE:                     syscall.ESPIPE,
 		vfs.EBADF:                      syscall.EBADF,
@@ -161,12 +171,14 @@ func RbCacheClearRemote(remote string) {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
-	v, ok := vfsCache[remote]
-	if ok {
-		v.WaitForWriters(1 * time.Minute)
-		v.CleanUp()
-		v.Shutdown()
-		delete(vfsCache, remote)
+	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
+		v, ok := vfsCache[remote]
+		if ok {
+			v.WaitForWriters(1 * time.Minute)
+			v.CleanUp()
+			v.Shutdown()
+			delete(vfsCache, remote)
+		}
 	}
 
 	cache.ClearConfig(remote)
@@ -178,11 +190,13 @@ func RbCacheClearAll() {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
-	for k := range vfsCache {
-		vfsCache[k].WaitForWriters(1 * time.Minute)
-		vfsCache[k].CleanUp()
-		vfsCache[k].Shutdown()
-		delete(vfsCache, k)
+	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
+		for k := range vfsCache {
+			vfsCache[k].WaitForWriters(1 * time.Minute)
+			vfsCache[k].CleanUp()
+			vfsCache[k].Shutdown()
+			delete(vfsCache, k)
+		}
 	}
 
 	cache.Clear()
@@ -332,12 +346,41 @@ func getVfs(remote string) (*vfs.VFS, error) {
 		return nil, err
 	}
 
+	parsed, err := fspath.Parse(remote)
+	if err != nil {
+		return nil, err
+	}
+
+	isCachingStr, found := config.Data().GetValue(parsed.Name, rsafVfsCaching)
+	if !found {
+		fs.Logf(remote, "No VFS caching preference. Enabling VFS caching")
+		isCachingStr = "true"
+	}
+
+	isCaching, err := strconv.ParseBool(isCachingStr)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isCaching && f.Features().PutStream == nil {
+		fs.Logf(remote, "Streaming is not supported. Enabling VFS caching")
+		isCaching = true
+	}
+
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
+
+	var vfsCache map[string]*vfs.VFS
+	if isCaching {
+		vfsCache = vfsCaching
+	} else {
+		vfsCache = vfsStreaming
+	}
 
 	v, ok := vfsCache[remote]
 	if !ok {
 		opts := vfscommon.Opt
+
 		// Significantly shorten the time that directory entries are cached so
 		// that file listings are more likely to reflect reality after external
 		// file operations made outside of rclone or local operations that touch
@@ -345,15 +388,23 @@ func getVfs(remote string) (*vfs.VFS, error) {
 		// internal API for just invalidating the directory cache. The RC API
 		// has vfs/refresh but that forces an unnecessary reread of directories.
 		opts.DirCacheTime = fs.Duration(5 * time.Second)
-		// This is required for O_RDWR
-		opts.CacheMode = vfscommon.CacheModeWrites
-		// Don't let the cache grow too big
+
+		if isCaching {
+			// This is required for O_RDWR.
+			opts.CacheMode = vfscommon.CacheModeWrites
+		} else {
+			opts.CacheMode = vfscommon.CacheModeOff
+		}
+
+		// Don't let the cache grow too big.
 		opts.CacheMaxAge = fs.Duration(60 * time.Second)
+
 		// Adjust read buffering to be more appropriate for a mobile app.
 		// Maybe make this configurable in the future.
 		opts.ChunkSize = 2 * fs.Mebi
 		opts.ChunkSizeLimit = 8 * fs.Mebi
-		// Synchronously upload on file close
+
+		// Synchronously upload on file close.
 		opts.WriteBack = 0
 
 		v = vfs.New(f, &opts)
@@ -378,6 +429,16 @@ func getVfsForDoc(doc string) (*vfs.VFS, string, error) {
 	}
 
 	return v, path, nil
+}
+
+// Return whether the specified remote supports streaming.
+func RbCanStream(remote string) (bool, error) {
+	f, err := getFs(remote)
+	if err != nil {
+		return false, err
+	}
+
+	return f.Features().PutStream != nil, nil
 }
 
 type RbRemoteSplitResult struct {
@@ -717,6 +778,11 @@ func RbDocOpen(doc string, flags int, mode int, errOut *RbError) *RbFile {
 	if err != nil {
 		assignError(errOut, err, syscall.EINVAL)
 		return nil
+	}
+
+	if v.Opt.CacheMode < vfscommon.CacheModeWrites && flags&(os.O_WRONLY|os.O_RDWR) != 0 {
+		fs.Logf(nil, "Forcing O_TRUNC for writable file due to streaming")
+		flags |= os.O_TRUNC
 	}
 
 	handle, err := v.OpenFile(path, flags, ioFs.FileMode(mode&int(ioFs.ModePerm)))
