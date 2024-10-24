@@ -396,8 +396,15 @@ func getVfs(remote string) (*vfs.VFS, error) {
 			opts.CacheMode = vfscommon.CacheModeOff
 		}
 
-		// Don't let the cache grow too big.
-		opts.CacheMaxAge = fs.Duration(60 * time.Second)
+		// Clean up cached files as soon as possible. The background upload
+		// monitor service will stop as soon as all files are closed and Android
+		// will SIGSTOP the process soon after that. The default poll interval
+		// generally causes files to not be cleaned up until the next time the
+		// user actively interacts with RSAF. If RSAF gets restarted in the
+		// meantime, the cleanup won't even run until the next time the VFS is
+		// created for this specific remote.
+		opts.CacheMaxAge = fs.Duration(15 * time.Second)
+		opts.CachePollInterval = fs.Duration(20 * time.Second)
 
 		// Adjust read buffering to be more appropriate for a mobile app.
 		// Maybe make this configurable in the future.
