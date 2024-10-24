@@ -15,6 +15,7 @@
 * Make biometric authentication option more robust ([PR #83])
 * Fix UI jank when rotating the device due to hiding already-granted permission requests too late ([PR #84])
 * Sort remote types by description when adding a new remote to match the rclone CLI ([PR #85])
+* Add support for disabling VFS caching per-remote ([Issue #79], [PR #86])
 
 ### Version 1.29
 
@@ -173,6 +174,7 @@
 [Issue #55]: https://github.com/chenxiaolong/RSAF/issues/55
 [Issue #65]: https://github.com/chenxiaolong/RSAF/issues/65
 [Issue #73]: https://github.com/chenxiaolong/RSAF/issues/73
+[Issue #79]: https://github.com/chenxiaolong/RSAF/issues/79
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -233,3 +235,4 @@
 [PR #83]: https://github.com/chenxiaolong/RSAF/pull/83
 [PR #84]: https://github.com/chenxiaolong/RSAF/pull/84
 [PR #85]: https://github.com/chenxiaolong/RSAF/pull/85
+[PR #86]: https://github.com/chenxiaolong/RSAF/pull/86
