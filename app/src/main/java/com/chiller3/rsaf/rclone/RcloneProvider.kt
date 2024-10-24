@@ -488,12 +488,12 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             (pfdMode and flags) == flags
         }
 
-        var fcntlMode = if (pfdModeHasFlags(ParcelFileDescriptor.MODE_READ_WRITE)) {
-            OsConstants.O_RDWR
+        var (fcntlMode, isWrite) = if (pfdModeHasFlags(ParcelFileDescriptor.MODE_READ_WRITE)) {
+            OsConstants.O_RDWR to true
         } else if (pfdModeHasFlags(ParcelFileDescriptor.MODE_WRITE_ONLY)) {
-            OsConstants.O_WRONLY
+            OsConstants.O_WRONLY to true
         } else if (pfdModeHasFlags(ParcelFileDescriptor.MODE_READ_ONLY)) {
-            OsConstants.O_RDONLY
+            OsConstants.O_RDONLY to false
         } else {
             throw IllegalArgumentException("Invalid mode: $mode")
         }
@@ -517,7 +517,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         try {
             return storageManager.openProxyFileDescriptor(
-                pfdMode, ProxyFd(documentId, handle), ioHandler)
+                pfdMode, ProxyFd(documentId, handle, isWrite), ioHandler)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to open proxy file descriptor", e)
             // openProxyFileDescriptor can throw an exception without invoking onRelease
@@ -735,8 +735,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    private inner class ProxyFd(private val documentId: String, private val handle: RbFile) :
-        ProxyFileDescriptorCallback() {
+    private inner class ProxyFd(
+        private val documentId: String,
+        private val handle: RbFile,
+        private val isWrite: Boolean
+    ) : ProxyFileDescriptorCallback() {
         private fun debugLog(msg: String) {
             this@RcloneProvider.debugLog("ProxyFd[$documentId].$msg")
         }
@@ -794,7 +797,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
             val context = context!!
 
-            if (Permissions.isInhibitingBatteryOpt(context)) {
+            if (isWrite && Permissions.isInhibitingBatteryOpt(context)) {
                 context.startForegroundService(
                     BackgroundUploadMonitorService.createAddIntent(context, documentId),
                 )
@@ -810,7 +813,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 notifications.notifyBackgroundUploadFailed(documentId, exception.toSingleLineString())
             }
 
-            if (Permissions.isInhibitingBatteryOpt(context)) {
+            if (isWrite && Permissions.isInhibitingBatteryOpt(context)) {
                 context.startForegroundService(
                     BackgroundUploadMonitorService.createRemoveIntent(context, documentId),
                 )
