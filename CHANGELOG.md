@@ -17,6 +17,7 @@
 * Sort remote types by description when adding a new remote to match the rclone CLI ([PR #85])
 * Add support for disabling VFS caching per-remote ([Issue #79], [PR #86])
 * Add progress details to background upload notification ([Issue #79], [PR #87])
+* Increase chance of the post-upload VFS cache directory cleanup finishing before Android stops RSAF ([PR #88])
 
 ### Version 1.29
 
@@ -238,3 +239,4 @@
 [PR #85]: https://github.com/chenxiaolong/RSAF/pull/85
 [PR #86]: https://github.com/chenxiaolong/RSAF/pull/86
 [PR #87]: https://github.com/chenxiaolong/RSAF/pull/87
+[PR #88]: https://github.com/chenxiaolong/RSAF/pull/88
