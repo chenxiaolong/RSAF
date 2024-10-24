@@ -10,6 +10,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.text.format.Formatter
+import kotlin.math.roundToInt
 
 class Notifications(private val context: Context) {
     companion object {
@@ -55,7 +57,11 @@ class Notifications(private val context: Context) {
         LEGACY_CHANNEL_IDS.forEach { notificationManager.deleteNotificationChannel(it) }
     }
 
-    fun createBackgroundUploadsNotification(count: Int): Notification {
+    fun createBackgroundUploadsNotification(
+        count: Int,
+        bytesCurrent: Long,
+        bytesTotal: Long,
+    ): Notification {
         val title = context.resources.getQuantityString(
             R.plurals.notification_background_uploads_in_progress_title,
             count,
@@ -67,7 +73,18 @@ class Notifications(private val context: Context) {
             setSmallIcon(R.drawable.ic_notifications)
             setOngoing(true)
             setOnlyAlertOnce(true)
-            setProgress(0, 0, true)
+
+            val formattedBytesCurrent = Formatter.formatFileSize(context, bytesCurrent)
+            val formattedBytesTotal = Formatter.formatFileSize(context, bytesTotal)
+            setContentText("$formattedBytesCurrent / $formattedBytesTotal")
+
+            val normalizedBytesTotal = 1000
+            val normalizedBytesCurrent = if (bytesTotal == 0L) {
+                0
+            } else {
+                (bytesCurrent.toDouble() / bytesTotal * normalizedBytesTotal).roundToInt()
+            }
+            setProgress(normalizedBytesTotal, normalizedBytesCurrent, bytesTotal == 0L)
 
             // Inhibit 10-second delay when showing persistent notification
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
