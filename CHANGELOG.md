@@ -12,7 +12,7 @@
 * Organize source code files into packages ([PR #78])
 * Make a proper settings screen for editing remotes instead of just using a dialog box ([PR #80])
 * Enable predictive back gestures ([PR #82])
-* Make biometric authentication option more robust ([PR #83])
+* Make biometric authentication option more robust ([PR #83], [PR #92])
 * Fix UI jank when rotating the device caused by hiding already-granted permission requests too late ([PR #84])
 * Sort remote types by description when adding a new remote to match the rclone CLI ([PR #85])
 * Add support for disabling VFS caching per-remote ([Issue #79], [PR #86])
@@ -247,3 +247,4 @@
 [PR #89]: https://github.com/chenxiaolong/RSAF/pull/89
 [PR #90]: https://github.com/chenxiaolong/RSAF/pull/90
 [PR #91]: https://github.com/chenxiaolong/RSAF/pull/91
+[PR #92]: https://github.com/chenxiaolong/RSAF/pull/92
