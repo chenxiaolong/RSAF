@@ -19,6 +19,7 @@
 * Add progress details to background upload notification ([Issue #79], [PR #87])
 * Increase chance of the post-upload VFS cache directory cleanup finishing before Android stops RSAF ([PR #88])
 * Avoid spawning the background upload monitor service for a split second when closing a read-only file ([PR #89])
+* Work around Android limitations to make client apps that rename, copy, or move a newly written file work more reliably ([Issue #81], [PR #90])
 
 ### Version 1.29
 
@@ -178,6 +179,7 @@
 [Issue #65]: https://github.com/chenxiaolong/RSAF/issues/65
 [Issue #73]: https://github.com/chenxiaolong/RSAF/issues/73
 [Issue #79]: https://github.com/chenxiaolong/RSAF/issues/79
+[Issue #81]: https://github.com/chenxiaolong/RSAF/issues/81
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -242,3 +244,4 @@
 [PR #87]: https://github.com/chenxiaolong/RSAF/pull/87
 [PR #88]: https://github.com/chenxiaolong/RSAF/pull/88
 [PR #89]: https://github.com/chenxiaolong/RSAF/pull/89
+[PR #90]: https://github.com/chenxiaolong/RSAF/pull/90
