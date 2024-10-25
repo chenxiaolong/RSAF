@@ -171,6 +171,9 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             return components.asReversed().joinToString("/")
         }
 
+        /** Split a path for traversing [VfsNode]. */
+        private fun vfsPath(documentId: String): List<String> = normalize(documentId).split('/')
+
         /**
          * Construct a document ID with a counter.
          *
@@ -293,6 +296,29 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     private lateinit var notifications: Notifications
     private val ioThread = HandlerThread(javaClass.simpleName).apply { start() }
     private val ioHandler = Handler(ioThread.looper)
+    // Because it is impossible to make close() blocking, we can't force the client app to wait for
+    // file uploads to complete. This causes a problem with the design pattern where a file is
+    // initially written to a temp file and then renamed when complete. The rename can happen while
+    // the VFS file is still open, which rclone does not properly support. Instead, we'll track
+    // which files are open and block certain operations, like file renaming. We also do this for
+    // file copies and moves because those operations happen at the FS layer and can't see pending
+    // uploads in the VFS layer.
+    //
+    // Note that this is not implementing a full-blown locking system to keep all VFS operations
+    // consistent. It is just a dumb workaround to make some common file access patterns work. A
+    // client app can absolutely still shoot itself in the foot.
+    private val inUseTracker = VfsNode()
+
+    private fun waitUntilUploadsDone(documentId: String) {
+        val path = vfsPath(documentId)
+
+        synchronized(inUseTracker) {
+            while (inUseTracker.contains(path)) {
+                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+                (inUseTracker as Object).wait()
+            }
+        }
+    }
 
     private fun debugLog(msg: String) {
         if (prefs.isDebugMode) {
@@ -514,14 +540,15 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             ?: throw error.toException("rbDocOpen")
 
         val storageManager = context!!.getSystemService(StorageManager::class.java)
+        val proxyFd = ProxyFd(documentId, handle, isWrite)
 
         try {
-            return storageManager.openProxyFileDescriptor(
-                pfdMode, ProxyFd(documentId, handle, isWrite), ioHandler)
+            return storageManager.openProxyFileDescriptor(pfdMode, proxyFd, ioHandler)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to open proxy file descriptor", e)
             // openProxyFileDescriptor can throw an exception without invoking onRelease
             handle.close(null)
+            proxyFd.markUnused()
             throw e
         }
     }
@@ -640,6 +667,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         debugLog("renameDocument($documentId, $displayName)")
         enforceNotBlocked(documentId)
 
+        waitUntilUploadsDone(documentId)
+
         // The displayName will include the extension because our queryDocument() exposes it
         val (parent, _) = splitPath(documentId)
         val (baseName, ext) = splitExt(displayName, documentIsDir(documentId))
@@ -722,6 +751,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         debugLog("copyDocument($sourceDocumentId, $targetParentDocumentId)")
         enforceNotBlocked(sourceDocumentId, targetParentDocumentId)
 
+        waitUntilUploadsDone(sourceDocumentId)
+
         return copyOrMove(sourceDocumentId, targetParentDocumentId, true)
     }
 
@@ -729,6 +760,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                               targetParentDocumentId: String): String {
         debugLog("moveDocument($sourceDocumentId, $sourceParentDocumentId, $targetParentDocumentId)")
         enforceNotBlocked(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)
+
+        waitUntilUploadsDone(sourceDocumentId)
 
         return copyOrMove(sourceDocumentId, targetParentDocumentId, false).also {
             revokeGrants(sourceDocumentId)
@@ -740,6 +773,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         private val handle: RbFile,
         private val isWrite: Boolean
     ) : ProxyFileDescriptorCallback() {
+        init {
+            markUsed()
+        }
+
         private fun debugLog(msg: String) {
             this@RcloneProvider.debugLog("ProxyFd[$documentId].$msg")
         }
@@ -819,7 +856,111 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 )
             }
 
+            markUnused()
+
             debugLog("onRelease() complete")
+        }
+
+        private fun markUsed() {
+            if (isWrite) {
+                synchronized(inUseTracker) {
+                    debugLog("markUsed()")
+
+                    inUseTracker.add(vfsPath(documentId))
+                }
+            }
+        }
+
+        fun markUnused() {
+            if (isWrite) {
+                synchronized(inUseTracker) {
+                    debugLog("markUnused()")
+
+                    inUseTracker.remove(vfsPath(documentId))
+
+                    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+                    (inUseTracker as Object).notifyAll()
+                }
+            }
+        }
+    }
+
+    private class VfsNode {
+        // Number of times this node was added as a leaf.
+        private var count: Int = 0
+        private val children = HashMap<String, VfsNode>()
+
+        fun contains(components: List<String>): Boolean {
+            var node = this
+
+            for (component in components) {
+                node = node.children[component] ?: return false
+            }
+
+            return true
+        }
+
+        fun add(components: List<String>) {
+            var node = this
+
+            for (component in components) {
+                node = node.children[component] ?: run {
+                    val child = VfsNode()
+                    node.children[component] = child
+                    child
+                }
+            }
+
+            node.count += 1
+        }
+
+        fun remove(components: List<String>) {
+            if (components.isEmpty()) {
+                return
+            }
+
+            val nodes = mutableListOf<Pair<String?, VfsNode>>(null to this)
+
+            for (component in components) {
+                val (_, parent) = nodes.last()
+                val child = parent.children[component] ?: return
+                nodes.add(component to child)
+            }
+
+            val lastNode = nodes.last().second
+            if (lastNode.count > 0) {
+                lastNode.count -= 1
+                if (lastNode.count > 0) {
+                    return
+                }
+            }
+
+            for ((childItem, parentItem) in nodes.asReversed().windowed(2)) {
+                val (childName, childNode) = childItem
+                val (_, parentNode) = parentItem
+
+                if (childNode.children.isEmpty() && childNode.count == 0) {
+                    parentNode.children.remove(childName)
+                } else {
+                    break
+                }
+            }
+        }
+
+        private fun toString(builder: StringBuilder, depth: Int) {
+            for ((name, node) in children.entries.sortedBy { it.key }) {
+                builder.append("  ".repeat(depth))
+                builder.append(name)
+                builder.append(" (count: ")
+                builder.append(node.count)
+                builder.append(")\n")
+
+                node.toString(builder, depth + 1)
+            }
+        }
+
+        override fun toString(): String = buildString {
+            toString(this, 0)
         }
     }
 }
