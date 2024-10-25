@@ -64,6 +64,8 @@ class BackgroundUploadMonitorService : Service() {
     private var monitorNotify = false
     private var monitorProgress = 0L to 0L
     private val handler = Handler(Looper.getMainLooper())
+    // We need to keep a reference the same runnable for cancelling a delayed execution.
+    private val stopNowRunnable = Runnable(::stopNow)
 
     private fun normalizePath(path: File): File {
         // Can't use relativeToOrNull() because it can add `..` components.
@@ -112,13 +114,22 @@ class BackgroundUploadMonitorService : Service() {
         monitorNotify = backgroundUploads.isNotEmpty()
 
         if (backgroundUploads.isEmpty()) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf(startId)
+            // We'll defer the stopping of the service by a small amount of time to avoid having
+            // notifications rapidly appear and disappear when writing many small files. We can't
+            // use FOREGROUND_SERVICE_DEFERRED because that is ignored if a deferral has already
+            // happened recently.
+            handler.postDelayed(stopNowRunnable, 1000)
         } else {
+            handler.removeCallbacks(stopNowRunnable)
             updateForegroundNotification()
         }
 
         return START_NOT_STICKY
+    }
+
+    private fun stopNow() {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     @UiThread
