@@ -6,6 +6,7 @@
 package com.chiller3.rsaf
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager.Authenticators
 import androidx.biometric.BiometricPrompt
@@ -32,7 +34,16 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         // within the app.
         private var bioAuthenticated = false
         private var lastPause = 0L
+
+        private fun supportsModernDeviceCredential() =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
+
+    protected abstract val actionBarTitle: CharSequence?
+
+    protected abstract val showUpButton: Boolean
+
+    protected abstract fun createFragment(): PreferenceBaseFragment
 
     private val tag = javaClass.simpleName
 
@@ -41,11 +52,15 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
     private lateinit var activityManager: ActivityManager
     private var isCoveredBySafeActivity = false
 
-    protected abstract val actionBarTitle: CharSequence?
-
-    protected abstract val showUpButton: Boolean
-
-    protected abstract fun createFragment(): PreferenceBaseFragment
+    private val requestLegacyDeviceCredential =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                onAuthenticationSucceeded()
+            } else {
+                // We can't know the reason.
+                onAuthenticationFailed()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -107,28 +122,14 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
             this,
             mainExecutor,
             object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    Toast.makeText(
-                        this@PreferenceBaseActivity,
-                        getString(R.string.biometric_error, errString),
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    finish()
-                }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) =
+                    this@PreferenceBaseActivity.onAuthenticationError(errorCode, errString)
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    bioAuthenticated = true
-                    refreshGlobalVisibility()
-                }
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) =
+                    this@PreferenceBaseActivity.onAuthenticationSucceeded()
 
-                override fun onAuthenticationFailed() {
-                    Toast.makeText(
-                        this@PreferenceBaseActivity,
-                        R.string.biometric_failure,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    finish()
-                }
+                override fun onAuthenticationFailed() =
+                    this@PreferenceBaseActivity.onAuthenticationFailed()
             },
         )
 
@@ -158,7 +159,7 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
             if (!prefs.requireAuth) {
                 bioAuthenticated = true
             } else {
-                startBiometricAuth()
+                startAuth()
             }
         }
 
@@ -214,6 +215,14 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         super.onWindowAttributesChanged(params)
     }
 
+    private fun startAuth() {
+        if (supportsModernDeviceCredential()) {
+            startBiometricAuth()
+        } else {
+            startLegacyDeviceCredentialAuth()
+        }
+    }
+
     private fun startBiometricAuth() {
         Log.d(tag, "Starting biometric authentication")
 
@@ -223,6 +232,58 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
             .build()
 
         bioPrompt.authenticate(promptInfo)
+    }
+
+
+    private fun startLegacyDeviceCredentialAuth() {
+        Log.d(tag, "Starting legacy device credential authentication")
+
+        val keyGuardManager = getSystemService(KeyguardManager::class.java)
+        @Suppress("DEPRECATION")
+        val intent = keyGuardManager?.createConfirmDeviceCredentialIntent(
+            getString(R.string.biometric_title),
+            "",
+        )
+
+        if (intent != null) {
+            requestLegacyDeviceCredential.launch(intent)
+        } else {
+            onAuthenticationError(
+                BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
+                getString(R.string.biometric_error_no_device_credential),
+            )
+        }
+    }
+
+    fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+        Log.d(tag, "Authentication error: $errorCode: $errString")
+
+        Toast.makeText(
+            this,
+            getString(R.string.biometric_error, errString),
+            Toast.LENGTH_LONG,
+        ).show()
+
+        finish()
+    }
+
+    private fun onAuthenticationSucceeded() {
+        Log.d(tag, "Authentication succeeded")
+
+        bioAuthenticated = true
+        refreshGlobalVisibility()
+    }
+
+    private fun onAuthenticationFailed() {
+        Log.d(tag, "Authentication failed")
+
+        Toast.makeText(
+            this,
+            R.string.biometric_failure,
+            Toast.LENGTH_LONG,
+        ).show()
+
+        finish()
     }
 
     private fun refreshTaskState() {
