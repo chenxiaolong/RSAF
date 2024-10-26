@@ -22,6 +22,7 @@
 * Work around Android limitations to make client apps that rename, copy, or move a newly written file work more reliably ([Issue #81], [PR #90])
 * Prevent background upload notifications from rapidly appearing and disappearing when writing many small files ([PR #91])
 * Fix biometric and device credential authentication on Android <11 ([Issue #93], [PR #94])
+* Work around an Android bug in Android <11 that causes the edge-to-edge layout to not account for the navigation bar ([Issue #93], [PR #95])
 
 ### Version 1.29
 
@@ -251,3 +252,4 @@
 [PR #91]: https://github.com/chenxiaolong/RSAF/pull/91
 [PR #92]: https://github.com/chenxiaolong/RSAF/pull/92
 [PR #94]: https://github.com/chenxiaolong/RSAF/pull/94
+[PR #95]: https://github.com/chenxiaolong/RSAF/pull/95
