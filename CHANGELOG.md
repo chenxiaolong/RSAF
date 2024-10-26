@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 2.0
 
 * Organize source code files into packages ([PR #78])
 * Make a proper settings screen for editing remotes instead of just using a dialog box ([PR #80])
