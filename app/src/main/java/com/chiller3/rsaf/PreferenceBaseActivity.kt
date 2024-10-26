@@ -106,7 +106,14 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
                 rightMargin = insets.right
             }
 
-            WindowInsetsCompat.CONSUMED
+            // Consuming the insets here prevents PreferenceBaseFragment's RecyclerView's insets
+            // callback from being called on older versions of Android, despite it not being a child
+            // of this view.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsCompat.CONSUMED
+            } else {
+                windowInsets
+            }
         }
 
         setSupportActionBar(binding.toolbar)
