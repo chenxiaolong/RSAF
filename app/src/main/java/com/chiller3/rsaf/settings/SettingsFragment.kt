@@ -361,9 +361,9 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 return true
             }
             preference === prefImportConfiguration -> {
-                // Android does not recognize .conf suffix as a text file
-                requestSafImportConfiguration.launch(
-                    arrayOf(RcloneConfig.MIMETYPE, "application/octet-stream"))
+                // We intentionally do not filter for specific MIME types because document providers
+                // are inconsistent in what MIME types they report for .conf files.
+                requestSafImportConfiguration.launch(arrayOf("*/*"))
                 return true
             }
             preference === prefExportConfiguration -> {
