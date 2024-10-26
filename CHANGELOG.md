@@ -21,6 +21,7 @@
 * Avoid spawning the background upload monitor service for a split second when closing a read-only file ([PR #89])
 * Work around Android limitations to make client apps that rename, copy, or move a newly written file work more reliably ([Issue #81], [PR #90])
 * Prevent background upload notifications from rapidly appearing and disappearing when writing many small files ([PR #91])
+* Fix biometric and device credential authentication on Android <11 ([Issue #93], [PR #94])
 
 ### Version 1.29
 
@@ -181,6 +182,7 @@
 [Issue #73]: https://github.com/chenxiaolong/RSAF/issues/73
 [Issue #79]: https://github.com/chenxiaolong/RSAF/issues/79
 [Issue #81]: https://github.com/chenxiaolong/RSAF/issues/81
+[Issue #93]: https://github.com/chenxiaolong/RSAF/issues/93
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -248,3 +250,4 @@
 [PR #90]: https://github.com/chenxiaolong/RSAF/pull/90
 [PR #91]: https://github.com/chenxiaolong/RSAF/pull/91
 [PR #92]: https://github.com/chenxiaolong/RSAF/pull/92
+[PR #94]: https://github.com/chenxiaolong/RSAF/pull/94
