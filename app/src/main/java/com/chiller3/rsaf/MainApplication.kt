@@ -23,6 +23,8 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
     override fun onCreate() {
         super.onCreate()
 
+        Logcat.init(this)
+
         val oldCrashHandler = Thread.getDefaultUncaughtExceptionHandler()
 
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
@@ -39,8 +41,6 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
         prefs.registerListener(this)
 
         backupManager = BackupManager(this)
-
-        Logcat.init(this)
 
         Notifications(this).updateChannels()
 
