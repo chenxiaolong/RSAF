@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Allow retries when biometric auth fails the first time, instead of just failing and exiting ([PR #98])
+
 ### Version 2.0
 
 * Organize source code files into packages ([PR #78])
@@ -257,3 +261,4 @@
 [PR #95]: https://github.com/chenxiaolong/RSAF/pull/95
 [PR #96]: https://github.com/chenxiaolong/RSAF/pull/96
 [PR #97]: https://github.com/chenxiaolong/RSAF/pull/97
+[PR #98]: https://github.com/chenxiaolong/RSAF/pull/98
