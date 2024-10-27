@@ -58,7 +58,10 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
                 onAuthenticationSucceeded()
             } else {
                 // We can't know the reason.
-                onAuthenticationFailed()
+                onAuthenticationError(
+                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
+                    getString(R.string.biometric_error_no_device_credential),
+                )
             }
         }
 
@@ -135,8 +138,10 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) =
                     this@PreferenceBaseActivity.onAuthenticationSucceeded()
 
-                override fun onAuthenticationFailed() =
-                    this@PreferenceBaseActivity.onAuthenticationFailed()
+                override fun onAuthenticationFailed() {
+                    // Ignore. This is called when a single biometric authentication attempt fails,
+                    // but the user is still allowed to retry.
+                }
             },
         )
 
@@ -279,18 +284,6 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
 
         bioAuthenticated = true
         refreshGlobalVisibility()
-    }
-
-    private fun onAuthenticationFailed() {
-        Log.d(tag, "Authentication failed")
-
-        Toast.makeText(
-            this,
-            R.string.biometric_failure,
-            Toast.LENGTH_LONG,
-        ).show()
-
-        finish()
     }
 
     private fun refreshTaskState() {

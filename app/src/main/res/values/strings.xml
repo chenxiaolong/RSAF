@@ -92,7 +92,6 @@
     <string name="biometric_title">Unlock configuration</string>
     <string name="biometric_error">Biometric authentication error: %1$s</string>
     <string name="biometric_error_no_device_credential">No device credential</string>
-    <string name="biometric_failure">Biometric authentication failed</string>
 
     <!-- Dialogs -->
     <string name="dialog_action_next">Next</string>
