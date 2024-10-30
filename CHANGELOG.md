@@ -10,6 +10,8 @@
 ### Unreleased
 
 * Allow retries when biometric auth fails the first time, instead of just failing and exiting ([PR #98])
+* Add support for reporting filesystem usage (total and available space) to client apps ([PR #99])
+  * This is configured per-remote and is disabled by default because some remote types (eg. Google Drive) are extremely slow at computing the numbers
 
 ### Version 2.0
 
@@ -262,3 +264,4 @@
 [PR #96]: https://github.com/chenxiaolong/RSAF/pull/96
 [PR #97]: https://github.com/chenxiaolong/RSAF/pull/97
 [PR #98]: https://github.com/chenxiaolong/RSAF/pull/98
+[PR #99]: https://github.com/chenxiaolong/RSAF/pull/99
