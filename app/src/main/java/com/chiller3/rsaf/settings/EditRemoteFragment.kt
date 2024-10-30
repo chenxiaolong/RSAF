@@ -57,6 +57,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefAllowExternalAccess: SwitchPreferenceCompat
     private lateinit var prefDynamicShortcut: SwitchPreferenceCompat
     private lateinit var prefVfsCaching: SwitchPreferenceCompat
+    private lateinit var prefReportUsage: SwitchPreferenceCompat
 
     private lateinit var remote: String
 
@@ -89,6 +90,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefVfsCaching = findPreference(Preferences.PREF_VFS_CACHING)!!
         prefVfsCaching.onPreferenceChangeListener = this
 
+        prefReportUsage = findPreference(Preferences.PREF_REPORT_USAGE)!!
+        prefReportUsage.onPreferenceChangeListener = this
+
         remote = requireArguments().getString(ARG_REMOTE)!!
         viewModel.setRemote(remote)
 
@@ -116,14 +120,26 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                         prefDynamicShortcut.isChecked = it.dynamicShortcut
                     }
 
-                    prefVfsCaching.isEnabled = it.allowExternalAccess ?: false && it.canStream ?: false
+                    prefVfsCaching.isEnabled = it.allowExternalAccess ?: false
+                            && it.features?.putStream ?: false
                     if (it.vfsCaching != null) {
                         prefVfsCaching.isChecked = it.vfsCaching
                     }
-                    prefVfsCaching.summary = when (it.canStream) {
+                    prefVfsCaching.summary = when (it.features?.putStream) {
                         null -> getString(R.string.pref_edit_remote_vfs_caching_desc_loading)
                         true -> getString(R.string.pref_edit_remote_vfs_caching_desc_optional)
                         false -> getString(R.string.pref_edit_remote_vfs_caching_desc_required)
+                    }
+
+                    prefReportUsage.isEnabled = it.allowExternalAccess ?: false
+                            && it.features?.about ?: false
+                    if (it.reportUsage != null) {
+                        prefReportUsage.isChecked = it.reportUsage
+                    }
+                    prefReportUsage.summary = when (it.features?.about) {
+                        null -> getString(R.string.pref_edit_remote_report_usage_desc_loading)
+                        true -> getString(R.string.pref_edit_remote_report_usage_desc_supported)
+                        false -> getString(R.string.pref_edit_remote_report_usage_desc_unsupported)
                     }
                 }
             }
@@ -247,6 +263,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             prefVfsCaching -> {
                 viewModel.setVfsCaching(remote, newValue as Boolean)
             }
+            prefReportUsage -> {
+                viewModel.setReportUsage(remote, newValue as Boolean)
+            }
         }
 
         return false
@@ -266,12 +285,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             is EditRemoteAlert.RemoteDuplicateFailed ->
                 getString(R.string.alert_duplicate_remote_failure, alert.oldRemote, alert.newRemote,
                     alert.error)
-            is EditRemoteAlert.UpdateExternalAccessFailed ->
-                getString(R.string.alert_update_external_access_failure, alert.remote, alert.error)
-            is EditRemoteAlert.UpdateDynamicShortcutFailed ->
-                getString(R.string.alert_update_dynamic_shortcut_failure, alert.remote, alert.error)
-            is EditRemoteAlert.UpdateVfsCachingFailed ->
-                getString(R.string.alert_update_vfs_caching_failure, alert.remote, alert.error)
+            is EditRemoteAlert.SetConfigFailed ->
+                getString(R.string.alert_set_config_failure, alert.opt, alert.remote, alert.error)
         }
 
         Snackbar.make(requireView(), msg, Snackbar.LENGTH_LONG)

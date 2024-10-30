@@ -65,6 +65,10 @@
     <string name="pref_edit_remote_vfs_caching_desc_loading">(Checking if streaming is supported…)</string>
     <string name="pref_edit_remote_vfs_caching_desc_optional">VFS caching enables support for random writes and allows failed uploads to be retried. However, files do not begin uploading until the client app closes them.</string>
     <string name="pref_edit_remote_vfs_caching_desc_required">VFS caching cannot be disabled because this remote type does not support streaming uploads.</string>
+    <string name="pref_edit_remote_report_usage_name">Report filesystem usage</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">(Checking if filesystem usage reporting is supported…)</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">Report free space and total space to client apps. For some remote types, this can significantly slow down client apps when they fetch the list of remotes.</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">This remote type does not support reporting its free space and total space.</string>
 
     <!-- Main alerts -->
     <string name="alert_list_remotes_failure">Failed to get list of remotes: %1$s</string>
@@ -84,9 +88,7 @@
     <string name="alert_delete_remote_failure">Failed to delete %1$s: %2$s</string>
     <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
     <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
-    <string name="alert_update_external_access_failure">Failed to update external app access to remote %1$s: %2$s</string>
-    <string name="alert_update_dynamic_shortcut_failure">Failed to update launcher shortcut for remote %1$s: %2$s</string>
-    <string name="alert_update_vfs_caching_failure">Failed to update VFS caching for remote %1$s: %2$s</string>
+    <string name="alert_set_config_failure">Failed to set %1$s config option for remote %2$s: %3$s</string>
 
     <!-- Biometric -->
     <string name="biometric_title">Unlock configuration</string>

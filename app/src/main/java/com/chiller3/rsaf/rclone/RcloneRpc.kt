@@ -19,10 +19,12 @@ object RcloneRpc {
     const val CUSTOM_OPT_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
     const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
     const val CUSTOM_OPT_VFS_CACHING = CUSTOM_OPT_PREFIX + "vfs_caching"
+    const val CUSTOM_OPT_REPORT_USAGE = CUSTOM_OPT_PREFIX + "report_usage"
 
     private const val DEFAULT_BLOCKED = false
     private const val DEFAULT_DYNAMIC_SHORTCUT = false
     private const val DEFAULT_VFS_CACHING = true
+    private const val DEFAULT_REPORT_USAGE = false
 
     /**
      * Perform an rclone RPC call.
@@ -398,9 +400,40 @@ object RcloneRpc {
             CUSTOM_OPT_BLOCKED -> DEFAULT_BLOCKED
             CUSTOM_OPT_DYNAMIC_SHORTCUT -> DEFAULT_DYNAMIC_SHORTCUT
             CUSTOM_OPT_VFS_CACHING -> DEFAULT_VFS_CACHING
+            CUSTOM_OPT_REPORT_USAGE -> DEFAULT_REPORT_USAGE
             else -> throw IllegalArgumentException("Invalid custom option: $opt")
         }
 
         return config[opt]?.toBooleanStrictOrNull() ?: default
+    }
+
+    data class Usage(
+        val total: Long?,
+        val used: Long?,
+        val trashed: Long?,
+        val other: Long?,
+        val free: Long?,
+        val objects: Long?,
+    )
+
+    /** Get the filesystem usage. */
+    fun getUsage(remote: String): Usage {
+        val output = invoke("operations/about", JSONObject().put("fs", remote))
+
+        fun getOptLong(name: String) =
+            if (output.isNull(name)) {
+                null
+            } else {
+                output.getLong(name)
+            }
+
+        return Usage(
+            getOptLong("total"),
+            getOptLong("used"),
+            getOptLong("trashed"),
+            getOptLong("other"),
+            getOptLong("free"),
+            getOptLong("objects"),
+        )
     }
 }

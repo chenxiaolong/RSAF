@@ -438,14 +438,26 @@ func getVfsForDoc(doc string) (*vfs.VFS, string, error) {
 	return v, path, nil
 }
 
+type RbRemoteFeaturesResult struct {
+	PutStream bool
+	About     bool
+}
+
 // Return whether the specified remote supports streaming.
-func RbCanStream(remote string) (bool, error) {
+func RbRemoteFeatures(remote string) (*RbRemoteFeaturesResult, error) {
 	f, err := getFs(remote)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return f.Features().PutStream != nil, nil
+	features := f.Features()
+
+	result := RbRemoteFeaturesResult{
+		PutStream: features.PutStream != nil,
+		About:     features.About != nil,
+	}
+
+	return &result, nil
 }
 
 type RbRemoteSplitResult struct {

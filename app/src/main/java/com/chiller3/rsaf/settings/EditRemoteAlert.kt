@@ -24,9 +24,9 @@ sealed interface EditRemoteAlert {
         val error: String,
     ) : EditRemoteAlert
 
-    data class UpdateExternalAccessFailed(val remote: String, val error: String) : EditRemoteAlert
-
-    data class UpdateDynamicShortcutFailed(val remote: String, val error: String) : EditRemoteAlert
-
-    data class UpdateVfsCachingFailed(val remote: String, val error: String) : EditRemoteAlert
+    data class SetConfigFailed(
+        val remote: String,
+        val opt: String,
+        val error: String,
+    ) : EditRemoteAlert
 }

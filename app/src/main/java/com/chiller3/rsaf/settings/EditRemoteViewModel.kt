@@ -8,6 +8,7 @@ package com.chiller3.rsaf.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chiller3.rsaf.binding.rcbridge.RbRemoteFeaturesResult
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
@@ -28,7 +29,8 @@ data class RemoteConfigState(
     val allowExternalAccess: Boolean? = null,
     val dynamicShortcut: Boolean? = null,
     val vfsCaching: Boolean? = null,
-    val canStream: Boolean? = null,
+    val reportUsage: Boolean? = null,
+    val features: RbRemoteFeaturesResult? = null,
 )
 
 class EditRemoteViewModel : ViewModel() {
@@ -80,15 +82,19 @@ class EditRemoteViewModel : ViewModel() {
                             config,
                             RcloneRpc.CUSTOM_OPT_VFS_CACHING,
                         ),
+                        reportUsage = RcloneRpc.getCustomBoolOpt(
+                            config,
+                            RcloneRpc.CUSTOM_OPT_REPORT_USAGE,
+                        ),
                     )
                 }
 
                 // Only calculate this once since the value can't change and it requires
                 // initializing the backend, which may perform network calls.
-                if (_remoteConfig.value.canStream == null) {
+                if (_remoteConfig.value.features == null) {
                     withContext(Dispatchers.IO) {
                         _remoteConfig.update {
-                            it.copy(canStream = Rcbridge.rbCanStream("$remote:"))
+                            it.copy(features = Rcbridge.rbRemoteFeatures("$remote:"))
                         }
                     }
                 }
@@ -108,58 +114,43 @@ class EditRemoteViewModel : ViewModel() {
         }
     }
 
-    fun setExternalAccess(remote: String, allow: Boolean) {
+    private fun setCustomOpt(
+        remote: String,
+        opt: String,
+        value: Boolean,
+        onSuccess: (() -> Unit)? = null,
+    ) {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(
-                        remote, mapOf(
-                            RcloneRpc.CUSTOM_OPT_BLOCKED to (!allow).toString(),
-                        )
-                    )
+                    RcloneRpc.setRemoteOptions(remote, mapOf(opt to value.toString()))
                 }
                 refreshRemotesInternal(true)
-                _activityActions.update { it.copy(refreshRoots = true) }
+                onSuccess?.let { it() }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to set $remote external access to $allow", e)
-                _alerts.update { it + EditRemoteAlert.UpdateExternalAccessFailed(remote, e.toString()) }
+                Log.w(TAG, "Failed to set $remote config option $opt to $value", e)
+                _alerts.update { it + EditRemoteAlert.SetConfigFailed(remote, opt, e.toString()) }
             }
+        }
+    }
+
+    fun setExternalAccess(remote: String, allow: Boolean) {
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_BLOCKED, !allow) {
+            _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 
     fun setDynamicShortcut(remote: String, enabled: Boolean) {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(
-                        remote, mapOf(
-                            RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT to enabled.toString(),
-                        )
-                    )
-                }
-                refreshRemotesInternal(true)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to set remote $remote shortcut state to $enabled", e)
-                _alerts.update { it + EditRemoteAlert.UpdateDynamicShortcutFailed(remote, e.toString()) }
-            }
-        }
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT, enabled)
     }
 
     fun setVfsCaching(remote: String, enabled: Boolean) {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(
-                        remote, mapOf(
-                            RcloneRpc.CUSTOM_OPT_VFS_CACHING to enabled.toString(),
-                        )
-                    )
-                }
-                refreshRemotesInternal(true)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to set remote $remote VFS caching state to $enabled", e)
-                _alerts.update { it + EditRemoteAlert.UpdateVfsCachingFailed(remote, e.toString()) }
-            }
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_VFS_CACHING, enabled)
+    }
+
+    fun setReportUsage(remote: String, enabled: Boolean) {
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_REPORT_USAGE, enabled) {
+            _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 

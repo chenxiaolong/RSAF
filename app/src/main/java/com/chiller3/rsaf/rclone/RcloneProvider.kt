@@ -424,6 +424,13 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                     continue
                 }
 
+                val usage = if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_REPORT_USAGE)) {
+                    debugLog("Querying filesystem usage: $remote")
+                    RcloneRpc.getUsage("$remote:")
+                } else {
+                    null
+                }
+
                 newRow().apply {
                     // Required
                     add(DocumentsContract.Root.COLUMN_ROOT_ID, remote)
@@ -434,6 +441,15 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
                     // Optional
                     add(DocumentsContract.Root.COLUMN_SUMMARY, remote)
+
+                    usage?.total?.let {
+                        debugLog("Remote reports total space: $remote: $it")
+                        add(DocumentsContract.Root.COLUMN_CAPACITY_BYTES, it)
+                    }
+                    usage?.free?.let {
+                        debugLog("Remote reports free space: $remote: $it")
+                        add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, it)
+                    }
                 }
             }
         }

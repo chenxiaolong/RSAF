@@ -68,5 +68,11 @@
             app:title="@string/pref_edit_remote_vfs_caching_name"
             app:iconSpaceReserved="false"
             app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            app:key="report_usage"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_report_usage_name"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </PreferenceScreen>
