@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 2.1
 
 * Allow retries when biometric auth fails the first time, instead of just failing and exiting ([PR #98])
 * Add support for reporting filesystem usage (total and available space) to client apps ([PR #99])
