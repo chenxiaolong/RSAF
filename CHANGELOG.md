@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Update rclone to 1.68.2 ([PR #103])
+* Update gradle dependencies ([PR #104])
 
 ### Version 2.1
 
@@ -270,3 +271,4 @@
 [PR #98]: https://github.com/chenxiaolong/RSAF/pull/98
 [PR #99]: https://github.com/chenxiaolong/RSAF/pull/99
 [PR #103]: https://github.com/chenxiaolong/RSAF/pull/103
+[PR #104]: https://github.com/chenxiaolong/RSAF/pull/104
