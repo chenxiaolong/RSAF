@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.68.2 ([PR #103])
+
 ### Version 2.1
 
 * Allow retries when biometric auth fails the first time, instead of just failing and exiting ([PR #98])
@@ -265,3 +269,4 @@
 [PR #97]: https://github.com/chenxiaolong/RSAF/pull/97
 [PR #98]: https://github.com/chenxiaolong/RSAF/pull/98
 [PR #99]: https://github.com/chenxiaolong/RSAF/pull/99
+[PR #103]: https://github.com/chenxiaolong/RSAF/pull/103
