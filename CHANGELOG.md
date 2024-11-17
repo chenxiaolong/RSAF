@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix icon scale and rebase off latest material smb share icon ([PR #105])
+
 ### Version 2.2
 
 * Update rclone to 1.68.2 ([PR #103])
@@ -272,3 +276,4 @@
 [PR #99]: https://github.com/chenxiaolong/RSAF/pull/99
 [PR #103]: https://github.com/chenxiaolong/RSAF/pull/103
 [PR #104]: https://github.com/chenxiaolong/RSAF/pull/104
+[PR #105]: https://github.com/chenxiaolong/RSAF/pull/105
