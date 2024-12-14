@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Fix icon scale and rebase off latest material smb share icon ([PR #105])
+* Suppress errors when closing read-only files ([PR #107])
 
 ### Version 2.2
 
@@ -277,3 +278,4 @@
 [PR #103]: https://github.com/chenxiaolong/RSAF/pull/103
 [PR #104]: https://github.com/chenxiaolong/RSAF/pull/104
 [PR #105]: https://github.com/chenxiaolong/RSAF/pull/105
+[PR #107]: https://github.com/chenxiaolong/RSAF/pull/107
