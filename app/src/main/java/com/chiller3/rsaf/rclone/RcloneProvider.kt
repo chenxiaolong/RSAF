@@ -860,10 +860,16 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             if (!handle.close(error)) {
                 val exception = error.toException("RbFile.close")
 
-                // This method is not supposed to throw
+                // This method is not supposed to throw.
                 Log.w(TAG, "Error when closing file", exception)
 
-                notifications.notifyBackgroundUploadFailed(documentId, exception.toSingleLineString())
+                // Don't notify if the file is read only. There would have been no data loss anyway.
+                if (isWrite) {
+                    notifications.notifyBackgroundUploadFailed(
+                        documentId,
+                        exception.toSingleLineString(),
+                    )
+                }
             }
 
             if (isWrite && Permissions.isInhibitingBatteryOpt(context)) {
