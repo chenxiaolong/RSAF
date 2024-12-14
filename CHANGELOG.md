@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 2.3
 
 * Fix icon scale and rebase off latest material smb share icon ([PR #105])
 * Suppress errors when closing read-only files ([PR #107])
