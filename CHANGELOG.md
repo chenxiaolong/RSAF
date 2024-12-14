@@ -11,6 +11,9 @@
 
 * Fix icon scale and rebase off latest material smb share icon ([PR #105])
 * Suppress errors when closing read-only files ([PR #107])
+* Show notification when files are open to keep the process alive ([PR #108])
+  * This reduces the chance of RSAF being suspended or killed, for example, when watching videos
+  * Android's restrictions require RSAF to attempt to show the notification, but the notification channel can be disabled from Android's settings with no negative side effects
 
 ### Version 2.2
 
@@ -279,3 +282,4 @@
 [PR #104]: https://github.com/chenxiaolong/RSAF/pull/104
 [PR #105]: https://github.com/chenxiaolong/RSAF/pull/105
 [PR #107]: https://github.com/chenxiaolong/RSAF/pull/107
+[PR #108]: https://github.com/chenxiaolong/RSAF/pull/108
