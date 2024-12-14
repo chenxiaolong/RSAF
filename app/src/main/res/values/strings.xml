@@ -124,10 +124,16 @@
     <string name="ic_header_examples">Example options:</string>
 
     <!-- Notifications -->
+    <string name="notification_channel_open_files_name">Open files</string>
+    <string name="notification_channel_open_files_desc">Keeps process alive while files are open</string>
     <string name="notification_channel_background_uploads_name">Background uploads</string>
     <string name="notification_channel_background_uploads_desc">Show in-progress background uploads</string>
     <string name="notification_channel_failure_name">Failure alerts</string>
     <string name="notification_channel_failure_desc">Alerts for errors during background uploads</string>
+    <plurals name="notification_open_files_title">
+        <item quantity="one">%d open file</item>
+        <item quantity="other">%d open files</item>
+    </plurals>
     <plurals name="notification_background_uploads_in_progress_title">
         <item quantity="one">Uploading %d file to remote</item>
         <item quantity="other">Uploading %d files to remotes</item>

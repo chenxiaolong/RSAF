@@ -791,6 +791,12 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     ) : ProxyFileDescriptorCallback() {
         init {
             markUsed()
+
+            val context = context!!
+
+            if (Permissions.isInhibitingBatteryOpt(context)) {
+                context.startForegroundService(OpenFilesService.createIncrementIntent(context))
+            }
         }
 
         private fun debugLog(msg: String) {
@@ -850,10 +856,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
             val context = context!!
 
-            if (isWrite && Permissions.isInhibitingBatteryOpt(context)) {
-                context.startForegroundService(
-                    BackgroundUploadMonitorService.createAddIntent(context, documentId),
-                )
+            if (Permissions.isInhibitingBatteryOpt(context)) {
+                context.startForegroundService(OpenFilesService.createDecrementIntent(context))
+
+                if (isWrite) {
+                    context.startForegroundService(
+                        BackgroundUploadMonitorService.createIncrementIntent(context),
+                    )
+                }
             }
 
             val error = RbError()
@@ -874,7 +884,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
             if (isWrite && Permissions.isInhibitingBatteryOpt(context)) {
                 context.startForegroundService(
-                    BackgroundUploadMonitorService.createRemoveIntent(context, documentId),
+                    BackgroundUploadMonitorService.createDecrementIntent(context),
                 )
             }
 

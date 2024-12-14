@@ -15,16 +15,27 @@ import kotlin.math.roundToInt
 
 class Notifications(private val context: Context) {
     companion object {
+        private const val CHANNEL_ID_OPEN_FILES = "open_files"
         private const val CHANNEL_ID_BACKGROUND_UPLOADS = "background_uploads"
         private const val CHANNEL_ID_FAILURE = "failure"
 
         private val LEGACY_CHANNEL_IDS = arrayOf<String>()
 
-        const val ID_BACKGROUND_UPLOADS = 1
+        const val ID_OPEN_FILES = -1
+        const val ID_BACKGROUND_UPLOADS = -2
     }
 
     private val prefs = Preferences(context)
     private val notificationManager = context.getSystemService(NotificationManager::class.java)
+
+    /** Create a low priority notification channel for the open files notification. */
+    private fun createOpenFilesChannel() = NotificationChannel(
+        CHANNEL_ID_OPEN_FILES,
+        context.getString(R.string.notification_channel_open_files_name),
+        NotificationManager.IMPORTANCE_LOW,
+    ).apply {
+        description = context.getString(R.string.notification_channel_open_files_desc)
+    }
 
     /** Create a low priority notification channel for the background uploads notification. */
     private fun createBackgroundUploadsChannel() = NotificationChannel(
@@ -51,10 +62,33 @@ class Notifications(private val context: Context) {
      */
     fun updateChannels() {
         notificationManager.createNotificationChannels(listOf(
+            createOpenFilesChannel(),
             createBackgroundUploadsChannel(),
             createFailureAlertsChannel(),
         ))
         LEGACY_CHANNEL_IDS.forEach { notificationManager.deleteNotificationChannel(it) }
+    }
+
+    fun createOpenFilesNotification(count: Int): Notification {
+        val title = context.resources.getQuantityString(
+            R.plurals.notification_open_files_title,
+            count,
+            count,
+        )
+
+        return Notification.Builder(context, CHANNEL_ID_OPEN_FILES).run {
+            setContentTitle(title)
+            setSmallIcon(R.drawable.ic_notifications)
+            setOngoing(true)
+            setOnlyAlertOnce(true)
+
+            // Inhibit 10-second delay when showing persistent notification
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+            }
+
+            build()
+        }
     }
 
     fun createBackgroundUploadsNotification(

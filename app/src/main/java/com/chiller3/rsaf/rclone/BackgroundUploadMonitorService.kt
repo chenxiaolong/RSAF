@@ -27,21 +27,19 @@ class BackgroundUploadMonitorService : Service() {
     companion object {
         private val TAG = BackgroundUploadMonitorService::class.java.simpleName
 
-        private val ACTION_ADD = "${BackgroundUploadMonitorService::class.java.canonicalName}.add"
-        private val ACTION_REMOVE = "${BackgroundUploadMonitorService::class.java.canonicalName}.remove"
+        private val ACTION_INCREMENT =
+            "${BackgroundUploadMonitorService::class.java.canonicalName}.increment"
+        private val ACTION_DECREMENT =
+            "${BackgroundUploadMonitorService::class.java.canonicalName}.decrement"
 
-        private const val EXTRA_DOCUMENT_ID = "document_id"
-
-        fun createAddIntent(context: Context, documentId: String) =
+        fun createIncrementIntent(context: Context) =
             Intent(context, BackgroundUploadMonitorService::class.java).apply {
-                this.action = ACTION_ADD
-                putExtra(EXTRA_DOCUMENT_ID, documentId)
+                action = ACTION_INCREMENT
             }
 
-        fun createRemoveIntent(context: Context, documentId: String) =
+        fun createDecrementIntent(context: Context) =
             Intent(context, BackgroundUploadMonitorService::class.java).apply {
-                this.action = ACTION_REMOVE
-                putExtra(EXTRA_DOCUMENT_ID, documentId)
+                action = ACTION_DECREMENT
             }
 
         private fun getFdPosAndSize(fd: Int): Pair<Long, Long> =
@@ -55,7 +53,7 @@ class BackgroundUploadMonitorService : Service() {
     }
 
     private lateinit var notifications: Notifications
-    private val backgroundUploads = mutableSetOf<String>()
+    private var backgroundUploads = 0
     private lateinit var dataDataDir: File
     private lateinit var vfsCacheDir: File
     private val monitorThread = Thread(::monitorVfsCache)
@@ -101,19 +99,13 @@ class BackgroundUploadMonitorService : Service() {
         Log.d(TAG, "Received intent: $intent")
 
         when (intent?.action) {
-            ACTION_ADD -> {
-                val documentId = intent.getStringExtra(EXTRA_DOCUMENT_ID)!!
-                backgroundUploads.add(documentId)
-            }
-            ACTION_REMOVE -> {
-                val documentId = intent.getStringExtra(EXTRA_DOCUMENT_ID)!!
-                backgroundUploads.remove(documentId)
-            }
+            ACTION_INCREMENT -> backgroundUploads += 1
+            ACTION_DECREMENT -> backgroundUploads -= 1
         }
 
-        monitorNotify = backgroundUploads.isNotEmpty()
+        monitorNotify = backgroundUploads != 0
 
-        if (backgroundUploads.isEmpty()) {
+        if (backgroundUploads == 0) {
             // We'll defer the stopping of the service by a small amount of time to avoid having
             // notifications rapidly appear and disappear when writing many small files. We can't
             // use FOREGROUND_SERVICE_DEFERRED because that is ignored if a deferral has already
@@ -135,7 +127,7 @@ class BackgroundUploadMonitorService : Service() {
     @UiThread
     private fun updateForegroundNotification() {
         val notification = notifications.createBackgroundUploadsNotification(
-            backgroundUploads.size,
+            backgroundUploads,
             monitorProgress.first,
             monitorProgress.second,
         )
@@ -159,7 +151,7 @@ class BackgroundUploadMonitorService : Service() {
 
             val target = try {
                 normalizePath(File(Os.readlink(file.toString())))
-            } catch (e: ErrnoException) {
+            } catch (_: ErrnoException) {
                 continue
             }
 

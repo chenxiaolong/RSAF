@@ -56,6 +56,11 @@
             android:exported="false" />
 
         <service
+            android:name=".rclone.OpenFilesService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false" />
+
+        <service
             android:name=".rclone.BackgroundUploadMonitorService"
             android:foregroundServiceType="specialUse"
             android:exported="false" />
