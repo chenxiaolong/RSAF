@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import kotlin.math.max
 
 class Preferences(private val context: Context) {
     companion object {
@@ -25,6 +26,8 @@ class Preferences(private val context: Context) {
         const val PREF_POSIX_LIKE_SEMANTICS = "posix_like_semantics"
         const val PREF_PRETEND_LOCAL = "pretend_local"
         const val PREF_REQUIRE_AUTH = "require_auth"
+        const val PREF_INACTIVITY_TIMEOUT = "inactivity_timeout"
+        const val PREF_LOCK_NOW = "lock_now"
         const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
 
         // Main UI actions only
@@ -51,6 +54,11 @@ class Preferences(private val context: Context) {
         // Not associated with a UI preference
         const val PREF_DEBUG_MODE = "debug_mode"
         private const val PREF_NEXT_NOTIFICATION_ID = "next_notification_id"
+
+        // This needs to be large enough to account for activity transitions, where the lock state
+        // will briefly become inactive. We also need to make sure it's high enough that the user
+        // can't lock themselves out.
+        const val MIN_INACTIVITY_TIMEOUT = 15
     }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -91,6 +99,13 @@ class Preferences(private val context: Context) {
     var requireAuth: Boolean
         get() = prefs.getBoolean(PREF_REQUIRE_AUTH, false)
         set(enabled) = prefs.edit { putBoolean(PREF_REQUIRE_AUTH, enabled) }
+
+    /** Inactivity timeout (in seconds). */
+    var inactivityTimeout: Int
+        get() = max(prefs.getInt(PREF_INACTIVITY_TIMEOUT, 60), MIN_INACTIVITY_TIMEOUT)
+        set(seconds) = prefs.edit {
+            putInt(PREF_INACTIVITY_TIMEOUT, max(seconds, MIN_INACTIVITY_TIMEOUT))
+        }
 
     /** Whether to allow app data backups. */
     var allowBackup: Boolean

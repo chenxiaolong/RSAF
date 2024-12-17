@@ -25,6 +25,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.get
 import androidx.preference.size
+import com.chiller3.rsaf.AppLock
 import com.chiller3.rsaf.BuildConfig
 import com.chiller3.rsaf.Logcat
 import com.chiller3.rsaf.Permissions
@@ -32,6 +33,7 @@ import com.chiller3.rsaf.PreferenceBaseFragment
 import com.chiller3.rsaf.Preferences
 import com.chiller3.rsaf.R
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.dialog.InactivityTimeoutDialogFragment
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
@@ -75,6 +77,8 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefLocalStorageAccess: SwitchPreferenceCompat
     private lateinit var prefImportConfiguration: Preference
     private lateinit var prefExportConfiguration: Preference
+    private lateinit var prefInactivityTimeout: Preference
+    private lateinit var prefLockNow: Preference
     private lateinit var prefVersion: LongClickablePreference
     private lateinit var prefSaveLogs: Preference
 
@@ -146,6 +150,12 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefExportConfiguration = findPreference(Preferences.PREF_EXPORT_CONFIGURATION)!!
         prefExportConfiguration.onPreferenceClickListener = this
 
+        prefInactivityTimeout = findPreference(Preferences.PREF_INACTIVITY_TIMEOUT)!!
+        prefInactivityTimeout.onPreferenceClickListener = this
+
+        prefLockNow = findPreference(Preferences.PREF_LOCK_NOW)!!
+        prefLockNow.onPreferenceClickListener = this
+
         prefVersion = findPreference(Preferences.PREF_VERSION)!!
         prefVersion.onPreferenceClickListener = this
         prefVersion.onPreferenceLongClickListener = this
@@ -157,6 +167,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         // onResume() because allowing the permissions does not restart the activity.
         refreshPermissions()
 
+        refreshInactivityTimeout()
         refreshVersion()
         refreshDebugPrefs()
 
@@ -253,6 +264,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
             TAG_ADD_REMOTE_NAME,
             TAG_IMPORT_EXPORT_PASSWORD,
             InteractiveConfigurationDialogFragment.TAG,
+            InactivityTimeoutDialogFragment.TAG,
         )) {
             parentFragmentManager.setFragmentResultListener(key, this, this)
         }
@@ -280,6 +292,14 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefMissingNotifications.isVisible = !allowedNotifications
 
         categoryPermissions.isVisible = !(allowedInhibitBatteryOpt && allowedNotifications)
+    }
+
+    private fun refreshInactivityTimeout() {
+        prefInactivityTimeout.summary = requireContext().resources.getQuantityString(
+            R.plurals.pref_inactivity_timeout_desc,
+            prefs.inactivityTimeout,
+            prefs.inactivityTimeout,
+        )
     }
 
     private fun refreshVersion() {
@@ -333,6 +353,9 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                     bundle.getBoolean(InteractiveConfigurationDialogFragment.RESULT_CANCELLED),
                 )
             }
+            InactivityTimeoutDialogFragment.TAG -> {
+                refreshInactivityTimeout()
+            }
         }
     }
 
@@ -368,6 +391,18 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
             }
             preference === prefExportConfiguration -> {
                 requestSafExportConfiguration.launch(RcloneConfig.FILENAME)
+                return true
+            }
+            preference === prefInactivityTimeout -> {
+                InactivityTimeoutDialogFragment().show(
+                    parentFragmentManager.beginTransaction(),
+                    InactivityTimeoutDialogFragment.TAG,
+                )
+                return true
+            }
+            preference === prefLockNow -> {
+                AppLock.onLock()
+                requireActivity().finishAndRemoveTask()
                 return true
             }
             preference === prefVersion -> {

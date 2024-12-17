@@ -28,13 +28,6 @@ import com.chiller3.rsaf.databinding.SettingsActivityBinding
 
 abstract class PreferenceBaseActivity : AppCompatActivity() {
     companion object {
-        private const val INACTIVE_TIMEOUT_NS = 60_000_000_000L
-
-        // These are intentionally global to ensure that the prompt does not appear when navigating
-        // within the app.
-        private var bioAuthenticated = false
-        private var lastPause = 0L
-
         private fun supportsModernDeviceCredential() =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
@@ -162,17 +155,10 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         super.onResume()
         Log.d(tag, "onResume()")
 
-        if (bioAuthenticated && (System.nanoTime() - lastPause) >= INACTIVE_TIMEOUT_NS) {
-            Log.d(tag, "Biometric authentication timed out due to inactivity")
-            bioAuthenticated = false
-        }
+        AppLock.onAppResume()
 
-        if (!bioAuthenticated) {
-            if (!prefs.requireAuth) {
-                bioAuthenticated = true
-            } else {
-                startAuth()
-            }
+        if (AppLock.isLocked) {
+            startAuth()
         }
 
         refreshTaskState()
@@ -183,7 +169,7 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         super.onPause()
         Log.d(tag, "onPause()")
 
-        lastPause = System.nanoTime()
+        AppLock.onAppPause()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -206,7 +192,7 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
 
     // We want the activity to be visible for predictive back gestures as long as the top-level
     // activity in the task is our own.
-    private fun canViewAndInteract() = bioAuthenticated || isCoveredBySafeActivity
+    private fun canViewAndInteract() = !AppLock.isLocked || isCoveredBySafeActivity
 
     override fun onWindowAttributesChanged(params: WindowManager.LayoutParams?) {
         val canInteract = canViewAndInteract()
@@ -246,7 +232,6 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         bioPrompt.authenticate(promptInfo)
     }
 
-
     private fun startLegacyDeviceCredentialAuth() {
         Log.d(tag, "Starting legacy device credential authentication")
 
@@ -282,7 +267,8 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
     private fun onAuthenticationSucceeded() {
         Log.d(tag, "Authentication succeeded")
 
-        bioAuthenticated = true
+        AppLock.onAuthSuccess()
+
         refreshGlobalVisibility()
     }
 

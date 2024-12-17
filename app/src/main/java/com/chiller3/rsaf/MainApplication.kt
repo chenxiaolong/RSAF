@@ -42,6 +42,8 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
 
         backupManager = BackupManager(this)
 
+        AppLock.init(this)
+
         Notifications(this).updateChannels()
 
         // Enable Material You colors
