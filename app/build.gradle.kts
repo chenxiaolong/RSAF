@@ -7,7 +7,6 @@ import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
 import org.eclipse.jgit.lib.ObjectId
-import org.jetbrains.kotlin.backend.common.pop
 
 plugins {
     alias(libs.plugins.android.application)
@@ -35,8 +34,8 @@ fun describeVersion(git: Git): VersionTriple {
 
     return if (describeStr != null) {
         val pieces = describeStr.split('-').toMutableList()
-        val commit = git.repository.resolve(pieces.pop().substring(1))
-        val count = pieces.pop().toInt()
+        val commit = git.repository.resolve(pieces.removeLast().substring(1))
+        val count = pieces.removeLast().toInt()
         val tag = pieces.joinToString("-")
 
         Triple(tag, count, commit)
@@ -103,7 +102,6 @@ val gitVersionCode = getVersionCode(gitVersionTriple)
 val gitVersionName = getVersionName(git, gitVersionTriple)
 
 val projectUrl = "https://github.com/chenxiaolong/RSAF"
-val releaseMetadataBranch = "master"
 
 val extraDir = layout.buildDirectory.map { it.dir("extra") }
 val archiveDir = extraDir.map { it.dir("archive") }
@@ -115,7 +113,7 @@ android {
 
     compileSdk = 35
     buildToolsVersion = "35.0.0"
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "27.2.12479018"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
@@ -236,6 +234,10 @@ val archive = tasks.register("archive") {
     }
 }
 
+interface InjectedExecOps {
+    @get:Inject val execOps: ExecOperations
+}
+
 val rcbridge = tasks.register<Exec>("rcbridge") {
     val rcbridgeSrcDir = File(rootDir, "rcbridge")
     val tempDir = rcbridgeDir.map { it.dir("temp") }
@@ -282,6 +284,8 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
         tempDir.get().asFile.mkdirs()
     }
 
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
     // gomobile fails to clean up its temp directories after it switched to using go modules. These
     // directories are never reused, so delete them.
     doLast {
@@ -292,7 +296,7 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
             for (subDir in subDirs) {
                 println("Cleaning up gomobile leftovers: $subDir")
 
-                exec {
+                injected.execOps.exec {
                     executable("go")
                     args = listOf("clean", "-modcache")
                     environment("GOPATH", subDir.absolutePath)
