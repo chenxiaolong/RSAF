@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Make inactivity timeout duration for the app lock configurable and add a button for locking immediately ([PR #109])
+
 ### Version 2.3
 
 * Fix icon scale and rebase off latest material smb share icon ([PR #105])
@@ -283,3 +287,4 @@
 [PR #105]: https://github.com/chenxiaolong/RSAF/pull/105
 [PR #107]: https://github.com/chenxiaolong/RSAF/pull/107
 [PR #108]: https://github.com/chenxiaolong/RSAF/pull/108
+[PR #109]: https://github.com/chenxiaolong/RSAF/pull/109
