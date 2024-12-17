@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 2.4
 
 * Make inactivity timeout duration for the app lock configurable and add a button for locking immediately ([PR #109])
 * Add support for hiding files on a remote while the app is locked ([Issue #106], [PR #110])
