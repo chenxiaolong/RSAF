@@ -67,6 +67,9 @@
     <string name="pref_edit_remote_delete_desc">Remove this remote from the configuration.</string>
     <string name="pref_edit_remote_allow_external_access_name">Allow external app access</string>
     <string name="pref_edit_remote_allow_external_access_desc">Allow external apps to access this remote via the system file manager. Access is not needed if this remote is just a backend for another remote.</string>
+    <string name="pref_edit_remote_allow_locked_access_name">Allow access while locked</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">While RSAF is locked, files are still available to external apps that have been granted access.</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">While RSAF is locked, files are hidden from external apps and new file operations are blocked. Ongoing operations with files that are already open are unaffected.</string>
     <string name="pref_edit_remote_dynamic_shortcut_name">Show in launcher shortcuts</string>
     <string name="pref_edit_remote_dynamic_shortcut_desc">Include this remote in the list of shortcuts when long pressing RSAF\'s launcher icon.</string>
     <string name="pref_edit_remote_vfs_caching_name">Enable VFS caching</string>

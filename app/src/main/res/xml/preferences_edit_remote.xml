@@ -56,6 +56,15 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
+            app:key="allow_locked_access"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_allow_locked_access_name"
+            app:summaryOn="@string/pref_edit_remote_allow_locked_access_desc_on"
+            app:summaryOff="@string/pref_edit_remote_allow_locked_access_desc_off"
+            app:iconSpaceReserved="false"
+            app:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             app:key="dynamic_shortcut"
             app:persistent="false"
             app:title="@string/pref_edit_remote_dynamic_shortcut_name"

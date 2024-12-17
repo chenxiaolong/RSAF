@@ -25,6 +25,7 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.chiller3.rsaf.AppLock
 import com.chiller3.rsaf.BuildConfig
 import com.chiller3.rsaf.Notifications
 import com.chiller3.rsaf.Permissions
@@ -36,6 +37,7 @@ import com.chiller3.rsaf.binding.rcbridge.RbFile
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
+import java.io.FileNotFoundException
 import java.io.IOException
 
 class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -403,8 +405,13 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             val config = configs[remote]
                 ?: throw IllegalArgumentException("Remote does not exist: $remote")
 
-            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_BLOCKED)) {
-                throw SecurityException("Access to remote is blocked: $remote")
+            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)) {
+                throw SecurityException("Access to remote is hard blocked: $remote")
+            }
+
+            val softBlocked = RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED)
+            if (softBlocked && AppLock.isLocked) {
+                throw FileNotFoundException("Remote inaccessible while app is locked: $remote")
             }
         }
     }
@@ -419,7 +426,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             }
 
             for ((remote, config) in RcloneRpc.remotes) {
-                if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_BLOCKED)) {
+                if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)) {
                     debugLog("Skipping blocked remote: $remote")
                     continue
                 }

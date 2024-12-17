@@ -27,6 +27,7 @@ data class EditRemoteActivityActions(
 
 data class RemoteConfigState(
     val allowExternalAccess: Boolean? = null,
+    val allowLockedAccess: Boolean? = null,
     val dynamicShortcut: Boolean? = null,
     val vfsCaching: Boolean? = null,
     val reportUsage: Boolean? = null,
@@ -72,7 +73,11 @@ class EditRemoteViewModel : ViewModel() {
                     it.copy(
                         allowExternalAccess = !RcloneRpc.getCustomBoolOpt(
                             config,
-                            RcloneRpc.CUSTOM_OPT_BLOCKED,
+                            RcloneRpc.CUSTOM_OPT_HARD_BLOCKED,
+                        ),
+                        allowLockedAccess = !RcloneRpc.getCustomBoolOpt(
+                            config,
+                            RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED,
                         ),
                         dynamicShortcut = RcloneRpc.getCustomBoolOpt(
                             config,
@@ -135,9 +140,13 @@ class EditRemoteViewModel : ViewModel() {
     }
 
     fun setExternalAccess(remote: String, allow: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_BLOCKED, !allow) {
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED, !allow) {
             _activityActions.update { it.copy(refreshRoots = true) }
         }
+    }
+
+    fun setLockedAccess(remote: String, allow: Boolean) {
+        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED, !allow)
     }
 
     fun setDynamicShortcut(remote: String, enabled: Boolean) {

@@ -55,6 +55,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefDuplicateRemote: Preference
     private lateinit var prefDeleteRemote: Preference
     private lateinit var prefAllowExternalAccess: SwitchPreferenceCompat
+    private lateinit var prefAllowLockedAccess: SwitchPreferenceCompat
     private lateinit var prefDynamicShortcut: SwitchPreferenceCompat
     private lateinit var prefVfsCaching: SwitchPreferenceCompat
     private lateinit var prefReportUsage: SwitchPreferenceCompat
@@ -84,6 +85,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefAllowExternalAccess = findPreference(Preferences.PREF_ALLOW_EXTERNAL_ACCESS)!!
         prefAllowExternalAccess.onPreferenceChangeListener = this
 
+        prefAllowLockedAccess = findPreference(Preferences.PREF_ALLOW_LOCKED_ACCESS)!!
+        prefAllowLockedAccess.onPreferenceChangeListener = this
+
         prefDynamicShortcut = findPreference(Preferences.PREF_DYNAMIC_SHORTCUT)!!
         prefDynamicShortcut.onPreferenceChangeListener = this
 
@@ -108,20 +112,26 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.remoteConfig.collect {
-                    prefOpenRemote.isEnabled = it.allowExternalAccess ?: false
+                    prefOpenRemote.isEnabled = it.allowExternalAccess == true
 
                     prefAllowExternalAccess.isEnabled = it.allowExternalAccess != null
                     if (it.allowExternalAccess != null) {
                         prefAllowExternalAccess.isChecked = it.allowExternalAccess
                     }
 
-                    prefDynamicShortcut.isEnabled = it.allowExternalAccess ?: false
+                    prefAllowLockedAccess.isEnabled = it.allowExternalAccess == true
+                            && prefs.requireAuth
+                    if (it.allowLockedAccess != null) {
+                        prefAllowLockedAccess.isChecked = it.allowLockedAccess
+                    }
+
+                    prefDynamicShortcut.isEnabled = it.allowExternalAccess == true
                     if (it.dynamicShortcut != null) {
                         prefDynamicShortcut.isChecked = it.dynamicShortcut
                     }
 
-                    prefVfsCaching.isEnabled = it.allowExternalAccess ?: false
-                            && it.features?.putStream ?: false
+                    prefVfsCaching.isEnabled = it.allowExternalAccess == true
+                            && it.features?.putStream == true
                     if (it.vfsCaching != null) {
                         prefVfsCaching.isChecked = it.vfsCaching
                     }
@@ -131,8 +141,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                         false -> getString(R.string.pref_edit_remote_vfs_caching_desc_required)
                     }
 
-                    prefReportUsage.isEnabled = it.allowExternalAccess ?: false
-                            && it.features?.about ?: false
+                    prefReportUsage.isEnabled = it.allowExternalAccess == true
+                            && it.features?.about == true
                     if (it.reportUsage != null) {
                         prefReportUsage.isChecked = it.reportUsage
                     }
@@ -257,6 +267,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             prefAllowExternalAccess -> {
                 viewModel.setExternalAccess(remote, newValue as Boolean)
             }
+            prefAllowLockedAccess -> {
+                viewModel.setLockedAccess(remote, newValue as Boolean)
+            }
             prefDynamicShortcut -> {
                 viewModel.setDynamicShortcut(remote, newValue as Boolean)
             }
@@ -307,7 +320,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         var rank = 0
 
         for ((remote, config) in remotes) {
-            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_BLOCKED)
+            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)
                 || !RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT)) {
                 continue
             }
