@@ -11,6 +11,7 @@
 
 * Make inactivity timeout duration for the app lock configurable and add a button for locking immediately ([PR #109])
 * Add support for hiding files on a remote while the app is locked ([Issue #106], [PR #110])
+* Update dependencies ([PR #111])
 
 ### Version 2.3
 
@@ -291,3 +292,4 @@
 [PR #108]: https://github.com/chenxiaolong/RSAF/pull/108
 [PR #109]: https://github.com/chenxiaolong/RSAF/pull/109
 [PR #110]: https://github.com/chenxiaolong/RSAF/pull/110
+[PR #111]: https://github.com/chenxiaolong/RSAF/pull/111
