@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add support for generating thumbnails for audio, image, and video files ([PR #113])
+
 ### Version 2.4
 
 * Make inactivity timeout duration for the app lock configurable and add a button for locking immediately ([PR #109])
@@ -293,3 +297,4 @@
 [PR #109]: https://github.com/chenxiaolong/RSAF/pull/109
 [PR #110]: https://github.com/chenxiaolong/RSAF/pull/110
 [PR #111]: https://github.com/chenxiaolong/RSAF/pull/111
+[PR #113]: https://github.com/chenxiaolong/RSAF/pull/113
