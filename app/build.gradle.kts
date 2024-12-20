@@ -196,6 +196,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.biometric)
     implementation(libs.core.ktx)
+    implementation(libs.exifinterface)
     implementation(libs.fragment.ktx)
     implementation(libs.preference.ktx)
     implementation(libs.security.crypto)

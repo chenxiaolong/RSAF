@@ -11,6 +11,7 @@ import android.content.SharedPreferences
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.os.CancellationSignal
 import android.os.Handler
@@ -24,6 +25,7 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.util.Log
+import android.util.Size
 import android.webkit.MimeTypeMap
 import com.chiller3.rsaf.AppLock
 import com.chiller3.rsaf.BuildConfig
@@ -39,6 +41,8 @@ import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
@@ -76,7 +80,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
             DocumentsContract.Document.FLAG_SUPPORTS_REMOVE or
             DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
-            DocumentsContract.Document.FLAG_SUPPORTS_WRITE
+            DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
+            DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
         private val DIRECTORY_PERMS =
             OsConstants.S_IRWXU or
             OsConstants.S_IRGRP or OsConstants.S_IXGRP or
@@ -310,6 +315,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     // consistent. It is just a dumb workaround to make some common file access patterns work. A
     // client app can absolutely still shoot itself in the foot.
     private val inUseTracker = VfsNode()
+    private val thumbnailTaskPool =
+        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
     private fun waitUntilUploadsDone(documentId: String) {
         val path = vfsPath(documentId)
@@ -382,6 +389,9 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun shutdown() {
         prefs.unregisterListener(this)
+
+        thumbnailTaskPool.shutdown()
+        thumbnailTaskPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -579,16 +589,46 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     /**
      * Open a document thumbnail.
      *
-     * This is not implemented. It's only overridden because certain clients, including DocumentsUI,
-     * would otherwise crash, even though [DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL] is
-     * never advertised.
+     * This is only implemented for audio, image, and video files. If generating a thumbnail is
+     * supported, but the process fails, the client will see an empty file.
      */
     override fun openDocumentThumbnail(documentId: String, sizeHint: Point,
                                        signal: CancellationSignal?): AssetFileDescriptor? {
         debugLog("openDocumentThumbnail($documentId, $sizeHint, $signal)")
         enforceNotBlocked(documentId)
 
-        return null
+        val projection = arrayOf(DocumentsContract.Document.COLUMN_MIME_TYPE)
+        val mimeType = queryDocument(documentId, projection).use { cursor ->
+            if (!cursor.moveToFirst()) {
+                // Should never happen.
+                return null
+            }
+
+            val index = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+            cursor.getString(index)
+        }
+
+        if (!Thumbnailer.isSupported(mimeType)) {
+            Log.d(TAG, "Thumbnail not supported for: $mimeType")
+            return null
+        }
+
+        val mediaInput = openDocument(documentId, "r", signal)
+
+        try {
+            val pipe = ParcelFileDescriptor.createReliablePipe()
+
+            // The task owns both file descriptors.
+            val task = ThumbnailTask(documentId, mediaInput, pipe[1], mimeType, sizeHint, signal)
+
+            thumbnailTaskPool.submit(task)
+
+            return AssetFileDescriptor(pipe[0], 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to create thumbnail pipe", e)
+            mediaInput.close()
+            return null
+        }
     }
 
     /**
@@ -1000,6 +1040,50 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         override fun toString(): String = buildString {
             toString(this, 0)
+        }
+    }
+
+    private inner class ThumbnailTask(
+        private val documentId: String,
+        private val mediaInput: ParcelFileDescriptor,
+        private val thumbnailOutput: ParcelFileDescriptor,
+        private val mimeType: String,
+        private val sizeHint: Point,
+        private val signal: CancellationSignal?,
+    ) : Runnable {
+        override fun run() {
+            debugLog("ThumbnailTask[$documentId].run()")
+
+            // Since we're accessing the data through ProxyFd, we don't need to try and keep the
+            // process alive during this process.
+
+            mediaInput.use { input ->
+                // We'll try to close with an error message if possible, in case the client is able
+                // to make use of that. There's no other way of indicating an error or that a
+                // thumbnail is unavailable. A client that doesn't check for errors will just see an
+                // empty file.
+                ParcelFileDescriptor.AutoCloseOutputStream(thumbnailOutput).use { output ->
+                    try {
+                        val bitmap = Thumbnailer.createThumbnail(
+                            input.fileDescriptor,
+                            mimeType,
+                            Size(sizeHint.x, sizeHint.y),
+                            signal,
+                        )
+
+                        try {
+                            signal?.throwIfCanceled()
+
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 0, output)
+                        } finally {
+                            bitmap.recycle()
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to generate thumbnail", e)
+                        thumbnailOutput.closeWithError(e.toSingleLineString())
+                    }
+                }
+            }
         }
     }
 }

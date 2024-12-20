@@ -6,6 +6,7 @@ biometric = "1.1.0"
 core-ktx = "1.15.0"
 jgit = "7.1.0.202411261347-r"
 espresso-core = "3.6.1"
+exifinterface = "1.3.7"
 fragment-ktx = "1.8.5"
 junit = "1.2.1"
 kotlin = "2.1.0"
@@ -20,6 +21,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
 jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit" }
 jgit-archive = { group = "org.eclipse.jgit", name = "org.eclipse.jgit.archive", version.ref = "jgit" }
