@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 2.5
 
 * Add support for generating thumbnails for audio, image, and video files ([PR #113])
 
