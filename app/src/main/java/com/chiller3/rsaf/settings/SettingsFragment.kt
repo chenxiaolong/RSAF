@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -39,6 +39,7 @@ import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.extension.formattedString
+import com.chiller3.rsaf.rclone.BackgroundUploadMonitorService
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.view.LongClickablePreference
@@ -124,6 +125,8 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         setPreferencesFromResource(R.xml.preferences_root, rootKey)
 
         val context = requireContext()
+
+        BackgroundUploadMonitorService.startWithScanOnce(context)
 
         prefs = Preferences(context)
 

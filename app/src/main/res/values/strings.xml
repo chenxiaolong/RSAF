@@ -151,5 +151,4 @@
         <item quantity="one">Uploading %d file to remote</item>
         <item quantity="other">Uploading %d files to remotes</item>
     </plurals>
-    <string name="notification_background_upload_failed_title">Failed to upload file to remote</string>
 </resources>

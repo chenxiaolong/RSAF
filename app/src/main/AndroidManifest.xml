@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- MTE is currently disabled because the cgo runtime does not work with it. -->
@@ -59,6 +60,15 @@
             android:name=".rclone.OpenFilesService"
             android:foregroundServiceType="specialUse"
             android:exported="false" />
+
+        <receiver
+            android:name=".rclone.BackgroundUploadMonitorReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".rclone.BackgroundUploadMonitorService"

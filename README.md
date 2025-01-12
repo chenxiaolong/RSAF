@@ -78,7 +78,9 @@ With POSIX-like semantics, RSAF follows the behavior of the underlying filesyste
 
 ## Permissions
 
-The only permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
+The main permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
+
+The `RECEIVE_BOOT_COMPLETED` permission is used to automatically resume pending uploads if they were interrupted due to a crash or reboot.
 
 Allowing notifications and disabling battery optimizations are optional, but strongly recommended. These are needed to allow RSAF to reliably run in the background after a client app closes a file, which is when file uploads actually begin.
 

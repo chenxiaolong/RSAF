@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+// SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
 // SPDX-License-Identifier: GPL-3.0-only
 
 // This is a thin wrapper around rclone's RPC calls and VFS system.
@@ -411,8 +411,12 @@ func getVfs(remote string) (*vfs.VFS, error) {
 		opts.ChunkSize = 2 * fs.Mebi
 		opts.ChunkSizeLimit = 8 * fs.Mebi
 
-		// Synchronously upload on file close.
-		opts.WriteBack = 0
+		// Asynchronously upload on file close. Due to how Android's virtual FD
+		// mechanism works, the close operation always completes immediately
+		// from the client's point of view. BackgroundUploadMonitorService will
+		// keep the process alive until the upload completes. This also prevents
+		// this function from blocking when rclone starts up with a dity cache.
+		opts.WriteBack = fs.Duration(1 * time.Millisecond)
 
 		v = vfs.New(f, &opts)
 		vfsCache[remote] = v
@@ -504,6 +508,17 @@ func RbPathSplit(doc string, errOut *RbError) *RbPathSplitResult {
 // Join a parent directory document with a leaf filename.
 func RbPathJoin(parentDoc string, leafName string) string {
 	return fspath.JoinRootPath(parentDoc, leafName)
+}
+
+// Initialize the VFS for the specified document.
+func RbDocVfsInit(doc string, errOut *RbError) bool {
+	_, _, err := getVfsForDoc(doc)
+	if err != nil {
+		assignError(errOut, err, syscall.EINVAL)
+		return false
+	}
+
+	return true
 }
 
 // Like vfs.ReadDir(), except it fails with ENOTDIR if the path does not point

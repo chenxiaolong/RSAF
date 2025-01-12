@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2022-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -11,6 +11,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.text.format.Formatter
+import com.chiller3.rsaf.rclone.BackgroundUploadMonitorService
 import kotlin.math.roundToInt
 
 class Notifications(private val context: Context) {
@@ -92,14 +93,12 @@ class Notifications(private val context: Context) {
     }
 
     fun createBackgroundUploadsNotification(
-        count: Int,
-        bytesCurrent: Long,
-        bytesTotal: Long,
+        progress: BackgroundUploadMonitorService.Progress,
     ): Notification {
         val title = context.resources.getQuantityString(
             R.plurals.notification_background_uploads_in_progress_title,
-            count,
-            count,
+            progress.count,
+            progress.count,
         )
 
         return Notification.Builder(context, CHANNEL_ID_BACKGROUND_UPLOADS).run {
@@ -108,17 +107,18 @@ class Notifications(private val context: Context) {
             setOngoing(true)
             setOnlyAlertOnce(true)
 
-            val formattedBytesCurrent = Formatter.formatFileSize(context, bytesCurrent)
-            val formattedBytesTotal = Formatter.formatFileSize(context, bytesTotal)
+            val formattedBytesCurrent = Formatter.formatFileSize(context, progress.bytesCurrent)
+            val formattedBytesTotal = Formatter.formatFileSize(context, progress.bytesTotal)
             setContentText("$formattedBytesCurrent / $formattedBytesTotal")
 
             val normalizedBytesTotal = 1000
-            val normalizedBytesCurrent = if (bytesTotal == 0L) {
+            val normalizedBytesCurrent = if (progress.bytesTotal == 0L) {
                 0
             } else {
-                (bytesCurrent.toDouble() / bytesTotal * normalizedBytesTotal).roundToInt()
+                (progress.bytesCurrent.toDouble() / progress.bytesTotal * normalizedBytesTotal)
+                    .roundToInt()
             }
-            setProgress(normalizedBytesTotal, normalizedBytesCurrent, bytesTotal == 0L)
+            setProgress(normalizedBytesTotal, normalizedBytesCurrent, progress.bytesTotal == 0L)
 
             // Inhibit 10-second delay when showing persistent notification
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -127,31 +127,5 @@ class Notifications(private val context: Context) {
 
             build()
         }
-    }
-
-    fun notifyBackgroundUploadFailed(documentId: String, errorMsg: String) {
-        val notificationId = prefs.nextNotificationId
-
-        val notification = Notification.Builder(context, CHANNEL_ID_FAILURE).run {
-            val text = buildString {
-                val errorMsgTrimmed = errorMsg.trim()
-                if (errorMsgTrimmed.isNotBlank()) {
-                    append(errorMsgTrimmed)
-                }
-                append("\n\n")
-                append(documentId)
-            }
-
-            setContentTitle(context.getString(R.string.notification_background_upload_failed_title))
-            if (text.isNotBlank()) {
-                setContentText(text)
-                style = Notification.BigTextStyle().bigText(text)
-            }
-            setSmallIcon(R.drawable.ic_notifications)
-
-            build()
-        }
-
-        notificationManager.notify(notificationId, notification)
     }
 }
