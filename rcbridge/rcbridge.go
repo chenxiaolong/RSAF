@@ -64,6 +64,7 @@ var (
 		vfs.EBADF:                      syscall.EBADF,
 		vfs.EROFS:                      syscall.EROFS,
 		vfs.ENOSYS:                     syscall.ENOSYS,
+		vfs.ELOOP:                      syscall.ELOOP,
 		vfs.ENOENT:                     syscall.ENOENT,
 		vfs.EEXIST:                     syscall.EEXIST,
 		vfs.EPERM:                      syscall.EPERM,
