@@ -26,7 +26,6 @@ class Notifications(private val context: Context) {
         const val ID_BACKGROUND_UPLOADS = -2
     }
 
-    private val prefs = Preferences(context)
     private val notificationManager = context.getSystemService(NotificationManager::class.java)
 
     /** Create a low priority notification channel for the open files notification. */

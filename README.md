@@ -21,7 +21,6 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 * Supports client applications that request access to a file descriptor
 * Supports client applications that open entire directories with `ACTION_OPEN_DOCUMENT_TREE`
 * Supports pretending to be local storage for apps that block remote SAF roots
-* Supports both [Android-like and POSIX-like file operation semantics](#file-operation-semantics)
 * [No required permissions besides network access](#permissions)
 
 ## Limitations
@@ -57,16 +56,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 
 ## File operation semantics
 
-RSAF supports operating with either Android-like (default) or POSIX-like semantics.
-
-With Android-like semantics, when creating, renaming, copying, or moving a file/directory, RSAF will add a counter to the filename to try and avoid conflicts (eg. `file(1).txt`) if the target path already exists. This matches the Storage Access Framework's behavior for local files, though RSAF extends this to copying/moving instead of just file creation/renaming. However, this feature cannot be implemented in a completely foolproof way. If two client applications try to create files with the same name at the same time, they still might end up clobbering each other's data, even with the added counter.
-
-With POSIX-like semantics, RSAF follows the behavior of the underlying filesystem calls. It'll behave more like common CLI utilities, such as `mv`, `cp`, or even `rclone` itself.
-
-* Creating a new file/directory behaves like `touch`/`mkdir -p`. If the path already exists and is the same type, the operation will succeed.
-* Renaming a file on top of an existing file will overwrite the existing file. Otherwise, if the target path already exists, the operation will fail.
-* Copying files/directories behaves like `cp -rT`. Files with the same name in the target will be overwritten. Directories will be merged (but conflicting files within directories are still overwritten).
-* Moving paths behaves like copying paths, except that the source is gone once the operation succeeds.
+When creating, renaming, copying, or moving a file/directory, RSAF will add a counter to the filename to try and avoid conflicts (eg. `file(1).txt`) if the target path already exists. This matches the Storage Access Framework's behavior for local files, though RSAF extends this to copying/moving instead of just file creation/renaming. However, this feature cannot be implemented in a completely foolproof way. If two client applications try to create files with the same name at the same time, they still might end up clobbering each other's data, even with the added counter.
 
 ## Usage
 

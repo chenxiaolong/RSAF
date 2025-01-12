@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -65,13 +65,6 @@
             app:defaultValue="true"
             app:title="@string/pref_add_file_extension_name"
             app:summary="@string/pref_add_file_extension_desc"
-            app:iconSpaceReserved="false" />
-
-        <SwitchPreferenceCompat
-            app:key="posix_like_semantics"
-            app:title="@string/pref_posix_like_semantics_name"
-            app:summaryOn="@string/pref_posix_like_semantics_desc_on"
-            app:summaryOff="@string/pref_posix_like_semantics_desc_off"
             app:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat

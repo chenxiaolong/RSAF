@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <resources>
@@ -28,9 +28,6 @@
     <string name="pref_export_configuration_desc">Export current rclone configuration to a file.</string>
     <string name="pref_add_file_extension_name">Add file extension</string>
     <string name="pref_add_file_extension_desc">When creating a new file, automatically add the file extension corresponding to the file type.</string>
-    <string name="pref_posix_like_semantics_name">POSIX-like semantics</string>
-    <string name="pref_posix_like_semantics_desc_on">Use command-line-style file operation behavior. Creating paths that already exist is allowed. Renaming files overwrites existing targets. Copying and moving paths overwrites files and merges directories.</string>
-    <string name="pref_posix_like_semantics_desc_off">Use Android-style file operation behavior. When creating, renaming, copying, or moving paths, add a number to the name to avoid conflicts if the target path already exists.</string>
     <string name="pref_pretend_local_name">Pretend to be local storage</string>
     <string name="pref_pretend_local_desc">Present the rclone remotes as local storage to the Storage Access Framework. This forces compatibility with apps that only allow selecting local files.</string>
     <string name="pref_local_storage_access_name">Allow local storage access</string>

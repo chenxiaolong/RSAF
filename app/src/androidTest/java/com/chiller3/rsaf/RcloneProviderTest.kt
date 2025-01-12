@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -278,10 +278,7 @@ class RcloneProviderTest {
 
     @Test
     fun openDocument() {
-        // Even though we do a synchronous upload during VFS file close on the rclone side, Android
-        // internally uses FUSE to provide a file descriptor and FuseAppLoop.cc calls onRelease()
-        // when receiving the FUSE_RELEASE opcode, which is not synchronous. Thus, we need to resort
-        // to manual polling to determine when changes have taken place.
+        // Since VFS cache writeback is asynchronous, we have to resort to manual polling.
         val timeout = 2000L
 
         val file = File(rootDir, "file.txt")
@@ -357,124 +354,45 @@ class RcloneProviderTest {
     }
 
     @Test
-    fun createDocumentAndroid() {
-        withValue(prefs::posixLikeSemantics, false) {
-            for ((mime, name) in arrayOf(
-                Pair(MIME_TEXT, "file"),
-                Pair(MIME_DIR, "dir"),
-            )) {
-                val uniqueUris = mutableSetOf<Uri>()
+    fun createDocument() {
+        for ((mime, name) in arrayOf(
+            Pair(MIME_TEXT, "file"),
+            Pair(MIME_DIR, "dir"),
+        )) {
+            val uniqueUris = mutableSetOf<Uri>()
 
-                for (counter in 0..RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
-                    val childUri = DocumentsContract.createDocument(
-                        appContext.contentResolver, rootDocUri, mime, name)
+            for (counter in 0..RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
+                val childUri = DocumentsContract.createDocument(
+                    appContext.contentResolver, rootDocUri, mime, name)
 
-                    if (counter == RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
-                        assertNull(childUri)
-                    } else {
-                        assertNotNull(childUri)
-                        uniqueUris.add(childUri!!)
-                    }
+                if (counter == RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
+                    assertNull(childUri)
+                } else {
+                    assertNotNull(childUri)
+                    uniqueUris.add(childUri!!)
                 }
-
-                assertEquals(RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS, uniqueUris.size)
             }
+
+            assertEquals(RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS, uniqueUris.size)
         }
     }
 
     @Test
-    fun createDocumentPosix() {
-        withValue(prefs::posixLikeSemantics, true) {
-            for ((mime, name) in arrayOf(
-                Pair(MIME_TEXT, "file"),
-                Pair(MIME_DIR, "dir"),
-            )) {
-                val childUri1 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, mime, name)
-                assertNotNull(childUri1)
+    fun renameDocument() {
+        withValue(prefs::addFileExtension, false) {
+            val childUri1 = DocumentsContract.createDocument(
+                appContext.contentResolver, rootDocUri, MIME_TEXT, "file1.txt")
+            assertNotNull(childUri1)
 
-                val childUri2 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, mime, name)
-                assertNotNull(childUri2)
+            val childUri2 = DocumentsContract.createDocument(
+                appContext.contentResolver, rootDocUri, MIME_TEXT, "file2.txt")
+            assertNotNull(childUri2)
 
-                assertEquals(childUri1, childUri2)
-            }
+            val renamedUri = DocumentsContract.renameDocument(
+                appContext.contentResolver, childUri2!!, "file1.txt")
 
-            withValue(prefs::addFileExtension, false) {
-                assertNotNull(DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "existing_file"))
-                assertNull(DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_DIR, "existing_file"))
-
-                assertNotNull(DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_DIR, "existing_dir"))
-                assertNull(DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "existing_dir"))
-            }
-        }
-    }
-
-    @Test
-    fun renameDocumentAndroid() {
-        withValue(prefs::posixLikeSemantics, false) {
-            withValue(prefs::addFileExtension, false) {
-                val childUri1 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "file1.txt")
-                assertNotNull(childUri1)
-
-                val childUri2 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "file2.txt")
-                assertNotNull(childUri2)
-
-                val renamedUri = DocumentsContract.renameDocument(
-                    appContext.contentResolver, childUri2!!, "file1.txt")
-
-                assertNotEquals(childUri1, renamedUri)
-                assertEquals("file1(1).txt", renamedUri?.docBasename())
-            }
-        }
-    }
-
-    @Test
-    fun renameDocumentPosix() {
-        withValue(prefs::posixLikeSemantics, true) {
-            withValue(prefs::addFileExtension, false) {
-                // Rename file on top of directory
-                val childDirUri = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_DIR, "dir")
-                assertNotNull(childDirUri)
-
-                val childFileUri = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "file")
-                assertNotNull(childFileUri)
-
-                var renamedUri = DocumentsContract.renameDocument(
-                    appContext.contentResolver, childFileUri!!, "dir")
-                assertNull(renamedUri)
-
-                // Rename directory on top of file
-                renamedUri = DocumentsContract.renameDocument(
-                    appContext.contentResolver, childDirUri!!, "file")
-                assertNull(renamedUri)
-
-                // Rename file on top of file
-                val childFileUri2 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_TEXT, "file2")
-                assertNotNull(childFileUri2)
-
-                renamedUri = DocumentsContract.renameDocument(
-                    appContext.contentResolver, childFileUri2!!, "file")
-                assertEquals(childFileUri, renamedUri)
-
-                // Rename directory on top of directory
-                val childDirUri2 = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, MIME_DIR, "dir2")
-                assertNotNull(childDirUri2)
-
-                renamedUri = DocumentsContract.renameDocument(
-                    appContext.contentResolver, childDirUri2!!, "dir")
-                assertEquals(childDirUri, renamedUri)
-            }
+            assertNotEquals(childUri1, renamedUri)
+            assertEquals("file1(1).txt", renamedUri?.docBasename())
         }
     }
 
@@ -535,218 +453,47 @@ class RcloneProviderTest {
                 targetParent)
         }
 
-    private fun testCopyMoveAndroid(copy: Boolean) {
-        withValue(prefs::posixLikeSemantics, false) {
-            val file = File(rootDir, "file.txt").apply {
-                writeText("helloworld")
-            }
-            val dir = File(rootDir, "dir").apply {
-                assertTrue(mkdir())
-                assertTrue(File(this, "file").createNewFile())
-            }
+    private fun testCopyMove(copy: Boolean) {
+        val file = File(rootDir, "file.txt").apply {
+            writeText("helloworld")
+        }
+        val dir = File(rootDir, "dir").apply {
+            assertTrue(mkdir())
+            assertTrue(File(this, "file").createNewFile())
+        }
 
-            // Copy/move file
-            var newUri = copyMove(
-                docUriFromRoot("file.txt"),
-                docUriFromRoot(),
-                copy,
-            )
-            assertEquals("file(1).txt", newUri?.docBasename())
-            assertEquals("helloworld", File(rootDir, "file(1).txt").readText())
-            if (!copy) {
-                assertFalse(file.exists())
-            }
+        // Copy/move file
+        var newUri = copyMove(
+            docUriFromRoot("file.txt"),
+            docUriFromRoot(),
+            copy,
+        )
+        assertEquals("file(1).txt", newUri?.docBasename())
+        assertEquals("helloworld", File(rootDir, "file(1).txt").readText())
+        if (!copy) {
+            assertFalse(file.exists())
+        }
 
-            // Copy/move directory
-            newUri = copyMove(
-                docUriFromRoot("dir"),
-                docUriFromRoot(),
-                copy,
-            )
-            assertEquals("dir(1)", newUri?.docBasename())
-            assertTrue(File(File(rootDir, "dir(1)"), "file").exists())
-            if (!copy) {
-                assertFalse(dir.exists())
-            }
+        // Copy/move directory
+        newUri = copyMove(
+            docUriFromRoot("dir"),
+            docUriFromRoot(),
+            copy,
+        )
+        assertEquals("dir(1)", newUri?.docBasename())
+        assertTrue(File(File(rootDir, "dir(1)"), "file").exists())
+        if (!copy) {
+            assertFalse(dir.exists())
         }
     }
 
     @Test
-    fun copyDocumentAndroid() {
-        testCopyMoveAndroid(true)
+    fun copyDocument() {
+        testCopyMove(true)
     }
 
     @Test
-    fun moveDocumentAndroid() {
-        testCopyMoveAndroid(false)
-    }
-
-    private fun testCopyMovePosixTargetMissing(copy: Boolean) {
-        withValue(prefs::posixLikeSemantics, true) {
-            val sourceTree = File(rootDir, "source").apply {
-                assertTrue(mkdir())
-                assertTrue(File(this, "file").createNewFile())
-                File(this, "dir").apply {
-                    assertTrue(mkdir())
-                    assertTrue(File(this, "file").createNewFile())
-                }
-            }
-            val targetTree = File(rootDir, "target").apply {
-                assertTrue(mkdir())
-            }
-
-            try {
-                // Copy/move file to missing target
-                var newUri = copyMove(
-                    docUriFromRoot("source", "file"),
-                    docUriFromRoot("target"),
-                    copy,
-                )
-                assertEquals("file", newUri?.docBasename())
-                assertTrue(File(targetTree, "file").exists())
-                if (!copy) {
-                    assertFalse(File(sourceTree, "file").exists())
-                }
-
-                // Copy/move dir to missing target
-                newUri = copyMove(
-                    docUriFromRoot("source", "dir"),
-                    docUriFromRoot("target"),
-                    copy
-                )
-                assertEquals("dir", newUri?.docBasename())
-                assertTrue(File(File(targetTree, "dir"), "file").exists())
-                if (!copy) {
-                    assertFalse(File(sourceTree, "dir").exists())
-                }
-            } finally {
-                sourceTree.deleteRecursively()
-                targetTree.deleteRecursively()
-            }
-        }
-    }
-
-    private fun testCopyMovePosixTargetExists(copy: Boolean) {
-        withValue(prefs::posixLikeSemantics, true) {
-            val sourceTree = File(rootDir, "source").apply {
-                assertTrue(mkdir())
-                File(this, "file").apply {
-                    writeText("hello top level")
-                }
-                File(this, "dir").apply {
-                    assertTrue(mkdir())
-                    File(this, "file").apply {
-                        writeText("hello nested")
-                    }
-                    File(this, "file2").apply {
-                        writeText("hello nested 2")
-                    }
-                }
-            }
-            val targetTree = File(rootDir, "target").apply {
-                assertTrue(mkdir())
-                File(this, "file").apply {
-                    writeText("bye top level")
-                }
-                File(this, "dir").apply {
-                    assertTrue(mkdir())
-                    File(this, "file").apply {
-                        writeText("bye nested")
-                    }
-                }
-            }
-
-            try {
-                // Copy/move file to existing target
-                var newUri = copyMove(
-                    docUriFromRoot("source", "file"),
-                    docUriFromRoot("target"),
-                    copy,
-                )
-                assertEquals("file", newUri?.docBasename())
-                assertEquals("hello top level", File(targetTree, "file").readText())
-                if (!copy) {
-                    assertFalse(File(sourceTree, "file").exists())
-                }
-
-                // Copy/move dir to existing target, which should merge
-                newUri = copyMove(
-                    docUriFromRoot("source", "dir"),
-                    docUriFromRoot("target"),
-                    copy
-                )
-                assertEquals("dir", newUri?.docBasename())
-                assertEquals("hello nested", File(File(targetTree, "dir"), "file").readText())
-                assertEquals("hello nested 2", File(File(targetTree, "dir"), "file2").readText())
-                if (!copy) {
-                    assertFalse(File(sourceTree, "dir").exists())
-                }
-            } finally {
-                sourceTree.deleteRecursively()
-                targetTree.deleteRecursively()
-            }
-        }
-    }
-
-    private fun testCopyMovePosixTargetConflicts(copy: Boolean) {
-        withValue(prefs::posixLikeSemantics, true) {
-            val sourceTree = File(rootDir, "source").apply {
-                assertTrue(mkdir())
-                File(this, "a").apply {
-                    assertTrue(createNewFile())
-                }
-                File(this, "b").apply {
-                    assertTrue(mkdir())
-                    assertTrue(File(this, "file").createNewFile())
-                }
-            }
-            val targetTree = File(rootDir, "target").apply {
-                assertTrue(mkdir())
-                File(this, "a").apply {
-                    assertTrue(mkdir())
-                    assertTrue(File(this, "file").createNewFile())
-                }
-                File(this, "b").apply {
-                    assertTrue(createNewFile())
-                }
-            }
-
-            try {
-                // Copy/move file to existing directory
-                var newUri = copyMove(
-                    docUriFromRoot("source", "a"),
-                    docUriFromRoot("target"),
-                    copy,
-                )
-                assertNull(newUri)
-                assertTrue(File(targetTree, "a").isDirectory)
-
-                // Copy/move dir to existing file
-                newUri = copyMove(
-                    docUriFromRoot("source", "b"),
-                    docUriFromRoot("target"),
-                    copy
-                )
-                assertNull(newUri)
-                assertTrue(File(targetTree, "b").isFile)
-            } finally {
-                sourceTree.deleteRecursively()
-                targetTree.deleteRecursively()
-            }
-        }
-    }
-
-    @Test
-    fun copyDocumentPosix() {
-        testCopyMovePosixTargetMissing(true)
-        testCopyMovePosixTargetExists(true)
-        testCopyMovePosixTargetConflicts(true)
-    }
-
-    @Test
-    fun moveDocumentPosix() {
-        testCopyMovePosixTargetMissing(false)
-        testCopyMovePosixTargetExists(false)
-        testCopyMovePosixTargetConflicts(false)
+    fun moveDocument() {
+        testCopyMove(false)
     }
 }

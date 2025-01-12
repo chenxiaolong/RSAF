@@ -202,44 +202,38 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 }
             }
 
-        /** How to handle the block throwing [ErrnoException] with [OsConstants.EEXIST]. */
-        private enum class EExistHandling {
-            /** Don't treat it specially. */
-            None,
-            /** Treat it as success. */
-            Suppress,
-            /** Skip and retry with incremented counter. */
-            Skip,
+        /** Method for determining if there's a conflicting target path. */
+        private enum class ConflictDetection {
+            /** The path will be stat'ed to determine if it exists. */
+            STAT,
+            /**
+             * The operation will throw [ErrnoException] with [OsConstants.EEXIST] if the path
+             * already exists.
+             */
+            EEXIST,
         }
 
         /**
          * Find a unique document that does not exist by adding a counter suffix if needed.
          *
-         * @param skipStat If true, don't call stat on the target document to check if it exists.
-         * This is only useful is [eExistHandling] is set to [EExistHandling.Skip] or else no
-         * retries will ever occur.
+         * @param method The method for determining if the target path already exists.
          *
          * @throws IOException if [ErrnoException] with [OsConstants.EEXIST] is thrown every time
          */
-        private fun retryUnique(baseDocumentId: String, ext: String?, skipStat: Boolean = false,
-                                eExistHandling: EExistHandling = EExistHandling.None,
+        private fun retryUnique(baseDocumentId: String, ext: String?, method: ConflictDetection,
                                 block: (String) -> Unit): String {
             for (counter in 0 until ANDROID_SEMANTICS_ATTEMPTS) {
                 val documentId = pathWithCounter(baseDocumentId, ext, counter)
 
-                if (!skipStat && documentExists(documentId)) {
+                if (method == ConflictDetection.STAT && documentExists(documentId)) {
                     continue
                 }
 
                 try {
                     block(documentId)
                 } catch (e: ErrnoException) {
-                    if (e.errno == OsConstants.EEXIST) {
-                        when (eExistHandling) {
-                            EExistHandling.None -> throw e
-                            EExistHandling.Suppress -> {}
-                            EExistHandling.Skip -> continue
-                        }
+                    if (method == ConflictDetection.EEXIST && e.errno == OsConstants.EEXIST) {
+                        continue
                     } else {
                         throw e
                     }
@@ -630,13 +624,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     /**
      * Create a document.
      *
-     * With Android-like semantics, if the target already exists, a counter suffix is added to the
-     * display name to find a unique name. If a unique name cannot be found, the operation will
-     * fail.
-     *
-     * With POSIX-like semantics, if the target already exists and is the correct type (file vs.
-     * directory), then the file creation is treated as if it succeeded. This is similar to `touch`
-     * and `mkdir -p` behavior.
+     * If the target already exists, a counter suffix is added to the display name to find a unique
+     * name. If a unique name cannot be found, the operation will fail.
      *
      * @param displayName The filename. If [Preferences.addFileExtension] is enabled and the
      * specified MIME type is known to Android, the corresponding extension will be appended to the
@@ -669,17 +658,15 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val base = Rcbridge.rbPathJoin(parentDocumentId, baseName)
         val error = RbError()
 
-        val eExistHandling = if (prefs.posixLikeSemantics) {
-            EExistHandling.Suppress
+        // We can skip the stat and avoid TOCTOU when creating files because it properly fails with
+        // EEXIST. Unfortunately, this is not the case with mkdir.
+        val method = if (isDir) {
+            ConflictDetection.STAT
         } else {
-            EExistHandling.Skip
+            ConflictDetection.EEXIST
         }
-        // We can skip the stat and avoid TOCTOU when creating files with Android semantics because
-        // it properly fails with EEXIST. Unfortunately, this is not the case with mkdir.
-        // We can skip the stat and avoid TOCTOU because these calls will properly fail with EEXIST
-        val skipStat = prefs.posixLikeSemantics || !isDir
 
-        return retryUnique(base, ext, skipStat = skipStat, eExistHandling = eExistHandling) {
+        return retryUnique(base, ext, method) {
             if (isDir) {
                 if (!Rcbridge.rbDocMkdir(it, DIRECTORY_PERMS.toLong(), error)) {
                     // This is unfortunately racy, but we need to use a different error code than
@@ -707,16 +694,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     /**
      * Rename a document.
      *
-     * With Android-like semantics, if the target already exists, a counter suffix is added to the
-     * display name (before the extension, if any) to find a unique name. If a unique name cannot be
-     * found, the operation will fail. The check is done in a way that is subject to TOCTOU issues
-     * because the underlying rclone operation follows the POSIX semantics of overwriting a target
-     * that already exists.
-     *
-     * With POSIX-like semantics, if renaming a file on top of an existing file, then the existing
-     * file is overwritten. Otherwise, the operation will fail. This is similar to `rename(2)`
-     * behavior, except that the overwriting does not occur with empty directories and will instead
-     * fail with [OsConstants.EEXIST].
+     * If the target already exists, a counter suffix is added to the display name (before the
+     * extension, if any) to find a unique name. If a unique name cannot be found, the operation
+     * will fail. The check is done in a way that is subject to TOCTOU issues because the underlying
+     * rclone operation follows the POSIX semantics of overwriting a target that already exists.
      *
      * @param displayName The filename, including the extension (if any)
      * @throws IOException if the target already exists and adding a counter suffix was not
@@ -734,7 +715,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val base = Rcbridge.rbPathJoin(parent, baseName)
         val error = RbError()
 
-        return retryUnique(base, ext, skipStat = prefs.posixLikeSemantics) {
+        return retryUnique(base, ext, ConflictDetection.STAT) {
             if (!Rcbridge.rbDocRename(documentId, it, error)) {
                 throw error.toException("rbDocRename")
             }
@@ -778,13 +759,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     /**
      * Try to copy or move a document, attempting to ensure that the target is unique.
      *
-     * With Android-like semantics, if the target already exists, a counter suffix is added to the
-     * display name (before the extension, if any) to find a unique name. If a unique name cannot be
-     * found, the operation will fail. The check is done in a way that is subject to TOCTOU issues
-     * because the underlying rclone operation follows the POSIX-like semantics.
-     *
-     * With POSIX-like semantics, target files are overwritten and directories are merged. This is
-     * similar to `cp -rT` behavior.
+     * If the target already exists, a counter suffix is added to the display name (before the
+     * extension, if any) to find a unique name. If a unique name cannot be found, the operation
+     * will fail. The check is done in a way that is subject to TOCTOU issues because the underlying
+     * rclone operation overwrites conflicting files and merges directories.
      *
      * @throws IOException if the target already exists and adding a counter suffix was not
      * sufficient to find a unique target
@@ -796,7 +774,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val targetBaseDocumentId = Rcbridge.rbPathJoin(targetParentDocumentId, baseName)
         val error = RbError()
 
-        return retryUnique(targetBaseDocumentId, ext, skipStat = prefs.posixLikeSemantics) {
+        return retryUnique(targetBaseDocumentId, ext, ConflictDetection.STAT) {
             if (!Rcbridge.rbDocCopyOrMove(sourceDocumentId, it, copy, error)) {
                 throw error.toException("rbDocCopyOrMove")
             }

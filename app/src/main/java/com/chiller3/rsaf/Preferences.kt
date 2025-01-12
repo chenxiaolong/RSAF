@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -23,7 +23,6 @@ class Preferences(private val context: Context) {
         const val PREF_ALLOW_BACKUP = "allow_backup"
         const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
         const val PREF_LOCAL_STORAGE_ACCESS = "local_storage_access"
-        const val PREF_POSIX_LIKE_SEMANTICS = "posix_like_semantics"
         const val PREF_PRETEND_LOCAL = "pretend_local"
         const val PREF_REQUIRE_AUTH = "require_auth"
         const val PREF_INACTIVITY_TIMEOUT = "inactivity_timeout"
@@ -80,11 +79,6 @@ class Preferences(private val context: Context) {
     var addFileExtension: Boolean
         get() = prefs.getBoolean(PREF_ADD_FILE_EXTENSION, true)
         set(enabled) = prefs.edit { putBoolean(PREF_ADD_FILE_EXTENSION, enabled) }
-
-    /** Whether to use POSIX-like semantics instead of Android-like semantics. */
-    var posixLikeSemantics: Boolean
-        get() = prefs.getBoolean(PREF_POSIX_LIKE_SEMANTICS, false)
-        set(enabled) = prefs.edit { putBoolean(PREF_POSIX_LIKE_SEMANTICS, enabled) }
 
     /** Whether to falsely advertise all roots as local storage. */
     var pretendLocal: Boolean
