@@ -7,6 +7,13 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add support for resuming background uploads if RSAF crashes or is killed by Android ([PR #114])
+  * This process is automatically triggered after the device boots or when RSAF is opened.
+  * This also fixes an issue where after a crash, the first file operation on a remote will hang until all leftover pending uploads for that remote have completed.
+  * **NOTE**: Due to limitations with how rclone reports errors for asynchronous uploads, RSAF is no longer able to show a notification if a file upload fails. rclone automatically retries failed uploads and the files remain in the VFS cache until the upload succeeds.
+
 ### Version 2.5
 
 * Add support for generating thumbnails for audio, image, and video files ([PR #113])
@@ -298,3 +305,4 @@
 [PR #110]: https://github.com/chenxiaolong/RSAF/pull/110
 [PR #111]: https://github.com/chenxiaolong/RSAF/pull/111
 [PR #113]: https://github.com/chenxiaolong/RSAF/pull/113
+[PR #114]: https://github.com/chenxiaolong/RSAF/pull/114
