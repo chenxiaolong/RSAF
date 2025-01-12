@@ -16,6 +16,7 @@
 * Remove support for POSIX-like file operation semantics ([PR #115])
   * Android is generally not designed to behave this way and applications expect document providers, like RSAF, to behave like Android's builtin document provider for local files. There are no known client applications that explicitly made use of this feature.
 * Fix caching of golang dependencies in Github Actions CI builds ([PR #116])
+* Update rclone to 1.69.0 ([PR #117])
 
 ### Version 2.5
 
@@ -311,3 +312,4 @@
 [PR #114]: https://github.com/chenxiaolong/RSAF/pull/114
 [PR #115]: https://github.com/chenxiaolong/RSAF/pull/115
 [PR #116]: https://github.com/chenxiaolong/RSAF/pull/116
+[PR #117]: https://github.com/chenxiaolong/RSAF/pull/117
