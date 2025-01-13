@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.0
 
 * Add support for resuming background uploads if RSAF crashes or is killed by Android ([PR #114])
   * This process is automatically triggered after the device boots or when RSAF is opened.
