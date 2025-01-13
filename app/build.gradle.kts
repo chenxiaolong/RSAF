@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -239,6 +239,14 @@ interface InjectedExecOps {
     @get:Inject val execOps: ExecOperations
 }
 
+// https://github.com/gradle/gradle/issues/12247
+class LazyString(private val source: Lazy<String>) : java.io.Serializable {
+    constructor(source: () -> String) : this(lazy(source))
+    constructor(source: Provider<String>) : this(source::get)
+
+    override fun toString() = source.value
+}
+
 val rcbridge = tasks.register<Exec>("rcbridge") {
     val rcbridgeSrcDir = File(rootDir, "rcbridge")
     val tempDir = rcbridgeDir.map { it.dir("temp") }
@@ -252,7 +260,10 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
     inputs.properties(
         "android.defaultConfig.minSdk" to android.defaultConfig.minSdk,
         "android.namespace" to android.namespace,
-        "android.ndkDirectory" to android.ndkDirectory,
+        "androidComponents.sdkComponents.ndkDirectory" to
+                androidComponents.sdkComponents.ndkDirectory.map { it.asFile.absolutePath },
+        "androidComponents.sdkComponents.sdkDirectory" to
+                androidComponents.sdkComponents.sdkDirectory.map { it.asFile.absolutePath },
     )
     outputs.files(
         rcbridgeDir.map { it.file("rcbridge.aar") },
@@ -260,19 +271,21 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
     )
 
     executable = "gomobile"
-    args = listOf(
+    args(
         "bind",
         "-v",
-        "-o", rcbridgeAar.get().asFile.absolutePath,
+        "-o", LazyString(rcbridgeAar.map { it.asFile.absolutePath }),
         "-target=android",
         "-androidapi=${android.defaultConfig.minSdk}",
         "-javapkg=${android.namespace}.binding",
         ".",
     )
     environment(
-        "ANDROID_HOME" to android.sdkDirectory,
-        "ANDROID_NDK_HOME" to android.ndkDirectory,
-        "TMPDIR" to tempDir.get().asFile.absolutePath,
+        "ANDROID_HOME" to LazyString(androidComponents.sdkComponents.sdkDirectory
+            .map { it.asFile.absolutePath }),
+        "ANDROID_NDK_HOME" to LazyString(androidComponents.sdkComponents.ndkDirectory
+            .map { it.asFile.absolutePath }),
+        "TMPDIR" to LazyString(tempDir.map { it.asFile.absolutePath }),
     )
 
     if (!environment.containsKey("GOPROXY")) {
