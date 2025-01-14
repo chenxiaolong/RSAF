@@ -18,6 +18,10 @@ package rcbridge
 import (
 	// This package's init() MUST run first
 	_ "rcbridge/envhack"
+
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
 	"strconv"
 
 	"context"
@@ -31,12 +35,14 @@ import (
 	"time"
 
 	_ "golang.org/x/mobile/event/key"
+	"golang.org/x/sys/unix"
 
 	_ "github.com/rclone/rclone/backend/all"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/obscure"
+	"github.com/rclone/rclone/fs/fshttp"
 	"github.com/rclone/rclone/fs/fspath"
 	"github.com/rclone/rclone/fs/operations"
 	"github.com/rclone/rclone/fs/sync"
@@ -82,7 +88,148 @@ var (
 		fs.ErrorFileNameTooLong:        syscall.ENAMETOOLONG,
 		config.ErrorConfigFileNotFound: syscall.ENOENT,
 	}
+	caCertsLock goSync.Mutex
+	caCertsFile *os.File
 )
+
+// Load as many certificates from the PEM data as possible and return the last
+// error, if any.
+func parsePemCerts(data []byte) (certs []*x509.Certificate, err error) {
+	for len(data) > 0 {
+		var block *pem.Block
+		block, data = pem.Decode(data)
+		if block == nil {
+			break
+		}
+		if block.Type != "CERTIFICATE" || len(block.Headers) != 0 {
+			continue
+		}
+
+		certBytes := block.Bytes
+		cert, err := x509.ParseCertificate(certBytes)
+		if err != nil {
+			continue
+		}
+
+		certs = append(certs, cert)
+	}
+
+	return certs, err
+}
+
+// Generate a trust store in a single file that we can pass to rclone via its
+// CaCert config option. This is necessary because golang currently does not
+// support reading from the proper Android directories. We can't just set
+// SSL_CERT_DIR either, even with envhack, because the user CA directory
+// contains DER-encoded certificates and golang only supports loading PEM.
+//
+// Additionally, our implementation will not trust any system CA certificates
+// that the user explicitly disabled from Android's settings.
+//
+// https://github.com/golang/go/issues/71258
+func generateTrustStoreTempFile(tempDir string) *os.File {
+	systemDir := os.Getenv("ANDROID_ROOT")
+	dataDir := os.Getenv("ANDROID_DATA")
+
+	// This has never changed since 2011 when support for multi-user was added.
+	androidUid := os.Getuid() / 100_000
+
+	addDirs := []string{
+		"/apex/com.android.conscrypt/cacerts",
+		systemDir + "/etc/security/cacerts",
+		fmt.Sprintf("%s/misc/user/%d/cacerts-added", dataDir, androidUid),
+	}
+	removeDirs := []string{
+		fmt.Sprintf("%s/misc/user/%d/cacerts-removed", dataDir, androidUid),
+	}
+
+	// Map from the certificate hash to the certificate path.
+	caFiles := make(map[string]string)
+
+	// Add all available certificates.
+	for _, dir := range addDirs {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			fs.Logf(nil, "Failed to read directory: %v: %v", dir, err)
+			continue
+		}
+
+		for _, entry := range entries {
+			if !entry.Type().IsRegular() {
+				continue
+			}
+
+			name := entry.Name()
+
+			_, ok := caFiles[name]
+			if ok {
+				continue
+			}
+
+			caFiles[name] = dir + "/" + name
+		}
+	}
+
+	// And then remove all certificates disabled by the user.
+	for _, dir := range removeDirs {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			fs.Logf(nil, "Failed to read directory: %v: %v", dir, err)
+			continue
+		}
+
+		for _, entry := range entries {
+			if !entry.Type().IsRegular() {
+				continue
+			}
+
+			delete(caFiles, entry.Name())
+		}
+	}
+
+	fd, err := unix.Open(tempDir, unix.O_RDWR|unix.O_TMPFILE|unix.O_CLOEXEC, 0600)
+	if err != nil {
+		fs.Errorf(nil, "Failed to create temp file in: %v: %v", tempDir, err)
+		return nil
+	}
+
+	path := fmt.Sprintf("/proc/self/fd/%d", fd)
+	file := os.NewFile(uintptr(fd), path)
+
+	for _, path := range caFiles {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			fs.Logf(nil, "Failed to read file: %v: %v", path, err)
+			continue
+		}
+
+		certs, err := x509.ParseCertificates(data)
+		if err != nil {
+			certs, err = parsePemCerts(data)
+		}
+		if err != nil {
+			fs.Logf(nil, "Failed to load certs: %v: %v", path, err)
+			continue
+		}
+
+		for _, cert := range certs {
+			block := &pem.Block{
+				Type:  "CERTIFICATE",
+				Bytes: cert.Raw,
+			}
+
+			err = pem.Encode(file, block)
+			if err != nil {
+				fs.Logf(nil, "Failed to encode certificate: %v", cert)
+				continue
+			}
+		}
+	}
+
+	fs.Logf(nil, "Loaded %d certificates", len(caFiles))
+
+	return file
+}
 
 // Initialize global aspects of the library.
 func RbInit() {
@@ -91,6 +238,34 @@ func RbInit() {
 	// Don't allow interactive password prompts
 	ci := fs.GetConfig(context.Background())
 	ci.AskPassword = false
+}
+
+// Reload certificates from the system and user trust stores. This is thread
+// safe within RSAF, but may race with rclone's NewTransportCustom(). Note that
+// reloading is not that useful because the changes do not affect fshttp clients
+// that were previously created.
+func RbReloadCerts() bool {
+	caCertsLock.Lock()
+	defer caCertsLock.Unlock()
+
+	ci := fs.GetConfig(context.Background())
+	ci.CaCert = nil
+
+	if caCertsFile != nil {
+		caCertsFile.Close()
+		caCertsFile = nil
+	}
+
+	caCertsFile = generateTrustStoreTempFile(config.GetCacheDir())
+	if caCertsFile == nil {
+		return false
+	}
+
+	ci.CaCert = append(ci.CaCert, caCertsFile.Name())
+
+	fshttp.ResetTransport()
+
+	return true
 }
 
 // Clean up library resources.

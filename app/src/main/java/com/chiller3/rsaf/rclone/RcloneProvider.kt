@@ -5,8 +5,11 @@
 
 package com.chiller3.rsaf.rclone
 
+import android.content.BroadcastReceiver
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
@@ -21,6 +24,7 @@ import android.os.ProxyFileDescriptorCallback
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import android.security.KeyChain
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
@@ -310,6 +314,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     private val thumbnailTaskPool =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
+    private val trustStoreListener = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == KeyChain.ACTION_TRUST_STORE_CHANGED) {
+                Rcbridge.rbReloadCerts()
+            }
+        }
+    }
+
     private fun waitUntilUploadsDone(documentId: String) {
         val path = vfsPath(documentId)
 
@@ -358,8 +370,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         Os.setenv("XDG_CACHE_HOME", context.cacheDir.path, true)
 
         Rcbridge.rbInit()
+        Rcbridge.rbReloadCerts()
         RcloneConfig.init(context)
         updateRcloneVerbosity()
+
+        context.registerReceiver(
+            trustStoreListener,
+            IntentFilter(KeyChain.ACTION_TRUST_STORE_CHANGED),
+        )
 
         return true
     }
@@ -378,6 +396,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     override fun shutdown() {
+        context!!.unregisterReceiver(trustStoreListener)
+
         prefs.unregisterListener(this)
 
         thumbnailTaskPool.shutdown()
