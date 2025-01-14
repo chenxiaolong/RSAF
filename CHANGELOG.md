@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add support for user CA certificate trust store and Android 14+'s apex trust store ([Issue #119], [PR #120])
+
 ### Version 3.0
 
 * Add support for resuming background uploads if RSAF crashes or is killed by Android ([PR #114])
@@ -228,6 +232,7 @@
 [Issue #81]: https://github.com/chenxiaolong/RSAF/issues/81
 [Issue #93]: https://github.com/chenxiaolong/RSAF/issues/93
 [Issue #106]: https://github.com/chenxiaolong/RSAF/issues/106
+[Issue #119]: https://github.com/chenxiaolong/RSAF/issues/119
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -315,3 +320,4 @@
 [PR #116]: https://github.com/chenxiaolong/RSAF/pull/116
 [PR #117]: https://github.com/chenxiaolong/RSAF/pull/117
 [PR #118]: https://github.com/chenxiaolong/RSAF/pull/118
+[PR #120]: https://github.com/chenxiaolong/RSAF/pull/120
