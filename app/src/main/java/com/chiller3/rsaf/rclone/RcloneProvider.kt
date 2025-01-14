@@ -33,6 +33,7 @@ import android.util.Size
 import android.webkit.MimeTypeMap
 import com.chiller3.rsaf.AppLock
 import com.chiller3.rsaf.BuildConfig
+import com.chiller3.rsaf.Notifications
 import com.chiller3.rsaf.Permissions
 import com.chiller3.rsaf.Preferences
 import com.chiller3.rsaf.R
@@ -297,6 +298,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     private lateinit var prefs: Preferences
+    private lateinit var notifications: Notifications
     private val ioThread = HandlerThread(javaClass.simpleName).apply { start() }
     private val ioHandler = Handler(ioThread.looper)
     // Because it is impossible to make close() blocking, we can't force the client app to wait for
@@ -360,6 +362,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         prefs = Preferences(context)
         prefs.registerListener(this)
+
+        notifications = Notifications(context)
 
         // Some of the rclone backend packages' init() functions set default values based on the
         // value of config.GetCacheDir(). However, there's no way to call config.SetCacheDir() early
@@ -913,6 +917,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
                 // This method is not supposed to throw.
                 Log.w(TAG, "Error when closing file", exception)
+
+                // Don't notify if the file is read only. There would have been no data loss anyway.
+                if (isWrite) {
+                    notifications.notifyBackgroundUploadFailed(
+                        documentId,
+                        exception.toSingleLineString(),
+                    )
+                }
             }
 
             markUnused()

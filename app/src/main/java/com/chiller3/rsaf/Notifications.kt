@@ -26,6 +26,7 @@ class Notifications(private val context: Context) {
         const val ID_BACKGROUND_UPLOADS = -2
     }
 
+    private val prefs = Preferences(context)
     private val notificationManager = context.getSystemService(NotificationManager::class.java)
 
     /** Create a low priority notification channel for the open files notification. */
@@ -126,5 +127,31 @@ class Notifications(private val context: Context) {
 
             build()
         }
+    }
+
+    fun notifyBackgroundUploadFailed(documentId: String, errorMsg: String) {
+        val notificationId = prefs.nextNotificationId
+
+        val notification = Notification.Builder(context, CHANNEL_ID_FAILURE).run {
+            val text = buildString {
+                val errorMsgTrimmed = errorMsg.trim()
+                if (errorMsgTrimmed.isNotBlank()) {
+                    append(errorMsgTrimmed)
+                }
+                append("\n\n")
+                append(documentId)
+            }
+
+            setContentTitle(context.getString(R.string.notification_background_upload_failed_title))
+            if (text.isNotBlank()) {
+                setContentText(text)
+                style = Notification.BigTextStyle().bigText(text)
+            }
+            setSmallIcon(R.drawable.ic_notifications)
+
+            build()
+        }
+
+        notificationManager.notify(notificationId, notification)
     }
 }

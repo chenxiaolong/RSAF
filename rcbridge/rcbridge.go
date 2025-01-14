@@ -587,15 +587,17 @@ func getVfs(remote string) (*vfs.VFS, error) {
 		opts.ChunkSize = 2 * fs.Mebi
 		opts.ChunkSizeLimit = 8 * fs.Mebi
 
-		// Asynchronously upload on file close. Due to how Android's virtual FD
-		// mechanism works, the close operation always completes immediately
-		// from the client's point of view. BackgroundUploadMonitorService will
-		// keep the process alive until the upload completes. This also prevents
-		// this function from blocking when rclone starts up with a dity cache.
+		// This is initially asynchronous so that vfs.New() -> vfs.Item.reload()
+		// does not block if there are dirty items in the VFS cache.
 		opts.WriteBack = fs.Duration(1 * time.Millisecond)
 
 		v = vfs.New(f, &opts)
 		vfsCache[remote] = v
+
+		// Then we make Close() synchronous again because we rely on this for
+		// the in-use file tracker in RcloneProvider and also for upload error
+		// reporting.
+		v.Opt.WriteBack = 0
 	}
 
 	return v, nil
