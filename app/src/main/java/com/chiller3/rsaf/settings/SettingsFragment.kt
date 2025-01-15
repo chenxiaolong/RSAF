@@ -38,6 +38,7 @@ import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.TextInputDialogFragment
+import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
 import com.chiller3.rsaf.extension.formattedString
 import com.chiller3.rsaf.rclone.BackgroundUploadMonitorService
 import com.chiller3.rsaf.rclone.RcloneConfig
@@ -54,6 +55,8 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         private val TAG_ADD_REMOTE_NAME = "$TAG.add_remote_name"
         private val TAG_IMPORT_EXPORT_PASSWORD = "$TAG.import_export_password"
+
+        private val TAG_IMPORT_CONFIRM = "$TAG.import_confirm"
 
         fun documentsUiIntent(remote: String): Intent =
             Intent(Intent.ACTION_VIEW).apply {
@@ -266,6 +269,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         for (key in arrayOf(
             TAG_ADD_REMOTE_NAME,
             TAG_IMPORT_EXPORT_PASSWORD,
+            TAG_IMPORT_CONFIRM,
             InteractiveConfigurationDialogFragment.TAG,
             InactivityTimeoutDialogFragment.TAG,
         )) {
@@ -350,6 +354,11 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                     viewModel.cancelPendingImportExport()
                 }
             }
+            TAG_IMPORT_CONFIRM -> {
+                if (bundle.getBoolean(VfsCacheDeletionDialogFragment.RESULT_SUCCESS)) {
+                    confirmImport(true)
+                }
+            }
             InteractiveConfigurationDialogFragment.TAG -> {
                 viewModel.interactiveConfigurationCompleted(
                     bundle.getString(InteractiveConfigurationDialogFragment.RESULT_REMOTE)!!,
@@ -387,9 +396,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 return true
             }
             preference === prefImportConfiguration -> {
-                // We intentionally do not filter for specific MIME types because document providers
-                // are inconsistent in what MIME types they report for .conf files.
-                requestSafImportConfiguration.launch(arrayOf("*/*"))
+                confirmImport(false)
                 return true
             }
             preference === prefExportConfiguration -> {
@@ -483,6 +490,18 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 }
             })
             .show()
+    }
+
+    private fun confirmImport(force: Boolean) {
+        if (!force && viewModel.isAnyVfsCacheDirty) {
+            VfsCacheDeletionDialogFragment.newInstance(
+                getString(R.string.dialog_import_password_title),
+            ).show(parentFragmentManager.beginTransaction(), TAG_IMPORT_CONFIRM)
+        } else {
+            // We intentionally do not filter for specific MIME types because document providers
+            // are inconsistent in what MIME types they report for .conf files.
+            requestSafImportConfiguration.launch(arrayOf("*/*"))
+        }
     }
 
     private fun editRemote(remote: String) {

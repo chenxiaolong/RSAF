@@ -341,8 +341,7 @@ func assignError(errOut *RbError, err error, fallback syscall.Errno) {
 }
 
 // Clear fs and vfs instances associated with the specified remote. The vfs
-// instance, if any, will be shut down with a short interval to wait for pending
-// writes.
+// instances, if any, will be shut down immediately.
 func RbCacheClearRemote(remote string) {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
@@ -350,9 +349,8 @@ func RbCacheClearRemote(remote string) {
 	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
 		v, ok := vfsCache[remote]
 		if ok {
-			v.WaitForWriters(1 * time.Minute)
-			v.CleanUp()
 			v.Shutdown()
+			v.CleanUp()
 			delete(vfsCache, remote)
 		}
 	}
@@ -360,17 +358,16 @@ func RbCacheClearRemote(remote string) {
 	cache.ClearConfig(remote)
 }
 
-// Clear cached fs and vfs instances. All vfs instances will be shut down with a
-// short interval to wait for pending writes.
+// Clear cached fs and vfs instances. All vfs instances will be shut down
+// immediately.
 func RbCacheClearAll() {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
 	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
 		for k := range vfsCache {
-			vfsCache[k].WaitForWriters(1 * time.Minute)
-			vfsCache[k].CleanUp()
 			vfsCache[k].Shutdown()
+			vfsCache[k].CleanUp()
 			delete(vfsCache, k)
 		}
 	}

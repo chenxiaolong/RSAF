@@ -11,7 +11,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.text.format.Formatter
-import com.chiller3.rsaf.rclone.BackgroundUploadMonitorService
+import com.chiller3.rsaf.rclone.VfsCache
 import kotlin.math.roundToInt
 
 class Notifications(private val context: Context) {
@@ -92,9 +92,7 @@ class Notifications(private val context: Context) {
         }
     }
 
-    fun createBackgroundUploadsNotification(
-        progress: BackgroundUploadMonitorService.Progress,
-    ): Notification {
+    fun createBackgroundUploadsNotification(progress: VfsCache.Progress): Notification {
         val title = context.resources.getQuantityString(
             R.plurals.notification_background_uploads_in_progress_title,
             progress.count,

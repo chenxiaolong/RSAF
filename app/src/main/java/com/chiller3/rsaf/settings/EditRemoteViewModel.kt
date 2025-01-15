@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -12,6 +12,7 @@ import com.chiller3.rsaf.binding.rcbridge.RbRemoteFeaturesResult
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
+import com.chiller3.rsaf.rclone.VfsCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,9 +21,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 data class EditRemoteActivityActions(
-    val refreshRoots: Boolean,
-    val editNewRemote: String?,
-    val finish: Boolean,
+    val refreshRoots: Boolean = false,
+    val editNewRemote: String? = null,
+    val finish: Boolean = false,
 )
 
 data class RemoteConfigState(
@@ -39,7 +40,13 @@ class EditRemoteViewModel : ViewModel() {
         private val TAG = EditRemoteViewModel::class.java.simpleName
     }
 
-    private lateinit var remote: String
+    private lateinit var _remote: String
+    var remote: String
+        get() = _remote
+        set(value) {
+            _remote = value
+            refreshRemotes(false)
+        }
 
     private val _remotes = MutableStateFlow<Map<String, Map<String, String>>>(emptyMap())
     val remotes = _remotes.asStateFlow()
@@ -50,13 +57,8 @@ class EditRemoteViewModel : ViewModel() {
     private val _alerts = MutableStateFlow<List<EditRemoteAlert>>(emptyList())
     val alerts = _alerts.asStateFlow()
 
-    private val _activityActions = MutableStateFlow(EditRemoteActivityActions(false, null, false))
+    private val _activityActions = MutableStateFlow(EditRemoteActivityActions())
     val activityActions = _activityActions.asStateFlow()
-
-    fun setRemote(remote: String) {
-        this.remote = remote
-        refreshRemotes(false)
-    }
 
     private suspend fun refreshRemotesInternal(force: Boolean) {
         try {
@@ -119,6 +121,10 @@ class EditRemoteViewModel : ViewModel() {
         }
     }
 
+    // This performs I/O, but only with the in-memory procfs.
+    val isVfsCacheDirty: Boolean
+        get() = VfsCache.guessProgress(remote, false).count > 0
+
     private fun setCustomOpt(
         remote: String,
         opt: String,
@@ -139,32 +145,32 @@ class EditRemoteViewModel : ViewModel() {
         }
     }
 
-    fun setExternalAccess(remote: String, allow: Boolean) {
+    fun setExternalAccess(allow: Boolean) {
         setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED, !allow) {
             _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 
-    fun setLockedAccess(remote: String, allow: Boolean) {
+    fun setLockedAccess(allow: Boolean) {
         setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED, !allow)
     }
 
-    fun setDynamicShortcut(remote: String, enabled: Boolean) {
+    fun setDynamicShortcut(enabled: Boolean) {
         setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT, enabled)
     }
 
-    fun setVfsCaching(remote: String, enabled: Boolean) {
+    fun setVfsCaching(enabled: Boolean) {
         setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_VFS_CACHING, enabled)
     }
 
-    fun setReportUsage(remote: String, enabled: Boolean) {
+    fun setReportUsage(enabled: Boolean) {
         setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_REPORT_USAGE, enabled) {
             _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 
-    private fun copyRemote(oldRemote: String, newRemote: String, delete: Boolean) {
-        if (oldRemote == newRemote) {
+    private fun copyRemote(newRemote: String, delete: Boolean) {
+        if (remote == newRemote) {
             throw IllegalStateException("Old and new remote names are the same")
         }
 
@@ -177,9 +183,9 @@ class EditRemoteViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    RcloneConfig.copyRemote(oldRemote, newRemote)
+                    RcloneConfig.copyRemote(remote, newRemote)
                     if (delete) {
-                        RcloneRpc.deleteRemote(oldRemote)
+                        RcloneRpc.deleteRemote(remote)
                     }
                 }
                 refreshRemotesInternal(true)
@@ -192,21 +198,21 @@ class EditRemoteViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 val action = if (delete) { "rename" } else { "duplicate" }
-                Log.e(TAG, "Failed to $action remote $oldRemote to $newRemote", e)
-                _alerts.update { it + failure(oldRemote, newRemote, e.toString()) }
+                Log.e(TAG, "Failed to $action remote $remote to $newRemote", e)
+                _alerts.update { it + failure(remote, newRemote, e.toString()) }
             }
         }
     }
 
-    fun renameRemote(oldRemote: String, newRemote: String) {
-        copyRemote(oldRemote, newRemote, true)
+    fun renameRemote(newRemote: String) {
+        copyRemote(newRemote, true)
     }
 
-    fun duplicateRemote(oldRemote: String, newRemote: String) {
-        copyRemote(oldRemote, newRemote, false)
+    fun duplicateRemote(newRemote: String) {
+        copyRemote(newRemote, false)
     }
 
-    fun deleteRemote(remote: String) {
+    fun deleteRemote() {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -233,6 +239,6 @@ class EditRemoteViewModel : ViewModel() {
     }
 
     fun activityActionCompleted() {
-        _activityActions.update { EditRemoteActivityActions(false, null, false) }
+        _activityActions.update { EditRemoteActivityActions() }
     }
 }

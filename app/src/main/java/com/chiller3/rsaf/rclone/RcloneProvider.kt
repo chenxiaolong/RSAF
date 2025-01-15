@@ -376,6 +376,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         Rcbridge.rbInit()
         Rcbridge.rbReloadCerts()
         RcloneConfig.init(context)
+        VfsCache.init(context)
         updateRcloneVerbosity()
 
         context.registerReceiver(

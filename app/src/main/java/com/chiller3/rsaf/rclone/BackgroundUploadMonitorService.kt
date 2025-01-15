@@ -13,18 +13,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.os.ParcelFileDescriptor
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
 import android.util.Log
 import androidx.annotation.UiThread
 import androidx.core.app.ServiceCompat
 import com.chiller3.rsaf.Notifications
-import com.chiller3.rsaf.binding.rcbridge.RbError
-import com.chiller3.rsaf.binding.rcbridge.Rcbridge
-import com.chiller3.rsaf.extension.toException
-import java.io.File
 
 class BackgroundUploadMonitorService : Service() {
     companion object {
@@ -54,18 +46,7 @@ class BackgroundUploadMonitorService : Service() {
                 context.startForegroundService(createIntent(context, true))
             }
         }
-
-        private fun getFdPosAndSize(fd: Int): Pair<Long, Long> =
-            // We dup() the fd to ensure that the pos and size at least refer to the same file.
-            ParcelFileDescriptor.fromFd(fd).use { pfd ->
-                val pos = Os.lseek(pfd.fileDescriptor, 0, OsConstants.SEEK_CUR)
-                val size = pfd.statSize
-
-                pos to size
-            }
     }
-
-    data class Progress(val count: Int, val bytesCurrent: Long, val bytesTotal: Long)
 
     private sealed interface MonitorState {
         data object Inactive : MonitorState
@@ -78,37 +59,22 @@ class BackgroundUploadMonitorService : Service() {
     }
 
     private lateinit var notifications: Notifications
-    private lateinit var dataDataDir: File
-    private lateinit var vfsCacheDir: File
     private val monitorThread = Thread(::monitorVfsCache)
     private var monitorState: MonitorState = MonitorState.Inactive
         set(state) {
             Log.d(TAG, "New monitor state: $state")
             field = state
         }
-    private var monitorProgress = Progress(0, 0L, 0L)
+    private var monitorProgress = VfsCache.Progress(0, 0L, 0L)
     private var monitorScanRemotes = false
     private val handler = Handler(Looper.getMainLooper())
     // We need to keep a reference the same runnable for cancelling a delayed execution.
     private val stopNowRunnable = Runnable(::stopNow)
 
-    private fun normalizePath(path: File): File {
-        // Can't use relativeToOrNull() because it can add `..` components.
-        return if (path.startsWith(dataDataDir)) {
-            val relPath = path.relativeTo(dataDataDir)
-            File(dataDir, relPath.path)
-        } else {
-            path
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
 
         notifications = Notifications(this)
-
-        dataDataDir = File("/data/data", packageName)
-        vfsCacheDir = normalizePath(File(cacheDir, "rclone/vfs"))
 
         monitorThread.start()
     }
@@ -158,79 +124,6 @@ class BackgroundUploadMonitorService : Service() {
         ServiceCompat.startForeground(this, Notifications.ID_BACKGROUND_UPLOADS, notification, type)
     }
 
-    private fun guessVfsCacheProgress(): Progress {
-        val procfsFd = File("/proc/self/fd")
-
-        var count = 0
-        var totalPos = 0L
-        var totalSize = 0L
-
-        for (file in procfsFd.listFiles() ?: emptyArray()) {
-            val fd = file.name.toInt()
-
-            val target = try {
-                normalizePath(File(Os.readlink(file.toString())))
-            } catch (_: ErrnoException) {
-                continue
-            }
-
-            if (!target.startsWith(vfsCacheDir)) {
-                continue
-            }
-
-            val (filePos, fileSize) = try {
-                getFdPosAndSize(fd)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to query fd $fd", e)
-                continue
-            }
-
-            count += 1
-            totalPos += filePos
-            totalSize += fileSize
-        }
-
-        return Progress(count, totalPos, totalSize)
-    }
-
-    private fun initVfsCacheRemotes() {
-        val neededRemotes = hashSetOf<String>()
-
-        // Only scan remotes that have things in their cache. We don't need to do a recursive
-        // scan because rclone automatically removes empty cache directories.
-        //
-        // NOTE: This is imperfect when using aliases. Specifically with SFTP, the cache paths are
-        // normally relative to the home directory. However, if an alias specifies an absolute path,
-        // then the cache files are relative to the root directory. We have no way to know which is
-        // correct when resuming uploads. Since information about aliases is lost in the VFS cache
-        // directory structure, we always initialize the VFS for the underlying remote. Absolute
-        // file paths will be uploaded to the home directory instead.
-        for (remoteDir in vfsCacheDir.listFiles() ?: emptyArray()) {
-            if ((remoteDir.list()?.size ?: 0) > 0) {
-                neededRemotes.add(remoteDir.name)
-            }
-        }
-
-        Log.d(TAG, "Initializing VFS for remotes: $neededRemotes")
-
-        for ((remote, config) in RcloneRpc.remotes) {
-            if (!neededRemotes.remove(remote)) {
-                continue
-            } else if (!RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_VFS_CACHING)) {
-                // The user will have to re-enable VFS caching to upload these.
-                continue
-            }
-
-            val error = RbError()
-            if (!Rcbridge.rbDocVfsInit("$remote:", error)) {
-                val e = error.toException("rbDocVfsInit")
-                Log.w(TAG, "Failed to initialize VFS for remote: $remote", e)
-            }
-        }
-
-        Log.d(TAG, "Uninitialized remotes: $neededRemotes")
-    }
-
     private fun monitorVfsCache() {
         while (true) {
             val scan = synchronized(monitorThread) {
@@ -239,10 +132,10 @@ class BackgroundUploadMonitorService : Service() {
                 scan
             }
             if (scan) {
-                initVfsCacheRemotes()
+                VfsCache.initDirtyRemotes()
             }
 
-            val progress = guessVfsCacheProgress()
+            val progress = VfsCache.guessProgress(null, true)
 
             synchronized(monitorThread) {
                 var shouldNotify = false

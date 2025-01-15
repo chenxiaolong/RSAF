@@ -26,6 +26,7 @@ import com.chiller3.rsaf.R
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
+import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
 import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.settings.SettingsFragment.Companion.documentsUiIntent
@@ -39,9 +40,11 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         internal const val ARG_REMOTE = "remote"
 
-        private val TAG_EDIT_REMOTE = "$TAG.edit_remote"
         private val TAG_RENAME_REMOTE = "$TAG.rename_remote"
         private val TAG_DUPLICATE_REMOTE = "$TAG.duplicate_remote"
+
+        private val TAG_RENAME_REMOTE_CONFIRM = "$TAG.rename_remote_confirm"
+        private val TAG_DELETE_REMOTE_CONFIRM = "$TAG.delete_remote_confirm"
     }
 
     override val requestTag: String = TAG
@@ -59,8 +62,6 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefDynamicShortcut: SwitchPreferenceCompat
     private lateinit var prefVfsCaching: SwitchPreferenceCompat
     private lateinit var prefReportUsage: SwitchPreferenceCompat
-
-    private lateinit var remote: String
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_edit_remote, rootKey)
@@ -97,8 +98,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefReportUsage = findPreference(Preferences.PREF_REPORT_USAGE)!!
         prefReportUsage.onPreferenceChangeListener = this
 
-        remote = requireArguments().getString(ARG_REMOTE)!!
-        viewModel.setRemote(remote)
+        viewModel.remote = requireArguments().getString(ARG_REMOTE)!!
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -179,7 +179,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                         ))
                     }
                     if (it.finish) {
-                        Log.d(TAG, "Finishing edit remote activity for: $remote")
+                        Log.d(TAG, "Finishing edit remote activity for: ${viewModel.remote}")
                         requireActivity().finish()
                     }
                     viewModel.activityActionCompleted()
@@ -188,9 +188,10 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         }
 
         for (key in arrayOf(
-            TAG_EDIT_REMOTE,
             TAG_RENAME_REMOTE,
             TAG_DUPLICATE_REMOTE,
+            TAG_RENAME_REMOTE_CONFIRM,
+            TAG_DELETE_REMOTE_CONFIRM,
             InteractiveConfigurationDialogFragment.TAG,
         )) {
             parentFragmentManager.setFragmentResultListener(key, this, this)
@@ -205,14 +206,24 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                 if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
                     val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
 
-                    viewModel.renameRemote(remote, newRemote)
+                    viewModel.renameRemote(newRemote)
                 }
             }
             TAG_DUPLICATE_REMOTE -> {
                 if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
                     val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
 
-                    viewModel.duplicateRemote(remote, newRemote)
+                    viewModel.duplicateRemote(newRemote)
+                }
+            }
+            TAG_RENAME_REMOTE_CONFIRM -> {
+                if (bundle.getBoolean(VfsCacheDeletionDialogFragment.RESULT_SUCCESS)) {
+                    confirmRenameDialog(true)
+                }
+            }
+            TAG_DELETE_REMOTE_CONFIRM -> {
+                if (bundle.getBoolean(VfsCacheDeletionDialogFragment.RESULT_SUCCESS)) {
+                    confirmDelete(true)
                 }
             }
             InteractiveConfigurationDialogFragment.TAG -> {
@@ -226,33 +237,29 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     override fun onPreferenceClick(preference: Preference): Boolean {
         when (preference) {
             prefOpenRemote -> {
-                startActivity(documentsUiIntent(remote))
+                startActivity(documentsUiIntent(viewModel.remote))
                 return true
             }
             prefConfigureRemote -> {
-                InteractiveConfigurationDialogFragment.newInstance(remote, false)
+                InteractiveConfigurationDialogFragment.newInstance(viewModel.remote, false)
                     .show(parentFragmentManager.beginTransaction(),
                         InteractiveConfigurationDialogFragment.TAG)
                 return true
             }
             prefRenameRemote -> {
-                RemoteNameDialogFragment.newInstance(
-                    requireContext(),
-                    RemoteNameDialogAction.Rename(remote),
-                    viewModel.remotes.value.keys.toTypedArray(),
-                ).show(parentFragmentManager.beginTransaction(), TAG_RENAME_REMOTE)
+                confirmRenameDialog(false)
                 return true
             }
             prefDuplicateRemote -> {
                 RemoteNameDialogFragment.newInstance(
                     requireContext(),
-                    RemoteNameDialogAction.Duplicate(remote),
+                    RemoteNameDialogAction.Duplicate(viewModel.remote),
                     viewModel.remotes.value.keys.toTypedArray(),
                 ).show(parentFragmentManager.beginTransaction(), TAG_DUPLICATE_REMOTE)
                 return true
             }
             prefDeleteRemote -> {
-                viewModel.deleteRemote(remote)
+                confirmDelete(false)
                 return true
             }
         }
@@ -265,19 +272,19 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         when (preference) {
             prefAllowExternalAccess -> {
-                viewModel.setExternalAccess(remote, newValue as Boolean)
+                viewModel.setExternalAccess(newValue as Boolean)
             }
             prefAllowLockedAccess -> {
-                viewModel.setLockedAccess(remote, newValue as Boolean)
+                viewModel.setLockedAccess(newValue as Boolean)
             }
             prefDynamicShortcut -> {
-                viewModel.setDynamicShortcut(remote, newValue as Boolean)
+                viewModel.setDynamicShortcut(newValue as Boolean)
             }
             prefVfsCaching -> {
-                viewModel.setVfsCaching(remote, newValue as Boolean)
+                viewModel.setVfsCaching(newValue as Boolean)
             }
             prefReportUsage -> {
-                viewModel.setReportUsage(remote, newValue as Boolean)
+                viewModel.setReportUsage(newValue as Boolean)
             }
         }
 
@@ -309,6 +316,30 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                 }
             })
             .show()
+    }
+
+    private fun confirmRenameDialog(force: Boolean) {
+        if (!force && viewModel.isVfsCacheDirty) {
+            VfsCacheDeletionDialogFragment.newInstance(
+                getString(R.string.dialog_rename_remote_title, viewModel.remote),
+            ).show(parentFragmentManager.beginTransaction(), TAG_RENAME_REMOTE_CONFIRM)
+        } else {
+            RemoteNameDialogFragment.newInstance(
+                requireContext(),
+                RemoteNameDialogAction.Rename(viewModel.remote),
+                viewModel.remotes.value.keys.toTypedArray(),
+            ).show(parentFragmentManager.beginTransaction(), TAG_RENAME_REMOTE)
+        }
+    }
+
+    private fun confirmDelete(force: Boolean) {
+        if (!force && viewModel.isVfsCacheDirty) {
+            VfsCacheDeletionDialogFragment.newInstance(
+                getString(R.string.dialog_delete_remote_title, viewModel.remote),
+            ).show(parentFragmentManager.beginTransaction(), TAG_DELETE_REMOTE_CONFIRM)
+        } else {
+            viewModel.deleteRemote()
+        }
     }
 
     private fun updateShortcuts(remotes: Map<String, Map<String, String>>) {

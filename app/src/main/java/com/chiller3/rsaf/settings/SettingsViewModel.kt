@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.chiller3.rsaf.Logcat
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
+import com.chiller3.rsaf.rclone.VfsCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,6 +94,10 @@ class SettingsViewModel : ViewModel() {
     fun remoteEdited() {
         refreshRemotes()
     }
+
+    // This performs I/O, but only with the in-memory procfs.
+    val isAnyVfsCacheDirty: Boolean
+        get() = VfsCache.guessProgress(null, false).count > 0
 
     fun startImportExport(mode: ImportExportMode, uri: Uri) {
         if (importExportState.value != null) {
