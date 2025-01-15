@@ -13,6 +13,8 @@
 * Make file close operations synchronous after VFS initialization ([PR #121])
   * This fixes a regression caused by [PR #114] in version 3.0 that reintroduced [Issue #81].
   * This allows RSAF to report upload errors in most cases again.
+* Ask for confirmation before performing destructive operations on a remote that has pending uploads ([PR #123])
+  * This includes deleting a remote, renaming a remote, or importing a config file.
 
 ### Version 3.0
 
@@ -325,3 +327,4 @@
 [PR #118]: https://github.com/chenxiaolong/RSAF/pull/118
 [PR #120]: https://github.com/chenxiaolong/RSAF/pull/120
 [PR #121]: https://github.com/chenxiaolong/RSAF/pull/121
+[PR #123]: https://github.com/chenxiaolong/RSAF/pull/123
