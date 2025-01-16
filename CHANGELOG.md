@@ -9,7 +9,7 @@
 
 ### Unreleased
 
-* Add support for user CA certificate trust store and Android 14+'s apex trust store ([Issue #119], [PR #120])
+* Add support for user CA certificate trust store and Android 14+'s apex trust store ([Issue #119], [PR #120], [PR #125])
 * Make file close operations synchronous after VFS initialization ([PR #121])
   * This fixes a regression caused by [PR #114] in version 3.0 that reintroduced [Issue #81].
   * This allows RSAF to report upload errors in most cases again.
@@ -328,3 +328,4 @@
 [PR #120]: https://github.com/chenxiaolong/RSAF/pull/120
 [PR #121]: https://github.com/chenxiaolong/RSAF/pull/121
 [PR #123]: https://github.com/chenxiaolong/RSAF/pull/123
+[PR #125]: https://github.com/chenxiaolong/RSAF/pull/125
