@@ -19,6 +19,7 @@ import (
 	// This package's init() MUST run first
 	_ "rcbridge/envhack"
 
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -35,7 +36,6 @@ import (
 	"time"
 
 	_ "golang.org/x/mobile/event/key"
-	"golang.org/x/sys/unix"
 
 	_ "github.com/rclone/rclone/backend/all"
 	"github.com/rclone/rclone/fs"
@@ -89,7 +89,7 @@ var (
 		config.ErrorConfigFileNotFound: syscall.ENOENT,
 	}
 	caCertsLock goSync.Mutex
-	caCertsFile *os.File
+	caCertsPool *x509.CertPool
 )
 
 // Load as many certificates from the PEM data as possible and return the last
@@ -117,17 +117,17 @@ func parsePemCerts(data []byte) (certs []*x509.Certificate, err error) {
 	return certs, err
 }
 
-// Generate a trust store in a single file that we can pass to rclone via its
-// CaCert config option. This is necessary because golang currently does not
-// support reading from the proper Android directories. We can't just set
-// SSL_CERT_DIR either, even with envhack, because the user CA directory
+// Generate a trust store pool that we can pass to rclone via the per-request
+// hook we add in our rclone fork. This is necessary because golang currently
+// does not support reading from the proper Android directories. We can't just
+// set SSL_CERT_DIR either, even with envhack, because the user CA directory
 // contains DER-encoded certificates and golang only supports loading PEM.
 //
 // Additionally, our implementation will not trust any system CA certificates
 // that the user explicitly disabled from Android's settings.
 //
 // https://github.com/golang/go/issues/71258
-func generateTrustStoreTempFile(tempDir string) *os.File {
+func generateTrustStorePool() *x509.CertPool {
 	systemDir := os.Getenv("ANDROID_ROOT")
 	dataDir := os.Getenv("ANDROID_DATA")
 
@@ -187,14 +187,7 @@ func generateTrustStoreTempFile(tempDir string) *os.File {
 		}
 	}
 
-	fd, err := unix.Open(tempDir, unix.O_RDWR|unix.O_TMPFILE|unix.O_CLOEXEC, 0600)
-	if err != nil {
-		fs.Errorf(nil, "Failed to create temp file in: %v: %v", tempDir, err)
-		return nil
-	}
-
-	path := fmt.Sprintf("/proc/self/fd/%d", fd)
-	file := os.NewFile(uintptr(fd), path)
+	pool := x509.NewCertPool()
 
 	for _, path := range caFiles {
 		data, err := os.ReadFile(path)
@@ -213,22 +206,21 @@ func generateTrustStoreTempFile(tempDir string) *os.File {
 		}
 
 		for _, cert := range certs {
-			block := &pem.Block{
-				Type:  "CERTIFICATE",
-				Bytes: cert.Raw,
-			}
-
-			err = pem.Encode(file, block)
-			if err != nil {
-				fs.Logf(nil, "Failed to encode certificate: %v", cert)
-				continue
-			}
+			pool.AddCert(cert)
 		}
 	}
 
 	fs.Logf(nil, "Loaded %d certificates", len(caFiles))
 
-	return file
+	return pool
+}
+
+// Set the trusted CA certificates on every HTTP request.
+func perRequestHook(config *tls.Config) {
+	caCertsLock.Lock()
+	defer caCertsLock.Unlock()
+
+	config.RootCAs = caCertsPool
 }
 
 // Initialize global aspects of the library.
@@ -238,34 +230,16 @@ func RbInit() {
 	// Don't allow interactive password prompts
 	ci := fs.GetConfig(context.Background())
 	ci.AskPassword = false
+
+	fshttp.SetRoundTripHook(perRequestHook)
 }
 
-// Reload certificates from the system and user trust stores. This is thread
-// safe within RSAF, but may race with rclone's NewTransportCustom(). Note that
-// reloading is not that useful because the changes do not affect fshttp clients
-// that were previously created.
-func RbReloadCerts() bool {
+// Reload certificates from the system and user trust stores.
+func RbReloadCerts() {
 	caCertsLock.Lock()
 	defer caCertsLock.Unlock()
 
-	ci := fs.GetConfig(context.Background())
-	ci.CaCert = nil
-
-	if caCertsFile != nil {
-		caCertsFile.Close()
-		caCertsFile = nil
-	}
-
-	caCertsFile = generateTrustStoreTempFile(config.GetCacheDir())
-	if caCertsFile == nil {
-		return false
-	}
-
-	ci.CaCert = append(ci.CaCert, caCertsFile.Name())
-
-	fshttp.ResetTransport()
-
-	return true
+	caCertsPool = generateTrustStorePool()
 }
 
 // Clean up library resources.
@@ -355,7 +329,10 @@ func RbCacheClearRemote(remote string) {
 		}
 	}
 
-	cache.ClearConfig(remote)
+	parsed, err := fspath.Parse(remote)
+	if err == nil {
+		cache.ClearConfig(parsed.Name)
+	}
 }
 
 // Clear cached fs and vfs instances. All vfs instances will be shut down

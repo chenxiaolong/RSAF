@@ -57,7 +57,7 @@
     <string name="pref_edit_remote_configure_name">Configure remote</string>
     <string name="pref_edit_remote_configure_desc">Rerun the rclone configuration wizard.</string>
     <string name="pref_edit_remote_rename_name">Rename remote</string>
-    <string name="pref_edit_remote_rename_desc">Change the name of the remote. If other remotes depends on this one, they will need to be manually updated with the new name.</string>
+    <string name="pref_edit_remote_rename_desc">Change the name of this remote. If other remotes depends on this one, they will need to be manually updated with the new name.</string>
     <string name="pref_edit_remote_duplicate_name">Duplicate remote</string>
     <string name="pref_edit_remote_duplicate_desc">Create a copy of this remote with identical configuration.</string>
     <string name="pref_edit_remote_delete_name">Delete remote</string>
@@ -93,7 +93,7 @@
 
     <!-- Edit remote alerts -->
     <string name="alert_edit_remote_success">Successfully edited remote %1$s</string>
-    <string name="alert_delete_remote_failure">Failed to delete %1$s: %2$s</string>
+    <string name="alert_delete_remote_failure">Failed to delete remote %1$s: %2$s</string>
     <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
     <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
     <string name="alert_set_config_failure">Failed to set %1$s config option for remote %2$s: %3$s</string>
@@ -127,7 +127,7 @@
     <string name="dialog_export_password_hint">Encryption password</string>
     <string name="dialog_inactivity_timeout_title">Inactivity timeout</string>
     <string name="dialog_inactivity_timeout_message">Enter a duration in seconds.</string>
-    <string name="dialog_vfs_cache_deletion_message">There are file operations in progress. These operations will be interrupted and pending uploads in the VFS cache will be permanently deleted.</string>
+    <string name="dialog_vfs_cache_deletion_message">There are pending uploads in progress that may be interrupted. These will be permanently deleted from the VFS cache.</string>
 
     <!-- Interactive configuration -->
     <string name="ic_title_add_remote">Add remote: %1$s</string>

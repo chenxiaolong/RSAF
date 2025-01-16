@@ -20,6 +20,10 @@ Hopefully, most issues can be found just by trying to compile rcbridge with `./g
 
 If librclone gained new functionality that can replace current uses of internal APIs, then that new functionality should be used. librclone RPC-related tasks should be done purely on the Android side in [`RcloneRpc`](./app/src/main/java/com/chiller3/rsaf/rclone/RcloneRpc.kt), not in go.
 
+### Certificate reloading
+
+Check if there's any way hook into `fshttp.(*Transport).RoundTrip()`. The hook to update `tls.Config.RootCAs` is the only reason we need to fork rclone.
+
 ### `RbDocMkdir`
 
 Check the `vfs.Dir.Mkdir()` implementation to see if it fails with EEXIST when the path already exists. If so, `RcloneProvider` can be updated to avoid an unnecessary stat when creating directories with Android semantics.
