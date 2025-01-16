@@ -15,6 +15,9 @@
   * This allows RSAF to report upload errors in most cases again.
 * Ask for confirmation before performing destructive operations on a remote that has pending uploads ([PR #123])
   * This includes deleting a remote, renaming a remote, or importing a config file.
+* Only perform copy and move operations via rclone if they can be done server-side ([PR #126])
+  * Android does not allow file copy/move operations to be slow and will kill RSAF if they are.
+  * For non-server-side copies/moves, RSAF will report that the operation is unsupported and the file manager will handle it itself instead.
 
 ### Version 3.0
 
@@ -329,3 +332,4 @@
 [PR #121]: https://github.com/chenxiaolong/RSAF/pull/121
 [PR #123]: https://github.com/chenxiaolong/RSAF/pull/123
 [PR #125]: https://github.com/chenxiaolong/RSAF/pull/125
+[PR #126]: https://github.com/chenxiaolong/RSAF/pull/126
