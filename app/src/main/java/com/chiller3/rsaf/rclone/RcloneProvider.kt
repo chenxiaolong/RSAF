@@ -794,10 +794,26 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     private fun copyOrMove(sourceDocumentId: String, targetParentDocumentId: String,
                            copy: Boolean): String {
+        val (sourceRemote, _) = splitRemote(sourceDocumentId)
+        val (targetRemote, _) = splitRemote(targetParentDocumentId)
+        if (sourceRemote != targetRemote) {
+            throw UnsupportedOperationException("Copying/moving across remotes is not supported")
+        }
+
+        val error = RbError()
+        val features = Rcbridge.rbRemoteFeatures(sourceRemote, error)
+            ?: throw error.toException("rbRemoteFeatures")
+        val serverSide = if (copy) { features.copy } else { features.move }
+        if (!serverSide) {
+            // Otherwise, it's really easy for the binder transaction to time out and cause Android
+            // to kill our process. copyDocument() and moveDocument() aren't really meant to block
+            // for very long.
+            throw UnsupportedOperationException("Copying/moving must be done server-side")
+        }
+
         val (sourceParentDocumentId, fileName) = splitPath(sourceDocumentId)
         val (baseName, ext) = splitExt(fileName, documentIsDir(sourceDocumentId))
         val targetBaseDocumentId = Rcbridge.rbPathJoin(targetParentDocumentId, baseName)
-        val error = RbError()
 
         return retryUnique(targetBaseDocumentId, ext, ConflictDetection.STAT) {
             if (!Rcbridge.rbDocCopyOrMove(sourceDocumentId, it, copy, error)) {

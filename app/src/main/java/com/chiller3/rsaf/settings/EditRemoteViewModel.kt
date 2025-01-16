@@ -8,8 +8,10 @@ package com.chiller3.rsaf.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.RbRemoteFeaturesResult
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
+import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.rclone.VfsCache
@@ -101,7 +103,11 @@ class EditRemoteViewModel : ViewModel() {
                 if (_remoteConfig.value.features == null) {
                     withContext(Dispatchers.IO) {
                         _remoteConfig.update {
-                            it.copy(features = Rcbridge.rbRemoteFeatures("$remote:"))
+                            val error = RbError()
+                            val features = Rcbridge.rbRemoteFeatures("$remote:", error)
+                                ?: throw error.toException("rbRemoteFeatures")
+
+                            it.copy(features = features)
                         }
                     }
                 }

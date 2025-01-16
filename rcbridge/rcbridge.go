@@ -595,25 +595,30 @@ func getVfsForDoc(doc string) (*vfs.VFS, string, error) {
 }
 
 type RbRemoteFeaturesResult struct {
+	Copy      bool
+	Move      bool
 	PutStream bool
 	About     bool
 }
 
 // Return whether the specified remote supports streaming.
-func RbRemoteFeatures(remote string) (*RbRemoteFeaturesResult, error) {
+func RbRemoteFeatures(remote string, errOut *RbError) *RbRemoteFeaturesResult {
 	f, err := getFs(remote)
 	if err != nil {
-		return nil, err
+		assignError(errOut, err, syscall.EINVAL)
+		return nil
 	}
 
 	features := f.Features()
 
 	result := RbRemoteFeaturesResult{
+		Copy:      features.Copy != nil,
+		Move:      features.Move != nil,
 		PutStream: features.PutStream != nil,
 		About:     features.About != nil,
 	}
 
-	return &result, nil
+	return &result
 }
 
 type RbRemoteSplitResult struct {

@@ -445,15 +445,30 @@ class RcloneProviderTest {
         }
     }
 
-    private fun copyMove(source: Uri, targetParent: Uri, copy: Boolean): Uri? =
-        if (copy) {
-            DocumentsContract.copyDocument(appContext.contentResolver, source, targetParent)
-        } else {
-            DocumentsContract.moveDocument(appContext.contentResolver, source, source.docParent(),
-                targetParent)
+    @Test
+    fun copyDocument() {
+        val file = File(rootDir, "file.txt").apply {
+            writeText("helloworld")
         }
 
-    private fun testCopyMove(copy: Boolean) {
+        // We can't easily test a successful copy because it requires server-side copy support,
+        // which is not the case for local filesystem paths. However, we can test the detection of
+        // server-side copy support.
+
+        assertThrows(UnsupportedOperationException::class.java) {
+            DocumentsContract.copyDocument(
+                appContext.contentResolver,
+                docUriFromRoot("file.txt"),
+                docUriFromRoot(),
+            )
+        }
+
+        assertTrue(file.exists())
+        assertFalse(File("file(1).txt").exists())
+    }
+
+    @Test
+    fun moveDocument() {
         val file = File(rootDir, "file.txt").apply {
             writeText("helloworld")
         }
@@ -462,38 +477,28 @@ class RcloneProviderTest {
             assertTrue(File(this, "file").createNewFile())
         }
 
-        // Copy/move file
-        var newUri = copyMove(
-            docUriFromRoot("file.txt"),
+        // Move file
+        var sourceDoc = docUriFromRoot("file.txt")
+        var newUri = DocumentsContract.moveDocument(
+            appContext.contentResolver,
+            sourceDoc,
+            sourceDoc.docParent(),
             docUriFromRoot(),
-            copy,
         )
         assertEquals("file(1).txt", newUri?.docBasename())
         assertEquals("helloworld", File(rootDir, "file(1).txt").readText())
-        if (!copy) {
-            assertFalse(file.exists())
-        }
+        assertFalse(file.exists())
 
-        // Copy/move directory
-        newUri = copyMove(
-            docUriFromRoot("dir"),
+        // Move directory
+        sourceDoc = docUriFromRoot("dir")
+        newUri = DocumentsContract.moveDocument(
+            appContext.contentResolver,
+            sourceDoc,
+            sourceDoc.docParent(),
             docUriFromRoot(),
-            copy,
         )
         assertEquals("dir(1)", newUri?.docBasename())
         assertTrue(File(File(rootDir, "dir(1)"), "file").exists())
-        if (!copy) {
-            assertFalse(dir.exists())
-        }
-    }
-
-    @Test
-    fun copyDocument() {
-        testCopyMove(true)
-    }
-
-    @Test
-    fun moveDocument() {
-        testCopyMove(false)
+        assertFalse(dir.exists())
     }
 }
