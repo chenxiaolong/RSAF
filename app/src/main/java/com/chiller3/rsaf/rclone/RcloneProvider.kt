@@ -349,14 +349,6 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         context!!.contentResolver.notifyChange(uri, null)
     }
 
-    private fun revokeGrants(documentId: String) {
-        val uri = DocumentsContract.buildDocumentUri(BuildConfig.DOCUMENTS_AUTHORITY, documentId)
-        context!!.revokeUriPermission(
-            uri,
-            Intent.FLAG_GRANT_READ_URI_PERMISSION and Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-        )
-    }
-
     override fun onCreate(): Boolean {
         val context = context!!
 
@@ -764,8 +756,6 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             throw error.toException("rbDocRemove")
         }
 
-        revokeGrants(documentId)
-
         val (parent, _) = splitPath(documentId)
         notifyChildrenChanged(parent)
     }
@@ -779,6 +769,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
 
         deleteDocument(documentId)
+        revokeDocumentPermission(documentId)
     }
 
     /**
@@ -842,7 +833,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         waitUntilUploadsDone(sourceDocumentId)
 
         return copyOrMove(sourceDocumentId, targetParentDocumentId, false).also {
-            revokeGrants(sourceDocumentId)
+            revokeDocumentPermission(sourceDocumentId)
         }
     }
 
