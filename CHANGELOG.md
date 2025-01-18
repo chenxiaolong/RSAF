@@ -18,6 +18,7 @@
 * Only perform copy and move operations via rclone if they can be done server-side ([PR #126])
   * Android does not allow file copy/move operations to be slow and will kill RSAF if they are.
   * For non-server-side copies/moves, RSAF will report that the operation is unsupported and the file manager will handle it itself instead.
+* Fix revoking access to the original path when a directory is moved or deleted ([PR #129])
 
 ### Version 3.0
 
