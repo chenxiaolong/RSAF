@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.1
 
 * Add support for user CA certificate trust store and Android 14+'s apex trust store ([Issue #119], [PR #120], [PR #125])
 * Make file close operations synchronous after VFS initialization ([PR #121])
@@ -334,3 +334,4 @@
 [PR #123]: https://github.com/chenxiaolong/RSAF/pull/123
 [PR #125]: https://github.com/chenxiaolong/RSAF/pull/125
 [PR #126]: https://github.com/chenxiaolong/RSAF/pull/126
+[PR #129]: https://github.com/chenxiaolong/RSAF/pull/129
