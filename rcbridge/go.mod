@@ -5,11 +5,11 @@ go 1.22.0
 toolchain go1.22.7
 
 require (
-	github.com/rclone/rclone v1.69.0
-	golang.org/x/mobile v0.0.0-20250106192035-c31d5b91ecc3
+	github.com/rclone/rclone v1.69.1
+	golang.org/x/mobile v0.0.0-20250210185054-b38b8813d607
 )
 
-replace github.com/rclone/rclone v1.69.0 => github.com/chenxiaolong/rclone v1.69.0-rsaf
+replace github.com/rclone/rclone v1.69.1 => github.com/chenxiaolong/rclone v1.69.1-rsaf
 
 require (
 	cloud.google.com/go/auth v0.12.1 // indirect
@@ -168,17 +168,17 @@ require (
 	go.opentelemetry.io/otel v1.29.0 // indirect
 	go.opentelemetry.io/otel/metric v1.29.0 // indirect
 	go.opentelemetry.io/otel/trace v1.29.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/term v0.29.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/tools v0.30.0 // indirect
 	google.golang.org/api v0.211.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/grpc v1.67.1 // indirect
