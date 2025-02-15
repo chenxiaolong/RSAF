@@ -37,7 +37,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 
     * Due to [Android API limitations](https://developer.android.com/reference/android/os/ProxyFileDescriptorCallback), only the normal `lseek()`/`read()`/`pread()`/`write()`/`pwrite()`/`fsync()` system calls are supported. Notably, `ftruncate()` is not supported.
 
-    * Also, due to Android's internal implementation details with regards to FUSE, `close()` is asynchronous (and cannot be made synchronous). Files may not be fully uploaded yet when `close()` returns.
+    * Also, due to Android's internal implementation details with regards to FUSE, `close()` is asynchronous (and cannot be made synchronous). Files may not be fully uploaded yet when `close()` returns. This breaks some common scenarios, like writing to a temporary file and then renaming it afterwards. This is impossible to handle in a foolproof way, but RSAF will try to work around the problem by making file renaming, copying, and moving wait until the relevant background uploads are complete.
 
 * Client applications may not be able to detect when errors occur.
 
