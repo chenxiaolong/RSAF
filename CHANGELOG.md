@@ -7,6 +7,11 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add debug option to add an `alias` remote that points to rclone's internal cache directory ([PR #133])
+  * This is useful for inspecting rclone's `vfsMeta` JSON files that describe the state of pending file uploads.
+
 ### Version 3.2
 
 * Update rclone to 1.69.1 ([PR #130])
@@ -340,3 +345,4 @@
 [PR #126]: https://github.com/chenxiaolong/RSAF/pull/126
 [PR #129]: https://github.com/chenxiaolong/RSAF/pull/129
 [PR #130]: https://github.com/chenxiaolong/RSAF/pull/130
+[PR #133]: https://github.com/chenxiaolong/RSAF/pull/133
