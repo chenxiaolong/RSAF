@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.3
 
 * Add debug option to add an `alias` remote that points to rclone's internal cache directory ([PR #133])
   * This is useful for inspecting rclone's `vfsMeta` JSON files that describe the state of pending file uploads.
