@@ -1,13 +1,14 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
 package com.chiller3.rsaf.settings
 
+import android.app.Application
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.chiller3.rsaf.Logcat
 import com.chiller3.rsaf.rclone.RcloneConfig
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 data class Remote(
     val name: String,
@@ -47,9 +49,11 @@ data class SettingsActivityActions(
     val refreshRoots: Boolean,
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         private val TAG = SettingsViewModel::class.java.simpleName
+
+        private const val INTERNAL_CACHE_REMOTE_NAME = "rclone_internal_cache"
     }
 
     private val _remotes = MutableStateFlow<List<Remote>>(emptyList())
@@ -231,6 +235,30 @@ class SettingsViewModel : ViewModel() {
                 Log.e(TAG, "Failed to dump logs to $uri", e)
                 _alerts.update { it + SettingsAlert.LogcatFailed(uri, e.toString()) }
             }
+        }
+    }
+
+    fun addInternalCacheRemote() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val cacheDir = File(getApplication<Application>().cacheDir, "rclone").path
+
+                val iq = RcloneRpc.InteractiveConfiguration(INTERNAL_CACHE_REMOTE_NAME)
+                while (true) {
+                    val (_, option) = iq.question ?: break
+
+                    when (option.name) {
+                        "type" -> iq.submit("alias")
+                        "remote" -> iq.submit(cacheDir)
+                        "config_fs_advanced" -> iq.submit("false")
+                        else -> throw IllegalStateException("Unexpected question: ${option.name}")
+                    }
+                }
+            }
+
+            refreshRemotesInternal()
+            _alerts.update { it + SettingsAlert.RemoteAddSucceeded(INTERNAL_CACHE_REMOTE_NAME) }
+            _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 

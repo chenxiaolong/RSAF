@@ -36,8 +36,9 @@ class Preferences(private val context: Context) {
         const val PREF_EDIT_REMOTE_PREFIX = "edit_remote_"
         const val PREF_IMPORT_CONFIGURATION = "import_configuration"
         const val PREF_EXPORT_CONFIGURATION = "export_configuration"
-        const val PREF_SAVE_LOGS = "save_logs"
         const val PREF_VERSION = "version"
+        const val PREF_SAVE_LOGS = "save_logs"
+        const val PREF_ADD_INTERNAL_CACHE_REMOTE = "add_internal_cache_remote"
 
         // Edit remote UI actions
         const val PREF_OPEN_REMOTE = "open_remote"

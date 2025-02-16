@@ -50,6 +50,8 @@
     <string name="pref_verbose_rclone_logs_desc">Warning: The verbose logs may contain sensitive information, like authentication tokens.</string>
     <string name="pref_save_logs_name">Save logs</string>
     <string name="pref_save_logs_desc">Save logcat logs to a file. Note that the logs may contain names of remote files that have been accessed.</string>
+    <string name="pref_add_internal_cache_remote_name">Add rclone internal cache remote</string>
+    <string name="pref_add_internal_cache_remote_desc">Add a new <tt>alias</tt> remote that points to rclone\'s internal cache directory. This can be useful for troubleshooting VFS issues.</string>
 
     <!-- Remote preferences -->
     <string name="pref_edit_remote_open_name">Open remote</string>

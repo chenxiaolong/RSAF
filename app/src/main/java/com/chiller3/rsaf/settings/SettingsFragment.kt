@@ -85,6 +85,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefLockNow: Preference
     private lateinit var prefVersion: LongClickablePreference
     private lateinit var prefSaveLogs: Preference
+    private lateinit var prefAddInternalCacheRemote: Preference
 
     private val requestEditRemote =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -168,6 +169,9 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         prefSaveLogs = findPreference(Preferences.PREF_SAVE_LOGS)!!
         prefSaveLogs.onPreferenceClickListener = this
+
+        prefAddInternalCacheRemote = findPreference(Preferences.PREF_ADD_INTERNAL_CACHE_REMOTE)!!
+        prefAddInternalCacheRemote.onPreferenceClickListener = this
 
         // Call this once first to avoid UI jank from elements shifting. We call it again in
         // onResume() because allowing the permissions does not restart the activity.
@@ -422,6 +426,10 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
             }
             preference === prefSaveLogs -> {
                 requestSafSaveLogs.launch(Logcat.FILENAME_DEFAULT)
+                return true
+            }
+            preference === prefAddInternalCacheRemote -> {
+                viewModel.addInternalCacheRemote()
                 return true
             }
         }

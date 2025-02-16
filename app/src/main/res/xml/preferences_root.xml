@@ -157,5 +157,12 @@
             app:title="@string/pref_save_logs_name"
             app:summary="@string/pref_save_logs_desc"
             app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="add_internal_cache_remote"
+            app:persistent="false"
+            app:title="@string/pref_add_internal_cache_remote_name"
+            app:summary="@string/pref_add_internal_cache_remote_desc"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </PreferenceScreen>
