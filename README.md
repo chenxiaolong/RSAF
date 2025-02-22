@@ -16,7 +16,7 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 * Supports Android 9 and newer
 * Supports all rclone remote backends, including those that require OAuth 2.0
 * Supports importing and exporting the rclone configuration file
-* Supports random reads and writes
+* Supports random reads
 * Supports server-side copy/move for rclone backends implementing this feature
 * Supports client applications that request access to a file descriptor
 * Supports client applications that open entire directories with `ACTION_OPEN_DOCUMENT_TREE`
@@ -29,9 +29,9 @@ RSAF is not itself a file manager, but any file manager supporting SAF, includin
 
     * In order to keep RSAF's code as simple as possible, the configuration system presents interactive questions just like the `rclone config` command. Due to this, the questions are always shown in English as rclone currently does not have internationalization support.
 
-* Although RSAF always allows random writes, not all backends support it.
+* Although RSAF allows random writes, rclone does not support it efficiently and will download and reupload the whole file.
 
-    * In this situation, files are temporarily buffered to disk before they are uploaded. This is the same behavior as with `rclone mount --vfs-cache-mode writes`.
+    * This is the same behavior as with `rclone mount --vfs-cache-mode writes`.
 
 * Fancier file descriptor system calls are not supported.
 
