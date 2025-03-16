@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Use local pinned version of gomobile during build ([PR #135])
+
 ### Version 3.3
 
 * Add debug option to add an `alias` remote that points to rclone's internal cache directory ([PR #133])
@@ -346,3 +350,4 @@
 [PR #129]: https://github.com/chenxiaolong/RSAF/pull/129
 [PR #130]: https://github.com/chenxiaolong/RSAF/pull/130
 [PR #133]: https://github.com/chenxiaolong/RSAF/pull/133
+[PR #135]: https://github.com/chenxiaolong/RSAF/pull/135
