@@ -124,7 +124,7 @@ android {
         versionCode = gitVersionCode
         versionName = gitVersionName
 
-        base.archivesName.set("RSAF-$versionName")
+        base.archivesName.set("RSAF-$versionName-$versionCode")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
