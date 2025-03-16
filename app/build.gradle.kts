@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+import java.io.ByteArrayOutputStream
 import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
 import org.eclipse.jgit.lib.ObjectId
+import org.gradle.kotlin.dsl.environment
 
 plugins {
     alias(libs.plugins.android.application)
@@ -239,16 +241,56 @@ interface InjectedExecOps {
     @get:Inject val execOps: ExecOperations
 }
 
-// https://github.com/gradle/gradle/issues/12247
-class LazyString(private val source: Lazy<String>) : java.io.Serializable {
-    constructor(source: () -> String) : this(lazy(source))
-    constructor(source: Provider<String>) : this(source::get)
+val rcbridgeSrcDir = File(rootDir, "rcbridge")
 
-    override fun toString() = source.value
+val gomobile = tasks.register("gomobile") {
+    val binDir = layout.buildDirectory.map { it.dir("bin") }
+
+    inputs.file(File(rcbridgeSrcDir, "go.sum"))
+    outputs.files(
+        binDir.map { it.file("gobind") },
+        binDir.map { it.file("gomobile") },
+    )
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
+    doLast {
+        val outputStream = ByteArrayOutputStream()
+
+        injected.execOps.exec {
+            executable("go")
+            args = listOf("mod", "graph")
+            workingDir(rcbridgeSrcDir)
+            standardOutput = outputStream
+        }
+
+        val outputText = outputStream.toString(Charsets.UTF_8)
+        val prefix = "rcbridge golang.org/x/mobile@"
+        val version = outputText.lineSequence()
+            .find { it.startsWith(prefix) }
+            ?.substring(prefix.length)
+            ?: throw IllegalStateException("go.sum does not contain gomobile version")
+
+        injected.execOps.exec {
+            executable("go")
+            args = listOf(
+                "install",
+                "golang.org/x/mobile/cmd/gobind@$version",
+                "golang.org/x/mobile/cmd/gomobile@$version",
+            )
+
+            environment("GOBIN" to binDir.get().asFile.absolutePath)
+
+            if (!environment.containsKey("GOPROXY")) {
+                environment("GOPROXY", "https://proxy.golang.org,direct")
+            }
+
+            workingDir(rcbridgeSrcDir)
+        }
+    }
 }
 
-val rcbridge = tasks.register<Exec>("rcbridge") {
-    val rcbridgeSrcDir = File(rootDir, "rcbridge")
+val rcbridge = tasks.register("rcbridge") {
     val tempDir = rcbridgeDir.map { it.dir("temp") }
 
     inputs.files(
@@ -256,6 +298,7 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
         File(rcbridgeSrcDir, "go.sum"),
         File(rcbridgeSrcDir, "rcbridge.go"),
         File(File(rcbridgeSrcDir, "envhack"), "envhack.go"),
+        gomobile.map { it.outputs.files },
     )
     inputs.properties(
         "android.defaultConfig.minSdk" to android.defaultConfig.minSdk,
@@ -270,35 +313,44 @@ val rcbridge = tasks.register<Exec>("rcbridge") {
         rcbridgeDir.map { it.file("rcbridge-sources.jar") },
     )
 
-    executable = "gomobile"
-    args(
-        "bind",
-        "-v",
-        "-o", LazyString(rcbridgeAar.map { it.asFile.absolutePath }),
-        "-target=android",
-        "-androidapi=${android.defaultConfig.minSdk}",
-        "-javapkg=${android.namespace}.binding",
-        ".",
-    )
-    environment(
-        "ANDROID_HOME" to LazyString(androidComponents.sdkComponents.sdkDirectory
-            .map { it.asFile.absolutePath }),
-        "ANDROID_NDK_HOME" to LazyString(androidComponents.sdkComponents.ndkDirectory
-            .map { it.asFile.absolutePath }),
-        "TMPDIR" to LazyString(tempDir.map { it.asFile.absolutePath }),
-    )
-
-    if (!environment.containsKey("GOPROXY")) {
-        environment("GOPROXY", "https://proxy.golang.org,direct")
-    }
-
-    workingDir(rcbridgeSrcDir)
-
     doFirst {
         tempDir.get().asFile.mkdirs()
     }
 
     val injected = project.objects.newInstance<InjectedExecOps>()
+
+    doLast {
+        val gomobileExecutable = gomobile.get().outputs.files.find { it.name == "gomobile" }!!
+        val binDir = gomobileExecutable.parentFile
+
+        injected.execOps.exec {
+            executable(gomobileExecutable)
+            args(
+                "bind",
+                "-v",
+                "-o", rcbridgeAar.get().asFile.absolutePath,
+                "-target=android",
+                "-androidapi=${android.defaultConfig.minSdk}",
+                "-javapkg=${android.namespace}.binding",
+                ".",
+            )
+            environment(
+                // gomobile only supports finding gobind in $PATH.
+                "PATH" to "$binDir${File.pathSeparator}${environment["PATH"]}",
+                "ANDROID_HOME" to androidComponents.sdkComponents.sdkDirectory.get()
+                    .asFile.absolutePath,
+                "ANDROID_NDK_HOME" to androidComponents.sdkComponents.ndkDirectory.get()
+                    .asFile.absolutePath,
+                "TMPDIR" to tempDir.get().asFile.absolutePath,
+            )
+
+            if (!environment.containsKey("GOPROXY")) {
+                environment("GOPROXY", "https://proxy.golang.org,direct")
+            }
+
+            workingDir(rcbridgeSrcDir)
+        }
+    }
 
     // gomobile fails to clean up its temp directories after it switched to using go modules. These
     // directories are never reused, so delete them.

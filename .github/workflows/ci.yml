@@ -31,13 +31,6 @@ jobs:
           cache-dependency-path: rcbridge/go.sum
           go-version-file: rcbridge/go.mod
 
-      - name: Install gomobile
-        shell: bash
-        run: |-
-          version=$(grep golang.org/x/mobile rcbridge/go.mod | awk '{print $2}')
-          go install golang.org/x/mobile/cmd/gobind@"${version}"
-          go install golang.org/x/mobile/cmd/gomobile@"${version}"
-
       - name: Get NDK version
         id: get_version
         shell: bash

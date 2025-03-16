@@ -97,7 +97,6 @@ Before building, the following tools must be installed:
 * Android SDK
 * Android NDK
 * `go` (golang compiler)
-* `gomobile`
 
 Once the dependencies are installed, RSAF can be built like most other Android apps using Android Studio or the gradle command line.
 
