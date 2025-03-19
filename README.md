@@ -1,6 +1,6 @@
 # RSAF
 
-<img src="app/images/icon.svg" alt="app icon" width="72" />
+<img src="metadata/en-US/images/icon.svg" alt="app icon" width="72" />
 
 ![latest release badge](https://img.shields.io/github/v/release/chenxiaolong/RSAF?sort=semver)
 ![license badge](https://img.shields.io/github/license/chenxiaolong/RSAF)
@@ -9,7 +9,7 @@ RSAF is an Android document provider for the wonderful [rclone](https://rclone.o
 
 RSAF is not itself a file manager, but any file manager supporting SAF, including the one built into Android (Settings -> Storage -> Documents), can make use of it.
 
-<img src="app/images/light.png" alt="light mode screenshot" width="200" /> <img src="app/images/dark.png" alt="dark mode screenshot" width="200" />
+<img src="metadata/en-US/images/phoneScreenshots/light.png" alt="light mode screenshot" width="200" /> <img src="metadata/en-US/images/phoneScreenshots/dark.png" alt="dark mode screenshot" width="200" />
 
 ## Features
 
@@ -140,7 +140,7 @@ Even though AGP (Android Gradle Plugin) is set up so that `rcbridge` is a `preBu
 
 RSAF is dedicated to my cat Meow-Meow, who unexpectedly passed away during the initial development of the project.
 
-<img src="app/images/meow-meow.jpg" alt="app icon" width="512" />
+<img src="metadata/en-US/images/meow-meow.jpg" alt="app icon" width="512" />
 
 ## Contributing
 
