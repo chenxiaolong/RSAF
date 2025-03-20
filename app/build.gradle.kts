@@ -332,6 +332,7 @@ val rcbridge = tasks.register("rcbridge") {
                 "-target=android",
                 "-androidapi=${android.defaultConfig.minSdk}",
                 "-javapkg=${android.namespace}.binding",
+                "-trimpath",
                 ".",
             )
             environment(
