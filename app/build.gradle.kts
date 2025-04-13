@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.internal.dsl.SdkComponentsImpl
+import com.android.build.gradle.internal.services.DslServices
 import java.io.ByteArrayOutputStream
 import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
@@ -17,7 +20,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -115,7 +118,7 @@ android {
 
     compileSdk = 35
     buildToolsVersion = "35.0.0"
-    ndkVersion = "27.2.12479018"
+    ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
@@ -172,11 +175,11 @@ android {
         resValue("string", "documents_authority", "$applicationId.documents")
     }
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_17)
-        targetCompatibility(JavaVersion.VERSION_17)
+        sourceCompatibility(JavaVersion.VERSION_21)
+        targetCompatibility(JavaVersion.VERSION_21)
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
     buildFeatures {
         buildConfig = true
@@ -212,6 +215,19 @@ dependencies {
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
 }
+
+// AGP is currently set up so that the NDK auto-installation only happens when the C++ functionality
+// is enabled. We want that behavior even though we're only using the NDK for building Go code.
+val sdkComponents = androidComponents.sdkComponents as SdkComponentsImpl
+val dslServices = BaseExtension::class.java
+    .getDeclaredField("dslServices")
+    .apply { isAccessible = true }
+    .get(android) as DslServices
+val ndkHandler = dslServices.sdkComponents.get().versionedNdkHandler(
+    sdkComponents.ndkVersion.get(),
+    sdkComponents.ndkPath.takeIf { it.isPresent }?.get(),
+)
+ndkHandler.getNdkPlatform(downloadOkay = true)
 
 val archive = tasks.register("archive") {
     inputs.property("gitVersionTriple.third", gitVersionTriple.third)
