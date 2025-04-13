@@ -14,6 +14,7 @@
 * Make gomobile shared library reproducible ([PR #138])
 * Add support for `mlkem768x25519-sha256` key exchange algorithm for sftp backend ([PR #143])
   * This is the new post-quantum key exchange algorithm that's used by default on OpenSSH 10.0 servers.
+* Update all dependencies ([PR #144])
 
 ### Version 3.3
 
@@ -358,3 +359,5 @@
 [PR #135]: https://github.com/chenxiaolong/RSAF/pull/135
 [PR #136]: https://github.com/chenxiaolong/RSAF/pull/136
 [PR #138]: https://github.com/chenxiaolong/RSAF/pull/138
+[PR #143]: https://github.com/chenxiaolong/RSAF/pull/143
+[PR #144]: https://github.com/chenxiaolong/RSAF/pull/144
