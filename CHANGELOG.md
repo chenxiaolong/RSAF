@@ -15,6 +15,7 @@
 * Add support for `mlkem768x25519-sha256` key exchange algorithm for sftp backend ([PR #143])
   * This is the new post-quantum key exchange algorithm that's used by default on OpenSSH 10.0 servers.
 * Update all dependencies ([PR #144])
+* Remove deprecated androidx security-crypto library dependency ([PR #145])
 
 ### Version 3.3
 
@@ -361,3 +362,4 @@
 [PR #138]: https://github.com/chenxiaolong/RSAF/pull/138
 [PR #143]: https://github.com/chenxiaolong/RSAF/pull/143
 [PR #144]: https://github.com/chenxiaolong/RSAF/pull/144
+[PR #145]: https://github.com/chenxiaolong/RSAF/pull/145
