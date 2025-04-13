@@ -12,6 +12,8 @@
 * Use local pinned version of gomobile during build ([PR #135])
 * Add the machine-readable version code to the APK filename ([Issue #50], [PR #136])
 * Make gomobile shared library reproducible ([PR #138])
+* Add support for `mlkem768x25519-sha256` key exchange algorithm for sftp backend ([PR #143])
+  * This is the new post-quantum key exchange algorithm that's used by default on OpenSSH 10.0 servers.
 
 ### Version 3.3
 
