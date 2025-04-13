@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.4
 
 * Use local pinned version of gomobile during build ([PR #135])
 * Add the machine-readable version code to the APK filename ([Issue #50], [PR #136])
