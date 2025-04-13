@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -11,9 +11,6 @@ import android.net.Uri
 import android.system.ErrnoException
 import android.system.OsConstants
 import android.util.Log
-import androidx.core.content.edit
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.chiller3.rsaf.RandomUtils
 import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
@@ -29,29 +26,18 @@ import kotlin.io.path.outputStream
 object RcloneConfig {
     private val TAG = RcloneConfig::class.java.simpleName
 
-    private const val KEY_RCLONE_CONFIG_PASS = "rclone_config_pass"
-
     const val FILENAME = "rclone.conf"
     const val MIMETYPE = "text/plain"
 
     private const val ERROR_BAD_PASSWORD = "not allowed to ask for password"
 
-    // We only need this for opening file descriptors and detecting system features (interally in
-    // MasterKey.Builder()). Configuration changes aren't relevant here.
+    // We only need this for opening file descriptors and shared preferences. Configuration changes
+    // aren't relevant here.
     private lateinit var applicationContext: Context
     private lateinit var backupManager: BackupManager
     private lateinit var appConfigFile: File
-    private val encryptedPrefs by lazy {
-        val masterKey = MasterKey.Builder(applicationContext)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        EncryptedSharedPreferences.create(
-            applicationContext,
-            "rclone_config",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-        )
+    private val passwordStore by lazy {
+        RclonePasswordStore(applicationContext)
     }
 
     /**
@@ -99,14 +85,12 @@ object RcloneConfig {
      */
     private val hardwareWrappedPassword: String
         get() {
-            synchronized(encryptedPrefs) {
-                if (!encryptedPrefs.contains(KEY_RCLONE_CONFIG_PASS)) {
-                    encryptedPrefs.edit {
-                        putString(KEY_RCLONE_CONFIG_PASS, RandomUtils.generatePassword(128))
-                    }
+            synchronized(passwordStore) {
+                if (passwordStore.password == null) {
+                    passwordStore.password = RandomUtils.generatePassword(128)
                 }
 
-                return encryptedPrefs.getString(KEY_RCLONE_CONFIG_PASS, null)!!
+                return passwordStore.password!!
             }
         }
 

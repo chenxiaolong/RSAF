@@ -204,8 +204,8 @@ dependencies {
     implementation(libs.exifinterface)
     implementation(libs.fragment.ktx)
     implementation(libs.preference.ktx)
-    implementation(libs.security.crypto)
     implementation(libs.material)
+    implementation(libs.tink.android)
     implementation(files(rcbridgeAar))
 
     // Included only to work around R8 complaining about missing annotation classes referenced by

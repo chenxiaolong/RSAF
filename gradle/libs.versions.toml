@@ -12,8 +12,8 @@ junit = "1.2.1"
 kotlin = "2.1.20"
 material = "1.12.0"
 preference-ktx = "1.2.1"
-security-crypto = "1.1.0-alpha07"
 spotbugs = "4.9.3"
+tink-android = "1.17.0"
 
 [libraries]
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
@@ -28,8 +28,8 @@ jgit-archive = { group = "org.eclipse.jgit", name = "org.eclipse.jgit.archive", 
 junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference-ktx" }
-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 spotbugs = { group = "com.github.spotbugs", name = "spotbugs-annotations", version.ref = "spotbugs" }
+tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink-android" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
