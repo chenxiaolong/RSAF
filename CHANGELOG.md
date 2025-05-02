@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.69.2 and update other dependencies too ([PR #150])
+
 ### Version 3.4
 
 * Use local pinned version of gomobile during build ([PR #135])
@@ -363,3 +367,4 @@
 [PR #143]: https://github.com/chenxiaolong/RSAF/pull/143
 [PR #144]: https://github.com/chenxiaolong/RSAF/pull/144
 [PR #145]: https://github.com/chenxiaolong/RSAF/pull/145
+[PR #150]: https://github.com/chenxiaolong/RSAF/pull/150
