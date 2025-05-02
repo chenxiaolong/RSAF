@@ -5,11 +5,11 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/rclone/rclone v1.69.1
+	github.com/rclone/rclone v1.69.2
 	golang.org/x/mobile v0.0.0-20250210185054-b38b8813d607
 )
 
-replace github.com/rclone/rclone v1.69.1 => github.com/chenxiaolong/rclone v1.69.1-rsaf
+replace github.com/rclone/rclone v1.69.2 => github.com/chenxiaolong/rclone v1.69.2-rsaf
 
 require (
 	cloud.google.com/go/auth v0.12.1 // indirect
@@ -89,7 +89,7 @@ require (
 	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -171,7 +171,7 @@ require (
 	golang.org/x/crypto v0.37.1-0.20250411143949-c96bba2ced58 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
