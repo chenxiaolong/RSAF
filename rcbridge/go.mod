@@ -5,11 +5,11 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/rclone/rclone v1.69.2
+	github.com/rclone/rclone v1.69.3
 	golang.org/x/mobile v0.0.0-20250210185054-b38b8813d607
 )
 
-replace github.com/rclone/rclone v1.69.2 => github.com/chenxiaolong/rclone v1.69.2-rsaf
+replace github.com/rclone/rclone v1.69.3 => github.com/chenxiaolong/rclone v1.69.3-rsaf
 
 require (
 	cloud.google.com/go/auth v0.12.1 // indirect
@@ -72,7 +72,7 @@ require (
 	github.com/cronokirby/saferith v0.33.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dropbox/dropbox-sdk-go-unofficial/v6 v6.0.5 // indirect
-	github.com/ebitengine/purego v0.8.1 // indirect
+	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/emersion/go-message v0.18.0 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/emersion/go-vcard v0.0.0-20230815062825-8fda7d206ec9 // indirect
@@ -90,7 +90,7 @@ require (
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect

@@ -16,7 +16,7 @@ jobs:
           submodules: true
 
       - name: Validate gradle wrapper checksum
-        uses: gradle/actions/wrapper-validation@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4.3.1
+        uses: gradle/actions/wrapper-validation@8379f6a1328ee0e06e2bb424dadb7b159856a326 # v4.4.0
 
       - name: Set up JDK 21
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
@@ -26,7 +26,7 @@ jobs:
           cache: gradle
 
       - name: Set up Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           cache-dependency-path: rcbridge/go.sum
           go-version-file: rcbridge/go.mod

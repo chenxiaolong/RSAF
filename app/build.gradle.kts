@@ -118,7 +118,7 @@ android {
 
     compileSdk = 35
     buildToolsVersion = "35.0.0"
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "28.1.13356709"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
