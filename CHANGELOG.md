@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.7
 
 * Add new per-remote option for disabling thumbnail support ([Issue #155], [PR #156])
 
