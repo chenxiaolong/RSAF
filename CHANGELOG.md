@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add new per-remote option for disabling thumbnail support ([Issue #155], [PR #156])
+
 ### Version 3.6
 
 * Update rclone to 1.69.3 and update other dependencies too ([PR #154])
@@ -270,6 +274,7 @@
 [Issue #93]: https://github.com/chenxiaolong/RSAF/issues/93
 [Issue #106]: https://github.com/chenxiaolong/RSAF/issues/106
 [Issue #119]: https://github.com/chenxiaolong/RSAF/issues/119
+[Issue #155]: https://github.com/chenxiaolong/RSAF/issues/155
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -373,3 +378,4 @@
 [PR #145]: https://github.com/chenxiaolong/RSAF/pull/145
 [PR #150]: https://github.com/chenxiaolong/RSAF/pull/150
 [PR #154]: https://github.com/chenxiaolong/RSAF/pull/154
+[PR #156]: https://github.com/chenxiaolong/RSAF/pull/156
