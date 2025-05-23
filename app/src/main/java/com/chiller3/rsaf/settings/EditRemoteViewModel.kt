@@ -28,14 +28,15 @@ data class EditRemoteActivityActions(
     val finish: Boolean = false,
 )
 
-data class RemoteConfigState(
-    val allowExternalAccess: Boolean? = null,
-    val allowLockedAccess: Boolean? = null,
-    val dynamicShortcut: Boolean? = null,
-    val vfsCaching: Boolean? = null,
-    val reportUsage: Boolean? = null,
+data class RemoteState(
+    val config: RcloneRpc.RemoteConfig? = null,
     val features: RbRemoteFeaturesResult? = null,
-)
+) {
+    val allowExternalAccessOrDefault: Boolean?
+        get() = config?.hardBlockedOrDefault?.let { !it }
+    val allowLockedAccessOrDefault: Boolean?
+        get() = config?.softBlockedOrDefault?.let { !it }
+}
 
 class EditRemoteViewModel : ViewModel() {
     companion object {
@@ -50,11 +51,11 @@ class EditRemoteViewModel : ViewModel() {
             refreshRemotes(false)
         }
 
-    private val _remotes = MutableStateFlow<Map<String, Map<String, String>>>(emptyMap())
-    val remotes = _remotes.asStateFlow()
+    private val _remoteConfigs = MutableStateFlow<Map<String, RcloneRpc.RemoteConfig>>(emptyMap())
+    val remoteConfigs = _remoteConfigs.asStateFlow()
 
-    private val _remoteConfig = MutableStateFlow(RemoteConfigState())
-    val remoteConfig = _remoteConfig.asStateFlow()
+    private val _remoteState = MutableStateFlow(RemoteState())
+    val remoteState = _remoteState.asStateFlow()
 
     private val _alerts = MutableStateFlow<List<EditRemoteAlert>>(emptyList())
     val alerts = _alerts.asStateFlow()
@@ -64,45 +65,24 @@ class EditRemoteViewModel : ViewModel() {
 
     private suspend fun refreshRemotesInternal(force: Boolean) {
         try {
-            if (_remotes.value.isEmpty() || force) {
+            if (_remoteConfigs.value.isEmpty() || force) {
                 withContext(Dispatchers.IO) {
-                    _remotes.update { RcloneRpc.remotes }
+                    _remoteConfigs.update { RcloneRpc.remoteConfigs }
                 }
             }
 
-            val config = remotes.value[remote]
+            val config = remoteConfigs.value[remote]
 
             if (config != null) {
-                _remoteConfig.update {
-                    it.copy(
-                        allowExternalAccess = !RcloneRpc.getCustomBoolOpt(
-                            config,
-                            RcloneRpc.CUSTOM_OPT_HARD_BLOCKED,
-                        ),
-                        allowLockedAccess = !RcloneRpc.getCustomBoolOpt(
-                            config,
-                            RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED,
-                        ),
-                        dynamicShortcut = RcloneRpc.getCustomBoolOpt(
-                            config,
-                            RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT,
-                        ),
-                        vfsCaching = RcloneRpc.getCustomBoolOpt(
-                            config,
-                            RcloneRpc.CUSTOM_OPT_VFS_CACHING,
-                        ),
-                        reportUsage = RcloneRpc.getCustomBoolOpt(
-                            config,
-                            RcloneRpc.CUSTOM_OPT_REPORT_USAGE,
-                        ),
-                    )
+                _remoteState.update {
+                    it.copy(config = config)
                 }
 
                 // Only calculate this once since the value can't change and it requires
                 // initializing the backend, which may perform network calls.
-                if (_remoteConfig.value.features == null) {
+                if (_remoteState.value.features == null) {
                     withContext(Dispatchers.IO) {
-                        _remoteConfig.update {
+                        _remoteState.update {
                             val error = RbError()
                             val features = Rcbridge.rbRemoteFeatures("$remote:", error)
                                 ?: throw error.toException("rbRemoteFeatures")
@@ -113,7 +93,7 @@ class EditRemoteViewModel : ViewModel() {
                 }
             } else {
                 // This will happen after renaming or deleting the remote.
-                _remoteConfig.update { RemoteConfigState() }
+                _remoteState.update { RemoteState() }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to refresh remotes", e)
@@ -133,44 +113,49 @@ class EditRemoteViewModel : ViewModel() {
 
     private fun setCustomOpt(
         remote: String,
-        opt: String,
-        value: Boolean,
+        config: RcloneRpc.RemoteConfig,
         onSuccess: (() -> Unit)? = null,
     ) {
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    RcloneRpc.setRemoteOptions(remote, mapOf(opt to value.toString()))
+                    RcloneRpc.setRemoteConfig(remote, config)
                 }
                 refreshRemotesInternal(true)
                 onSuccess?.let { it() }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to set $remote config option $opt to $value", e)
+                Log.w(TAG, "Failed to set $remote config $config", e)
+                // We only set one option at a time.
+                val opt = config.toMap().keys.first()
                 _alerts.update { it + EditRemoteAlert.SetConfigFailed(remote, opt, e.toString()) }
             }
         }
     }
 
     fun setExternalAccess(allow: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED, !allow) {
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(hardBlocked = !allow)) {
             _activityActions.update { it.copy(refreshRoots = true) }
         }
     }
 
     fun setLockedAccess(allow: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED, !allow)
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(softBlocked = !allow))
     }
 
     fun setDynamicShortcut(enabled: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT, enabled)
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(dynamicShortcut = enabled))
+    }
+
+    fun setThumbnails(enabled: Boolean) {
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(thumbnails = enabled))
     }
 
     fun setVfsCaching(enabled: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_VFS_CACHING, enabled)
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(vfsCaching = enabled))
     }
 
     fun setReportUsage(enabled: Boolean) {
-        setCustomOpt(remote, RcloneRpc.CUSTOM_OPT_REPORT_USAGE, enabled) {
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(reportUsage = enabled)) {
             _activityActions.update { it.copy(refreshRoots = true) }
         }
     }

@@ -71,6 +71,8 @@
     <string name="pref_edit_remote_allow_locked_access_desc_off">While RSAF is locked, files are hidden from external apps and new file operations are blocked. Ongoing operations with files that are already open are unaffected.</string>
     <string name="pref_edit_remote_dynamic_shortcut_name">Show in launcher shortcuts</string>
     <string name="pref_edit_remote_dynamic_shortcut_desc">Include this remote in the list of shortcuts when long pressing RSAF\'s launcher icon.</string>
+    <string name="pref_edit_remote_thumbnails_name">Enable thumbnails</string>
+    <string name="pref_edit_remote_thumbnails_desc">Allow showing thumbnails for images, videos, and music (album art). This may result in additional network traffic when browsing files.</string>
     <string name="pref_edit_remote_vfs_caching_name">Enable VFS caching</string>
     <string name="pref_edit_remote_vfs_caching_desc_loading">(Checking if streaming is supported…)</string>
     <string name="pref_edit_remote_vfs_caching_desc_optional">VFS caching enables support for random writes and allows failed uploads to be retried. However, files do not begin uploading until the client app closes them.</string>

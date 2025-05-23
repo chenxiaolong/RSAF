@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -16,15 +16,18 @@ object RcloneRpc {
 
     private const val CUSTOM_OPT_PREFIX = "rsaf:"
     // This is called hidden due to backwards compatibility.
-    const val CUSTOM_OPT_HARD_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
-    const val CUSTOM_OPT_SOFT_BLOCKED = CUSTOM_OPT_PREFIX + "soft_blocked"
-    const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
-    const val CUSTOM_OPT_VFS_CACHING = CUSTOM_OPT_PREFIX + "vfs_caching"
-    const val CUSTOM_OPT_REPORT_USAGE = CUSTOM_OPT_PREFIX + "report_usage"
+    private const val CUSTOM_OPT_HARD_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
+    private const val CUSTOM_OPT_SOFT_BLOCKED = CUSTOM_OPT_PREFIX + "soft_blocked"
+    private const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
+    private const val CUSTOM_OPT_THUMBNAILS = CUSTOM_OPT_PREFIX + "thumbnails"
+    private const val CUSTOM_OPT_VFS_CACHING = CUSTOM_OPT_PREFIX + "vfs_caching"
+    private const val CUSTOM_OPT_REPORT_USAGE = CUSTOM_OPT_PREFIX + "report_usage"
 
+    // Keep in sync with preferences_edit_remote.xml
     private const val DEFAULT_HARD_BLOCKED = false
     private const val DEFAULT_SOFT_BLOCKED = false
     private const val DEFAULT_DYNAMIC_SHORTCUT = false
+    private const val DEFAULT_THUMBNAILS = true
     private const val DEFAULT_VFS_CACHING = true
     private const val DEFAULT_REPORT_USAGE = false
 
@@ -59,8 +62,8 @@ object RcloneRpc {
             }
         }
 
-    /** All rclone remotes, along with their configurations. */
-    val remotes: Map<String, Map<String, String>>
+    /** All rclone remotes, along with their raw configurations. */
+    val remoteConfigsRaw: Map<String, Map<String, String>>
         get() {
             val output = invoke("config/dump", JSONObject())
             val result = mutableMapOf<String, Map<String, String>>()
@@ -77,6 +80,12 @@ object RcloneRpc {
             }
 
             return result
+        }
+
+    /** All rclone remotes, along with their configurations. */
+    val remoteConfigs: Map<String, RemoteConfig>
+        get() = remoteConfigsRaw.mapValues {
+            RemoteConfig(it.value)
         }
 
     /**
@@ -370,7 +379,7 @@ object RcloneRpc {
     }
 
     /** Directly and non-interactively set config key/value pairs for a remote. */
-    fun setRemoteOptions(remote: String, options: Map<String, String>) {
+    private fun setRemoteOptions(remote: String, options: Map<String, String>) {
         invoke("config/update", JSONObject()
             .put("name", remote)
             .put("parameters", JSONObject()
@@ -396,18 +405,48 @@ object RcloneRpc {
         return output.getString("obscured")
     }
 
-    /** Get the custom option boolean value or return the default if unset or invalid. */
-    fun getCustomBoolOpt(config: Map<String, String>, opt: String): Boolean {
-        val default = when (opt) {
-            CUSTOM_OPT_HARD_BLOCKED -> DEFAULT_HARD_BLOCKED
-            CUSTOM_OPT_SOFT_BLOCKED -> DEFAULT_SOFT_BLOCKED
-            CUSTOM_OPT_DYNAMIC_SHORTCUT -> DEFAULT_DYNAMIC_SHORTCUT
-            CUSTOM_OPT_VFS_CACHING -> DEFAULT_VFS_CACHING
-            CUSTOM_OPT_REPORT_USAGE -> DEFAULT_REPORT_USAGE
-            else -> throw IllegalArgumentException("Invalid custom option: $opt")
+    data class RemoteConfig(
+        val hardBlocked: Boolean? = null,
+        val softBlocked: Boolean? = null,
+        val dynamicShortcut: Boolean? = null,
+        val thumbnails: Boolean? = null,
+        val vfsCaching: Boolean? = null,
+        val reportUsage: Boolean? = null,
+    ) {
+        constructor(config: Map<String, String>) : this(
+            hardBlocked = config[CUSTOM_OPT_HARD_BLOCKED]?.toBooleanStrictOrNull(),
+            softBlocked = config[CUSTOM_OPT_SOFT_BLOCKED]?.toBooleanStrictOrNull(),
+            dynamicShortcut = config[CUSTOM_OPT_DYNAMIC_SHORTCUT]?.toBooleanStrictOrNull(),
+            thumbnails = config[CUSTOM_OPT_THUMBNAILS]?.toBooleanStrictOrNull(),
+            vfsCaching = config[CUSTOM_OPT_VFS_CACHING]?.toBooleanStrictOrNull(),
+            reportUsage = config[CUSTOM_OPT_REPORT_USAGE]?.toBooleanStrictOrNull(),
+        )
+
+        fun toMap(): Map<String, String> = buildMap {
+            hardBlocked?.let { put(CUSTOM_OPT_HARD_BLOCKED, it.toString()) }
+            softBlocked?.let { put(CUSTOM_OPT_SOFT_BLOCKED, it.toString()) }
+            dynamicShortcut?.let { put(CUSTOM_OPT_DYNAMIC_SHORTCUT, it.toString()) }
+            thumbnails?.let { put(CUSTOM_OPT_THUMBNAILS, it.toString()) }
+            vfsCaching?.let { put(CUSTOM_OPT_VFS_CACHING, it.toString()) }
+            reportUsage?.let { put(CUSTOM_OPT_REPORT_USAGE, it.toString()) }
         }
 
-        return config[opt]?.toBooleanStrictOrNull() ?: default
+        val hardBlockedOrDefault: Boolean
+            get() = hardBlocked ?: DEFAULT_HARD_BLOCKED
+        val softBlockedOrDefault: Boolean
+            get() = softBlocked ?: DEFAULT_SOFT_BLOCKED
+        val dynamicShortcutOrDefault: Boolean
+            get() = dynamicShortcut ?: DEFAULT_DYNAMIC_SHORTCUT
+        val thumbnailsOrDefault: Boolean
+            get() = thumbnails ?: DEFAULT_THUMBNAILS
+        val vfsCachingOrDefault: Boolean
+            get() = vfsCaching ?: DEFAULT_VFS_CACHING
+        val reportUsageOrDefault: Boolean
+            get() = reportUsage ?: DEFAULT_REPORT_USAGE
+    }
+
+    fun setRemoteConfig(remote: String, config: RemoteConfig) {
+        setRemoteOptions(remote, config.toMap())
     }
 
     data class Usage(

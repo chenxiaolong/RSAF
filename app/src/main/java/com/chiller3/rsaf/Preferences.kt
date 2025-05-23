@@ -49,6 +49,7 @@ class Preferences(private val context: Context) {
         const val PREF_ALLOW_EXTERNAL_ACCESS = "allow_external_access"
         const val PREF_ALLOW_LOCKED_ACCESS = "allow_locked_access"
         const val PREF_DYNAMIC_SHORTCUT = "dynamic_shortcut"
+        const val PREF_THUMBNAILS = "thumbnails"
         const val PREF_VFS_CACHING = "vfs_caching"
         const val PREF_REPORT_USAGE = "report_usage"
 

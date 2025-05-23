@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -70,6 +70,14 @@
             app:title="@string/pref_edit_remote_dynamic_shortcut_name"
             app:summary="@string/pref_edit_remote_dynamic_shortcut_desc"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="thumbnails"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_thumbnails_name"
+            app:summary="@string/pref_edit_remote_thumbnails_desc"
+            app:iconSpaceReserved="false"
+            app:defaultValue="true" />
 
         <SwitchPreferenceCompat
             app:key="vfs_caching"

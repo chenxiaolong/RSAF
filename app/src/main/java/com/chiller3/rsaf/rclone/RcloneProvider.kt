@@ -84,8 +84,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
             DocumentsContract.Document.FLAG_SUPPORTS_REMOVE or
             DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
-            DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
-            DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
+            DocumentsContract.Document.FLAG_SUPPORTS_WRITE
         private val DIRECTORY_PERMS =
             OsConstants.S_IRWXU or
             OsConstants.S_IRGRP or OsConstants.S_IXGRP or
@@ -273,7 +272,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
          * If the MIME type cannot be determined from the filename, then it is set to
          * [MIME_TYPE_BINARY].
          */
-        private fun addRowByDirEntry(row: MatrixCursor.RowBuilder, entry: RbDirEntry) {
+        private fun addRowByDirEntry(row: MatrixCursor.RowBuilder, entry: RbDirEntry,
+                                     allowThumbnails: Boolean) {
             var flags = DOCUMENT_FLAGS
             var mimeType: String
 
@@ -288,12 +288,32 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 }
             }
 
+            if (allowThumbnails) {
+                flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
+            }
+
             row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, entry.doc)
             row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, mimeType)
             row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, entry.name)
             row.add(DocumentsContract.Document.COLUMN_FLAGS, flags)
             row.add(DocumentsContract.Document.COLUMN_SIZE, entry.size)
             row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, entry.modTime)
+        }
+
+        private fun remoteConfigForDocument(
+            documentId: String,
+            configs: Map<String, RcloneRpc.RemoteConfig> = RcloneRpc.remoteConfigs,
+        ): Pair<String, RcloneRpc.RemoteConfig> {
+            val remote = splitRemote(documentId).first.trimEnd(':')
+            if (remote.isEmpty()) {
+                // Local paths are not exposed remotes in SAF.
+                throw IllegalArgumentException("Document ID is local file path")
+            }
+
+            val config = configs[remote]
+                ?: throw IllegalArgumentException("Remote does not exist: $remote")
+
+            return remote to config
         }
     }
 
@@ -409,27 +429,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    private fun enforceNotBlocked(vararg documentIds: String) {
-        val configs = RcloneRpc.remotes
+    private fun enforceNotBlocked(remote: String, config: RcloneRpc.RemoteConfig) {
+        if (config.hardBlockedOrDefault) {
+            throw SecurityException("Access to remote is hard blocked: $remote")
+        }
 
-        for (documentId in documentIds) {
-            val remote = splitRemote(documentId).first.trimEnd(':')
-            if (remote.isEmpty()) {
-                // Local paths are not exposed remotes in SAF.
-                continue
-            }
-
-            val config = configs[remote]
-                ?: throw IllegalArgumentException("Remote does not exist: $remote")
-
-            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)) {
-                throw SecurityException("Access to remote is hard blocked: $remote")
-            }
-
-            val softBlocked = RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_SOFT_BLOCKED)
-            if (softBlocked && AppLock.isLocked) {
-                throw FileNotFoundException("Remote inaccessible while app is locked: $remote")
-            }
+        val softBlocked = config.softBlockedOrDefault
+        if (softBlocked && AppLock.isLocked) {
+            throw FileNotFoundException("Remote inaccessible while app is locked: $remote")
         }
     }
 
@@ -442,13 +449,13 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 flags = flags or DocumentsContract.Root.FLAG_LOCAL_ONLY
             }
 
-            for ((remote, config) in RcloneRpc.remotes) {
-                if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)) {
+            for ((remote, config) in RcloneRpc.remoteConfigs) {
+                if (config.hardBlockedOrDefault) {
                     debugLog("Skipping blocked remote: $remote")
                     continue
                 }
 
-                val usage = if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_REPORT_USAGE)) {
+                val usage = if (config.reportUsageOrDefault) {
                     debugLog("Querying filesystem usage: $remote")
                     RcloneRpc.getUsage("$remote:")
                 } else {
@@ -482,7 +489,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<String>?,
                                      sortOrder: String?): Cursor {
         debugLog("queryChildDocuments($parentDocumentId, ${projection.contentToString()}, $sortOrder)")
-        enforceNotBlocked(parentDocumentId)
+        val (remote, config) = remoteConfigForDocument(parentDocumentId)
+        enforceNotBlocked(remote, config)
 
         val error = RbError()
 
@@ -491,7 +499,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 ?: throw error.toException("rbDocListDir")
 
             for (i in 0 until entries.size()) {
-                addRowByDirEntry(newRow(), entries.get(i))
+                addRowByDirEntry(newRow(), entries.get(i), config.thumbnailsOrDefault)
             }
 
             val uri = DocumentsContract.buildChildDocumentsUri(
@@ -502,14 +510,15 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
         debugLog("queryDocument($documentId, ${projection.contentToString()})")
-        enforceNotBlocked(documentId)
+        val (remote, config) = remoteConfigForDocument(documentId)
+        enforceNotBlocked(remote, config)
 
         val error = RbError()
         val entry = Rcbridge.rbDocStat(documentId, error)
             ?: throw error.toException("rbDocStat")
 
         return MatrixCursor(getDocumentProjection(projection)).apply {
-            addRowByDirEntry(newRow(), entry)
+            addRowByDirEntry(newRow(), entry, config.thumbnailsOrDefault)
         }
     }
 
@@ -520,7 +529,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
         debugLog("isChildDocument($parentDocumentId, $documentId)")
-        enforceNotBlocked(parentDocumentId, documentId)
+        val configs = RcloneRpc.remoteConfigs
+        for (id in arrayOf(parentDocumentId, documentId)) {
+            val (remote, config) = remoteConfigForDocument(id, configs)
+            enforceNotBlocked(remote, config)
+        }
 
         // AOSP's FileSystemProvider [1] returns true [2] if parentDocumentId and documentId refer
         // to the same path, but this conflicts with the documented behavior of isChildDocument(),
@@ -547,7 +560,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun openDocument(documentId: String, mode: String,
                               signal: CancellationSignal?): ParcelFileDescriptor {
         debugLog("openDocument($documentId, $mode, $signal)")
-        enforceNotBlocked(documentId)
+        val (remote, config) = remoteConfigForDocument(documentId)
+        enforceNotBlocked(remote, config)
 
         val pfdMode = ParcelFileDescriptor.parseMode(mode)
         val pfdModeHasFlags = { flags: Int ->
@@ -602,7 +616,13 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun openDocumentThumbnail(documentId: String, sizeHint: Point,
                                        signal: CancellationSignal?): AssetFileDescriptor? {
         debugLog("openDocumentThumbnail($documentId, $sizeHint, $signal)")
-        enforceNotBlocked(documentId)
+        val (remote, config) = remoteConfigForDocument(documentId)
+        enforceNotBlocked(remote, config)
+
+        if (!config.thumbnailsOrDefault) {
+            Log.w(TAG, "Thumbnails are disabled for remote: $remote")
+            return null
+        }
 
         val projection = arrayOf(DocumentsContract.Document.COLUMN_MIME_TYPE)
         val mimeType = queryDocument(documentId, projection).use { cursor ->
@@ -653,7 +673,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun createDocument(parentDocumentId: String, mimeType: String,
                                 displayName: String): String {
         debugLog("createDocument($parentDocumentId, $mimeType, $displayName)")
-        enforceNotBlocked(parentDocumentId)
+        val (remote, config) = remoteConfigForDocument(parentDocumentId)
+        enforceNotBlocked(remote, config)
 
         val isDir = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
         // Adding a .bin extension is allowed, but AOSP's FileSystemProvider does not do it and
@@ -722,7 +743,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun renameDocument(documentId: String, displayName: String): String {
         debugLog("renameDocument($documentId, $displayName)")
-        enforceNotBlocked(documentId)
+        val (remote, config) = remoteConfigForDocument(documentId)
+        enforceNotBlocked(remote, config)
 
         waitUntilUploadsDone(documentId)
 
@@ -748,7 +770,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      */
     override fun deleteDocument(documentId: String) {
         debugLog("deleteDocument($documentId)")
-        enforceNotBlocked(documentId)
+        val (remote, config) = remoteConfigForDocument(documentId)
+        enforceNotBlocked(remote, config)
 
         val error = RbError()
         if (!Rcbridge.rbDocRemove(documentId, true, error)
@@ -762,7 +785,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun removeDocument(documentId: String, parentDocumentId: String) {
         debugLog("removeDocument($documentId, $parentDocumentId)")
-        enforceNotBlocked(documentId, parentDocumentId)
+        val configs = RcloneRpc.remoteConfigs
+        for (id in arrayOf(documentId, parentDocumentId)) {
+            val (remote, config) = remoteConfigForDocument(id, configs)
+            enforceNotBlocked(remote, config)
+        }
 
         if (!isChildDocument(parentDocumentId, documentId)) {
             throw IllegalArgumentException("$documentId is not a child of $parentDocumentId")
@@ -818,7 +845,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
         debugLog("copyDocument($sourceDocumentId, $targetParentDocumentId)")
-        enforceNotBlocked(sourceDocumentId, targetParentDocumentId)
+        val configs = RcloneRpc.remoteConfigs
+        for (id in arrayOf(sourceDocumentId, targetParentDocumentId)) {
+            val (remote, config) = remoteConfigForDocument(id, configs)
+            enforceNotBlocked(remote, config)
+        }
 
         waitUntilUploadsDone(sourceDocumentId)
 
@@ -828,7 +859,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String,
                               targetParentDocumentId: String): String {
         debugLog("moveDocument($sourceDocumentId, $sourceParentDocumentId, $targetParentDocumentId)")
-        enforceNotBlocked(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)
+        val configs = RcloneRpc.remoteConfigs
+        for (id in arrayOf(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)) {
+            val (remote, config) = remoteConfigForDocument(id, configs)
+            enforceNotBlocked(remote, config)
+        }
 
         waitUntilUploadsDone(sourceDocumentId)
 

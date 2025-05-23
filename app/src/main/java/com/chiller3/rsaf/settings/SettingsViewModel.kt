@@ -24,7 +24,6 @@ import java.io.File
 
 data class Remote(
     val name: String,
-    val config: Map<String, String>,
     val provider: RcloneRpc.Provider?,
 )
 
@@ -77,8 +76,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             val r = withContext(Dispatchers.IO) {
                 val providers = RcloneRpc.providers
 
-                RcloneRpc.remotes.map {
-                    Remote(it.key, it.value, providers[it.value["type"]])
+                RcloneRpc.remoteConfigsRaw.map {
+                    Remote(it.key, providers[it.value["type"]])
                 }.sortedBy { it.name }
             }
 

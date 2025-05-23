@@ -113,10 +113,10 @@ object VfsCache {
 
         Log.d(TAG, "Initializing VFS for remotes: $neededRemotes")
 
-        for ((remote, config) in RcloneRpc.remotes) {
+        for ((remote, config) in RcloneRpc.remoteConfigs) {
             if (!neededRemotes.remove(remote)) {
                 continue
-            } else if (!RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_VFS_CACHING)) {
+            } else if (!config.vfsCachingOrDefault) {
                 // The user will have to re-enable VFS caching to upload these.
                 continue
             }

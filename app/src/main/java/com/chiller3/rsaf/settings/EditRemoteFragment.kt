@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -60,6 +60,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefAllowExternalAccess: SwitchPreferenceCompat
     private lateinit var prefAllowLockedAccess: SwitchPreferenceCompat
     private lateinit var prefDynamicShortcut: SwitchPreferenceCompat
+    private lateinit var prefThumbnails: SwitchPreferenceCompat
     private lateinit var prefVfsCaching: SwitchPreferenceCompat
     private lateinit var prefReportUsage: SwitchPreferenceCompat
 
@@ -92,6 +93,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefDynamicShortcut = findPreference(Preferences.PREF_DYNAMIC_SHORTCUT)!!
         prefDynamicShortcut.onPreferenceChangeListener = this
 
+        prefThumbnails = findPreference(Preferences.PREF_THUMBNAILS)!!
+        prefThumbnails.onPreferenceChangeListener = this
+
         prefVfsCaching = findPreference(Preferences.PREF_VFS_CACHING)!!
         prefVfsCaching.onPreferenceChangeListener = this
 
@@ -102,7 +106,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.remotes.collect {
+                viewModel.remoteConfigs.collect {
                     Log.d(TAG, "Updating dynamic shortcuts")
                     updateShortcuts(it)
                 }
@@ -111,42 +115,48 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.remoteConfig.collect {
-                    prefOpenRemote.isEnabled = it.allowExternalAccess == true
+                viewModel.remoteState.collect { state ->
+                    prefOpenRemote.isEnabled = state.allowExternalAccessOrDefault == true
 
-                    prefAllowExternalAccess.isEnabled = it.allowExternalAccess != null
-                    if (it.allowExternalAccess != null) {
-                        prefAllowExternalAccess.isChecked = it.allowExternalAccess
+                    prefAllowExternalAccess.isEnabled = state.allowExternalAccessOrDefault != null
+                    state.allowExternalAccessOrDefault?.let {
+                        prefAllowExternalAccess.isChecked = it
                     }
 
-                    prefAllowLockedAccess.isEnabled = it.allowExternalAccess == true
+                    prefAllowLockedAccess.isEnabled = state.allowExternalAccessOrDefault == true
                             && prefs.requireAuth
-                    if (it.allowLockedAccess != null) {
-                        prefAllowLockedAccess.isChecked = it.allowLockedAccess
+                    state.allowLockedAccessOrDefault?.let {
+                        prefAllowLockedAccess.isChecked = it
                     }
 
-                    prefDynamicShortcut.isEnabled = it.allowExternalAccess == true
-                    if (it.dynamicShortcut != null) {
-                        prefDynamicShortcut.isChecked = it.dynamicShortcut
+                    prefDynamicShortcut.isEnabled = state.allowExternalAccessOrDefault == true
+                    state.config?.dynamicShortcutOrDefault?.let {
+                        prefDynamicShortcut.isChecked = it
                     }
 
-                    prefVfsCaching.isEnabled = it.allowExternalAccess == true
-                            && it.features?.putStream == true
-                    if (it.vfsCaching != null) {
-                        prefVfsCaching.isChecked = it.vfsCaching
+                    prefThumbnails.isEnabled = state.allowExternalAccessOrDefault == true
+                    state.config?.thumbnailsOrDefault?.let {
+                        prefThumbnails.isChecked = it
                     }
-                    prefVfsCaching.summary = when (it.features?.putStream) {
+
+                    prefVfsCaching.isEnabled = state.allowExternalAccessOrDefault == true
+                            && state.features?.putStream == true
+                    state.config?.vfsCachingOrDefault?.let {
+                        prefVfsCaching.isChecked = it
+                    }
+                    prefVfsCaching.summary = when (state.features?.putStream) {
                         null -> getString(R.string.pref_edit_remote_vfs_caching_desc_loading)
                         true -> getString(R.string.pref_edit_remote_vfs_caching_desc_optional)
                         false -> getString(R.string.pref_edit_remote_vfs_caching_desc_required)
                     }
 
-                    prefReportUsage.isEnabled = it.allowExternalAccess == true
-                            && it.features?.about == true
-                    if (it.reportUsage != null) {
-                        prefReportUsage.isChecked = it.reportUsage
+                    prefReportUsage.isEnabled = state.allowExternalAccessOrDefault == true
+                            && state.features?.about == true
+
+                    state.config?.reportUsageOrDefault?.let {
+                        prefReportUsage.isChecked = it
                     }
-                    prefReportUsage.summary = when (it.features?.about) {
+                    prefReportUsage.summary = when (state.features?.about) {
                         null -> getString(R.string.pref_edit_remote_report_usage_desc_loading)
                         true -> getString(R.string.pref_edit_remote_report_usage_desc_supported)
                         false -> getString(R.string.pref_edit_remote_report_usage_desc_unsupported)
@@ -254,7 +264,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                 RemoteNameDialogFragment.newInstance(
                     requireContext(),
                     RemoteNameDialogAction.Duplicate(viewModel.remote),
-                    viewModel.remotes.value.keys.toTypedArray(),
+                    viewModel.remoteConfigs.value.keys.toTypedArray(),
                 ).show(parentFragmentManager.beginTransaction(), TAG_DUPLICATE_REMOTE)
                 return true
             }
@@ -279,6 +289,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             }
             prefDynamicShortcut -> {
                 viewModel.setDynamicShortcut(newValue as Boolean)
+            }
+            prefThumbnails -> {
+                viewModel.setThumbnails(newValue as Boolean)
             }
             prefVfsCaching -> {
                 viewModel.setVfsCaching(newValue as Boolean)
@@ -327,7 +340,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             RemoteNameDialogFragment.newInstance(
                 requireContext(),
                 RemoteNameDialogAction.Rename(viewModel.remote),
-                viewModel.remotes.value.keys.toTypedArray(),
+                viewModel.remoteConfigs.value.keys.toTypedArray(),
             ).show(parentFragmentManager.beginTransaction(), TAG_RENAME_REMOTE)
         }
     }
@@ -342,7 +355,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         }
     }
 
-    private fun updateShortcuts(remotes: Map<String, Map<String, String>>) {
+    private fun updateShortcuts(remoteConfigs: Map<String, RcloneRpc.RemoteConfig>) {
         val context = requireContext()
 
         val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
@@ -350,9 +363,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         val shortcuts = mutableListOf<ShortcutInfoCompat>()
         var rank = 0
 
-        for ((remote, config) in remotes) {
-            if (RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_HARD_BLOCKED)
-                || !RcloneRpc.getCustomBoolOpt(config, RcloneRpc.CUSTOM_OPT_DYNAMIC_SHORTCUT)) {
+        for ((remote, config) in remoteConfigs) {
+            if (config.hardBlockedOrDefault || !config.dynamicShortcutOrDefault) {
                 continue
             }
 
