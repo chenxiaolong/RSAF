@@ -157,8 +157,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             return Pair(Rcbridge.rbPathJoin(parent, baseName), ext)
         }
 
-        /** Normalize a document ID so that there are no duplicate or trailing slashes. */
-        private fun normalize(documentId: String): String {
+        /** Split a document ID into its path components, starting at the remote root. */
+        private fun splitComponents(documentId: String): List<String> {
             val components = arrayListOf<String>()
             var currentDoc = documentId
 
@@ -170,7 +170,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 }
 
                 if (parent.isEmpty() || parent.endsWith(':')) {
-                    // Root of the remote
+                    // Root of the remote.
                     components.add(parent)
                     break
                 }
@@ -178,11 +178,27 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 currentDoc = parent
             }
 
-            return components.asReversed().joinToString("/")
+            return components.asReversed()
         }
 
-        /** Split a path for traversing [VfsNode]. */
-        private fun vfsPath(documentId: String): List<String> = normalize(documentId).split('/')
+        /**
+         * Convert a list of path components to a list of document IDs representing each part of the
+         * path. The list of components must be absolute, as the first component will be treated as
+         * the remote.
+         */
+        private fun componentsToDocumentIds(components: List<String>): List<String> {
+            var documentId = ""
+
+            return components.mapIndexed { index, name ->
+                if (index == 0) {
+                    documentId = name
+                } else {
+                    documentId = Rcbridge.rbPathJoin(documentId, name)
+                }
+
+                documentId
+            }
+        }
 
         /**
          * Construct a document ID with a counter.
@@ -315,6 +331,9 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
             return remote to config
         }
+
+        private fun <T> List<T>.startsWith(prefix: List<T>): Boolean =
+            prefix.size <= size && prefix.withIndex().all { it.value == this[it.index] }
     }
 
     private lateinit var prefs: Preferences
@@ -345,7 +364,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     private fun waitUntilUploadsDone(documentId: String) {
-        val path = vfsPath(documentId)
+        val path = splitComponents(documentId)
 
         synchronized(inUseTracker) {
             while (inUseTracker.contains(path)) {
@@ -486,8 +505,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    override fun queryChildDocuments(parentDocumentId: String, projection: Array<String>?,
-                                     sortOrder: String?): Cursor {
+    override fun queryChildDocuments(
+        parentDocumentId: String,
+        projection: Array<String>?,
+        sortOrder: String?,
+    ): Cursor {
         debugLog("queryChildDocuments($parentDocumentId, ${projection.contentToString()}, $sortOrder)")
         val (remote, config) = remoteConfigForDocument(parentDocumentId)
         enforceNotBlocked(remote, config)
@@ -541,14 +563,54 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         // given parent". We'll match AOSP's behavior because some apps expect providers to behave
         // this way.
         //
-        // [1] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/com/android/internal/content/FileSystemProvider.java;l=141
-        // [2] https://cs.android.com/android/platform/superproject/+/android-13.0.0_r49:frameworks/base/core/java/android/os/FileUtils.java;l=917
+        // [1] https://cs.android.com/android/platform/superproject/+/android-15.0.0_r36:frameworks/base/core/java/com/android/internal/content/FileSystemProvider.java;l=143
+        // [2] https://cs.android.com/android/platform/superproject/+/android-15.0.0_r36:frameworks/base/core/java/android/os/FileUtils.java;l=1022
 
-        val normalizedParentDocumentId = normalize(parentDocumentId)
-        val normalizedDocumentId = normalize(documentId)
+        val parentDocumentIdComponents = splitComponents(parentDocumentId)
+        val documentIdComponents = splitComponents(documentId)
 
-        return normalizedDocumentId == normalizedParentDocumentId
-                || normalizedDocumentId.startsWith("$normalizedParentDocumentId/")
+        return documentIdComponents.startsWith(parentDocumentIdComponents)
+    }
+
+    override fun findDocumentPath(
+        parentDocumentId: String?,
+        childDocumentId: String,
+    ): DocumentsContract.Path {
+        debugLog("findDocumentPath($parentDocumentId, $childDocumentId)")
+        val configs = RcloneRpc.remoteConfigs
+        for (id in arrayOf(parentDocumentId, childDocumentId)) {
+            if (id != null) {
+                val (remote, config) = remoteConfigForDocument(id, configs)
+                enforceNotBlocked(remote, config)
+            }
+        }
+
+        // The documentation does not say if this method should operate purely on paths or not.
+        // We'll match the behavior of AOSP's FileSystemProvider here [1].
+        //
+        // [1] https://cs.android.com/android/platform/superproject/+/android-15.0.0_r36:frameworks/base/core/java/com/android/internal/content/FileSystemProvider.java;l=230
+        if (!documentExists(childDocumentId)) {
+            throw FileNotFoundException("$childDocumentId does not exist")
+        }
+
+        val (childRemote, _) = splitRemote(childDocumentId)
+        val actualParentDocumentId = parentDocumentId ?: childRemote
+        val parentComponentIds = componentsToDocumentIds(splitComponents(actualParentDocumentId))
+        val childComponentIds = componentsToDocumentIds(splitComponents(childDocumentId))
+
+        if (!childComponentIds.startsWith(parentComponentIds)) {
+            throw FileNotFoundException("$childDocumentId is not a child of $actualParentDocumentId")
+        }
+
+        return DocumentsContract.Path(
+            if (parentDocumentId == null) {
+                childRemote
+            } else {
+                null
+            },
+            // The path should include the parent document ID.
+            childComponentIds.subList(parentComponentIds.size - 1, childComponentIds.size),
+        )
     }
 
     /**
@@ -980,7 +1042,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 synchronized(inUseTracker) {
                     debugLog("markUsed()")
 
-                    inUseTracker.add(vfsPath(documentId))
+                    inUseTracker.add(splitComponents(documentId))
                 }
             }
         }
@@ -990,7 +1052,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 synchronized(inUseTracker) {
                     debugLog("markUnused()")
 
-                    inUseTracker.remove(vfsPath(documentId))
+                    inUseTracker.remove(splitComponents(documentId))
 
                     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                     (inUseTracker as Object).notifyAll()

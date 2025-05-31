@@ -29,6 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.io.FileNotFoundException
 import java.time.Duration
 import java.time.Instant
 import kotlin.reflect.KMutableProperty0
@@ -104,6 +105,12 @@ class RcloneProviderTest {
 
     private fun docUri(doc: String): Uri =
         DocumentsContract.buildDocumentUri(BuildConfig.DOCUMENTS_AUTHORITY, doc)
+
+    private fun docTreeUri(parent: String, child: String): Uri =
+        DocumentsContract.buildDocumentUriUsingTree(
+            DocumentsContract.buildTreeDocumentUri(BuildConfig.DOCUMENTS_AUTHORITY, parent),
+            child,
+        )
 
     private fun docUriFromRoot(vararg components: String): Uri =
         docUri(docFromRoot(*components))
@@ -256,7 +263,7 @@ class RcloneProviderTest {
 
     @Test
     fun isChildDocument() {
-        // Our implementation is defined to operate on paths only and will not perform IO
+        // Our implementation is defined to operate on paths only and will not perform IO.
 
         val isChild = { parent: Uri, child: Uri ->
             DocumentsContract.isChildDocument(appContext.contentResolver, parent, child)
@@ -274,6 +281,69 @@ class RcloneProviderTest {
         assertTrue(isChild(docUri("${rootDoc}dir/"), docUriFromRoot("dir", "child")))
         assertTrue(isChild(docUri("${rootDoc}dir/"), docUri("${rootDoc}dir/child/")))
         assertTrue(isChild(docUri("${rootDoc}//dir/////"), docUri("${rootDoc}dir///nested//child///")))
+    }
+
+    @Test
+    fun findDocumentPath() {
+        // The DocumentsProvider implementation calls findDocumentPath(parent, child) if passed a
+        // tree URI. Otherwise, it calls findDocumentPath(null, child). We have no way of testing
+        // the latter scenario because only apps with the MANAGE_DOCUMENTS permission can make those
+        // calls and this is a privileged permission. We also can't test the scenario where the
+        // child is not a descendant of the parent because DocumentsProvider.enforceTree() calls
+        // isChildDocument() for all tree URIs and throws a SecurityException if it returns false.
+        val findPath = { uri: Uri ->
+            DocumentsContract.findDocumentPath(appContext.contentResolver, uri)
+        }
+
+        File(rootDir, "a").apply {
+            assertTrue(mkdir())
+            File(this, "b").apply {
+                assertTrue(mkdir())
+                File(this, "c").apply {
+                    assertTrue(createNewFile())
+                }
+            }
+        }
+
+        assertEquals(
+            DocumentsContract.Path(null, listOf(docFromRoot())),
+            findPath(docTreeUri(docFromRoot(), docFromRoot())),
+        )
+        assertEquals(
+            DocumentsContract.Path(null, listOf(docFromRoot(), docFromRoot("a"))),
+            findPath(docTreeUri(docFromRoot(), docFromRoot("a"))),
+        )
+        assertEquals(
+            DocumentsContract.Path(null, listOf(
+                docFromRoot(),
+                docFromRoot("a"),
+                docFromRoot("a", "b"),
+            )),
+            findPath(docTreeUri(docFromRoot(), docFromRoot("a", "b"))),
+        )
+        assertEquals(
+            DocumentsContract.Path(null, listOf(docFromRoot("a"))),
+            findPath(docTreeUri(docFromRoot("a"), docFromRoot("a"))),
+        )
+        assertEquals(
+            DocumentsContract.Path(null, listOf(
+                docFromRoot("a"),
+                docFromRoot("a", "b"),
+            )),
+            findPath(docTreeUri(docFromRoot("a"), docFromRoot("a", "b"))),
+        )
+        assertEquals(
+            DocumentsContract.Path(null, listOf(
+                docFromRoot("a"),
+                docFromRoot("a", "b"),
+                docFromRoot("a", "b", "c"),
+            )),
+            findPath(docTreeUri(docFromRoot("a"), docFromRoot("a", "b", "c"))),
+        )
+        // This function does not operate purely on paths.
+        assertThrows(FileNotFoundException::class.java) {
+            findPath(docTreeUri(docFromRoot(), docFromRoot("z")))
+        }
     }
 
     @Test
