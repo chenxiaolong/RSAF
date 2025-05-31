@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Add support for the `findDocumentPath` SAF call ([Issue #158], [PR #160])
+* Update dependencies ([PR #161])
 
 ### Version 3.7
 
@@ -385,3 +386,4 @@
 [PR #154]: https://github.com/chenxiaolong/RSAF/pull/154
 [PR #156]: https://github.com/chenxiaolong/RSAF/pull/156
 [PR #160]: https://github.com/chenxiaolong/RSAF/pull/160
+[PR #161]: https://github.com/chenxiaolong/RSAF/pull/161
