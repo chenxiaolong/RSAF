@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.8
 
 * Add support for the `findDocumentPath` SAF call ([Issue #158], [PR #160])
 * Update dependencies ([PR #161])
