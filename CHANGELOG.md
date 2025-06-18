@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.9
 
 * Update rclone to 1.70.0, update dependencies, and target API 36 ([PR #162])
 
