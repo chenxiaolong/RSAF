@@ -6,7 +6,6 @@
 package com.chiller3.rsaf.settings
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -14,6 +13,7 @@ import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.viewModels
@@ -420,7 +420,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 return true
             }
             preference === prefVersion -> {
-                val uri = Uri.parse(BuildConfig.PROJECT_URL_AT_COMMIT)
+                val uri = BuildConfig.PROJECT_URL_AT_COMMIT.toUri()
                 startActivity(Intent(Intent.ACTION_VIEW, uri))
                 return true
             }
@@ -456,7 +456,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val intent = Intent(
                         Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                        Uri.parse("package:${BuildConfig.APPLICATION_ID}"),
+                        "package:${BuildConfig.APPLICATION_ID}".toUri(),
                     )
 
                     startActivity(intent)

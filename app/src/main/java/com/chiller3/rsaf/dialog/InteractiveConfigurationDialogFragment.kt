@@ -60,7 +60,7 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
 
         /** Replace newlines with spaces unless there are multiple newlines in a row. */
         private fun reflowString(msg: String): String =
-            msg.replace("([^\\n])\\n([^\\n]|\$)".toRegex(), "$1 $2")
+            msg.replace("([^\\n])\\n([^\\n]|$)".toRegex(), "$1 $2")
 
         private fun tryReveal(text: String, isPassword: Boolean): String {
             var value = text

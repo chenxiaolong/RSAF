@@ -20,7 +20,7 @@ class LongClickablePreference(context: Context, attrs: AttributeSet?) : Preferen
         super.onBindViewHolder(holder)
 
         holder.itemView.setOnLongClickListener {
-            onPreferenceLongClickListener?.onPreferenceLongClick(this) ?: true
+            onPreferenceLongClickListener?.onPreferenceLongClick(this) != false
         }
     }
 

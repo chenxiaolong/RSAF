@@ -49,7 +49,7 @@ object Thumbnailer {
         ) {
             signal?.throwIfCanceled()
 
-            decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE)
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
 
             val widthScale = info.size.width / size.width
             val heightScale = info.size.height / size.height
