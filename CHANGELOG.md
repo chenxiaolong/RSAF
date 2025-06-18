@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.70.0, update dependencies, and target API 36 ([PR #162])
+
 ### Version 3.8
 
 * Add support for the `findDocumentPath` SAF call ([Issue #158], [PR #160])
@@ -387,3 +391,4 @@
 [PR #156]: https://github.com/chenxiaolong/RSAF/pull/156
 [PR #160]: https://github.com/chenxiaolong/RSAF/pull/160
 [PR #161]: https://github.com/chenxiaolong/RSAF/pull/161
+[PR #162]: https://github.com/chenxiaolong/RSAF/pull/162
