@@ -5,11 +5,11 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/rclone/rclone v1.70.0
+	github.com/rclone/rclone v1.70.1
 	golang.org/x/mobile v0.0.0-20250606033058-a2a15c67f36f
 )
 
-replace github.com/rclone/rclone v1.70.0 => github.com/chenxiaolong/rclone v1.70.0-rsaf
+replace github.com/rclone/rclone v1.70.1 => github.com/chenxiaolong/rclone v1.70.1-rsaf
 
 require (
 	cloud.google.com/go/auth v0.16.2 // indirect
