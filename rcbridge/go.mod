@@ -5,11 +5,11 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/rclone/rclone v1.70.1
+	github.com/rclone/rclone v1.70.2
 	golang.org/x/mobile v0.0.0-20250606033058-a2a15c67f36f
 )
 
-replace github.com/rclone/rclone v1.70.1 => github.com/chenxiaolong/rclone v1.70.1-rsaf
+replace github.com/rclone/rclone v1.70.2 => github.com/chenxiaolong/rclone v1.70.2-rsaf
 
 require (
 	cloud.google.com/go/auth v0.16.2 // indirect
@@ -82,7 +82,7 @@ require (
 	github.com/flynn/noise v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/geoffgarside/ber v1.2.0 // indirect
-	github.com/go-chi/chi/v5 v5.2.1 // indirect
+	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/go-darwin/apfs v0.0.0-20211011131704-f84b94dbf348 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
