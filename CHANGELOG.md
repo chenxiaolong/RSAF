@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.70.2 ([PR #165])
+
 ### Version 3.10
 
 * Update rclone to 1.70.1 ([PR #163])
@@ -397,3 +401,4 @@
 [PR #161]: https://github.com/chenxiaolong/RSAF/pull/161
 [PR #162]: https://github.com/chenxiaolong/RSAF/pull/162
 [PR #163]: https://github.com/chenxiaolong/RSAF/pull/163
+[PR #165]: https://github.com/chenxiaolong/RSAF/pull/165
