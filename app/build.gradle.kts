@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
 import org.eclipse.jgit.lib.ObjectId
 import org.gradle.kotlin.dsl.environment
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -178,9 +179,6 @@ android {
         sourceCompatibility(JavaVersion.VERSION_21)
         targetCompatibility(JavaVersion.VERSION_21)
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
     buildFeatures {
         buildConfig = true
         viewBinding = true
@@ -193,6 +191,12 @@ android {
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
     }
 }
 
@@ -317,8 +321,8 @@ val rcbridge = tasks.register("rcbridge") {
         gomobile.map { it.outputs.files },
     )
     inputs.properties(
-        "android.defaultConfig.minSdk" to android.defaultConfig.minSdk,
-        "android.namespace" to android.namespace,
+        "android.defaultConfig.minSdk" to android.defaultConfig.minSdk!!,
+        "android.namespace" to android.namespace!!,
         "androidComponents.sdkComponents.ndkDirectory" to
                 androidComponents.sdkComponents.ndkDirectory.map { it.asFile.absolutePath },
         "androidComponents.sdkComponents.sdkDirectory" to
@@ -512,9 +516,9 @@ tasks.register("changelogUpdateLinks") {
 }
 
 tasks.register("changelogPreRelease") {
-    doLast {
-        val version = project.property("releaseVersion")
+    val version = project.property("releaseVersion")
 
+    doLast {
         updateChangelog(version.toString(), true)
     }
 }
