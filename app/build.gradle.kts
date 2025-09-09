@@ -529,11 +529,23 @@ tasks.register("changelogPostRelease") {
     }
 }
 
+tasks.register("versionPreRelease") {
+    // This needs to be computed manually since the git tag hasn't been created yet at this point.
+    val version = project.property("releaseVersion")
+    val gitVersionCode = getVersionCode(VersionTriple("v$version", 0, ObjectId.zeroId()))
+
+    doLast {
+        File(File(rootDir, "metadata"), "version.txt").writeText(gitVersionCode.toString())
+    }
+}
+
 tasks.register("preRelease") {
     dependsOn("changelogUpdateLinks")
     dependsOn("changelogPreRelease")
+    dependsOn("versionPreRelease")
 }
 
 tasks.register("postRelease") {
     dependsOn("changelogPostRelease")
+    dependsOn("versionPostRelease")
 }
