@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Remove toolchain version from rcbridge's `go.mod` ([Issue #50], [PR #175])
+
 ### Version 3.13
 
 * Update rclone to 1.71.0 ([PR #171])
@@ -412,3 +416,4 @@
 [PR #165]: https://github.com/chenxiaolong/RSAF/pull/165
 [PR #166]: https://github.com/chenxiaolong/RSAF/pull/166
 [PR #171]: https://github.com/chenxiaolong/RSAF/pull/171
+[PR #175]: https://github.com/chenxiaolong/RSAF/pull/175
