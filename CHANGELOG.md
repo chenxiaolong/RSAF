@@ -9,8 +9,8 @@
 
 ### Unreleased
 
-* Remove toolchain version from rcbridge's `go.mod` ([Issue #50], [PR #175])
 * Add version code to `metadata/version.txt` in the repo instead of in APK filename ([Issue #50], [PR #176])
+* Make builds more reproducible ([Issue #50], [PR #175], [PR #177])
 
 ### Version 3.13
 
@@ -419,3 +419,4 @@
 [PR #171]: https://github.com/chenxiaolong/RSAF/pull/171
 [PR #175]: https://github.com/chenxiaolong/RSAF/pull/175
 [PR #176]: https://github.com/chenxiaolong/RSAF/pull/176
+[PR #177]: https://github.com/chenxiaolong/RSAF/pull/177
