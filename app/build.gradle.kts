@@ -265,7 +265,12 @@ interface InjectedExecOps {
 val rcbridgeSrcDir = File(rootDir, "rcbridge")
 
 val goenv = tasks.register("goenv") {
-    val envVars = arrayOf("GOPROXY", "GOSUMDB", "GOTOOLCHAIN").associateWith { System.getenv(it) }
+    val envVars = arrayOf(
+        "GOPROXY",
+        "GOSUMDB",
+        "GOTOOLCHAIN",
+        "GOFLAGS",
+    ).associateWith { System.getenv(it) }
     val goModFile = File(rcbridgeSrcDir, "go.mod")
     val outputFile = extraDir.map { it.file("go.env") }
 
@@ -290,6 +295,7 @@ val goenv = tasks.register("goenv") {
             // Pin to the specified toolchain version, even if the local toolchain is newer, for
             // more reproducible builds.
             "GOTOOLCHAIN" to goToolchain,
+            "GOFLAGS" to "-ldflags=-buildid= -buildvcs=false",
         )
 
         defaultEnvVars + envVars
