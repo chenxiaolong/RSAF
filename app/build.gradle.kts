@@ -367,6 +367,35 @@ val gomobile = tasks.register("gomobile") {
     }
 }
 
+val gowrapper = tasks.register("gowrapper") {
+    val gowrapperDir = File(rcbridgeSrcDir, "gowrapper")
+    val binDir = layout.buildDirectory.map { it.dir("bin") }
+
+    inputs.files(
+        File(gowrapperDir, "go.go"),
+        File(rcbridgeSrcDir, "go.mod"),
+        File(rcbridgeSrcDir, "go.sum"),
+        goenv.map { it.outputs.files },
+    )
+    outputs.files(
+        binDir.map { it.file("go") },
+    )
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
+    doLast {
+        injected.execOps.exec {
+            executable("go")
+            args("install", "go.go")
+
+            environment("GOBIN", binDir.get().asFile.absolutePath)
+            addGoEnvironment(this)
+
+            workingDir(gowrapperDir)
+        }
+    }
+}
+
 val rcbridge = tasks.register("rcbridge") {
     val tempDir = rcbridgeDir.map { it.dir("temp") }
 
@@ -377,6 +406,7 @@ val rcbridge = tasks.register("rcbridge") {
         File(File(rcbridgeSrcDir, "envhack"), "envhack.go"),
         goenv.map { it.outputs.files },
         gomobile.map { it.outputs.files },
+        gowrapper.map { it.outputs.files },
     )
     inputs.properties(
         "android.defaultConfig.minSdk" to android.defaultConfig.minSdk!!,
@@ -421,6 +451,13 @@ val rcbridge = tasks.register("rcbridge") {
                 "ANDROID_NDK_HOME" to androidComponents.sdkComponents.ndkDirectory.get()
                     .asFile.absolutePath,
                 "TMPDIR" to tempDir.get().asFile.absolutePath,
+                // The wrapper will use this as a template to construct a relative path for
+                // reproducible builds. This will need to change if gomobile ever changes their
+                // temp directory layout.
+                "GOWRAPPER_BASE_PATH" to File(
+                    File(tempDir.get().asFile, "gomobile-work-PLACEHOLDER"),
+                    "src-android-PLACEHOLDER",
+                ),
             )
             addGoEnvironment(this)
 
