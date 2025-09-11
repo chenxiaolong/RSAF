@@ -10,7 +10,7 @@
 ### Unreleased
 
 * Add version code to `metadata/version.txt` in the repo instead of in APK filename ([Issue #50], [PR #176])
-* Make builds more reproducible ([Issue #50], [PR #175], [PR #177])
+* Make builds more reproducible ([Issue #50], [PR #175], [PR #177], [PR #178])
 
 ### Version 3.13
 
@@ -420,3 +420,4 @@
 [PR #175]: https://github.com/chenxiaolong/RSAF/pull/175
 [PR #176]: https://github.com/chenxiaolong/RSAF/pull/176
 [PR #177]: https://github.com/chenxiaolong/RSAF/pull/177
+[PR #178]: https://github.com/chenxiaolong/RSAF/pull/178
