@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.14
 
 * Add version code to `metadata/version.txt` in the repo instead of in APK filename ([Issue #50], [PR #176])
 * Make builds more reproducible ([Issue #50], [PR #175], [PR #177], [PR #178])
