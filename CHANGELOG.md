@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix installation of missing Android SDK components when running `./gradlew rcbridge` directly ([Issue #50], [PR #182])
+
 ### Version 3.15
 
 * Add PNG icon for F-Droid metadata ([Issue #50], [PR #180])
@@ -428,3 +432,4 @@
 [PR #178]: https://github.com/chenxiaolong/RSAF/pull/178
 [PR #180]: https://github.com/chenxiaolong/RSAF/pull/180
 [PR #181]: https://github.com/chenxiaolong/RSAF/pull/181
+[PR #182]: https://github.com/chenxiaolong/RSAF/pull/182

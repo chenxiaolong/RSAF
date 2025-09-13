@@ -681,5 +681,4 @@ tasks.register("preRelease") {
 
 tasks.register("postRelease") {
     dependsOn("changelogPostRelease")
-    dependsOn("versionPostRelease")
 }
