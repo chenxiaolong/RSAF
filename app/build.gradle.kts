@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.internal.UsesSdkComponentsBuildService
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
-import com.android.build.gradle.internal.services.DslServices
+import com.android.repository.Revision
 import java.io.ByteArrayOutputStream
 import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
@@ -225,19 +225,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 }
 
-// AGP is currently set up so that the NDK auto-installation only happens when the C++ functionality
-// is enabled. We want that behavior even though we're only using the NDK for building Go code.
-val sdkComponents = androidComponents.sdkComponents as SdkComponentsImpl
-val dslServices = BaseExtension::class.java
-    .getDeclaredField("dslServices")
-    .apply { isAccessible = true }
-    .get(android) as DslServices
-val ndkHandler = dslServices.sdkComponents.get().versionedNdkHandler(
-    sdkComponents.ndkVersion.get(),
-    sdkComponents.ndkPath.takeIf { it.isPresent }?.get(),
-)
-ndkHandler.getNdkPlatform(downloadOkay = true)
-
 val archive = tasks.register("archive") {
     inputs.property("gitVersionTriple.third", gitVersionTriple.third)
 
@@ -401,6 +388,33 @@ val gowrapper = tasks.register("gowrapper") {
 }
 
 val rcbridge = tasks.register("rcbridge") {
+    project.objects.newInstance<UsesSdkComponentsBuildService>().let { usesSdkComponents ->
+        usesSdkComponents.initializeSdkComponentsBuildService(this)
+        val sdkComponentsBuildService = usesSdkComponents.sdkComponentsBuildService.get()
+
+        // AGP is currently set up so that the NDK auto-installation only happens when the C++
+        // functionality is enabled. We want that behavior even though we're only using the NDK for
+        // building Go code.
+        val sdkComponents = androidComponents.sdkComponents as SdkComponentsImpl
+        val ndkHandler = sdkComponentsBuildService.versionedNdkHandler(
+            sdkComponents.ndkVersion.get(),
+            sdkComponents.ndkPath.takeIf { it.isPresent }?.get(),
+        )
+        ndkHandler.getNdkPlatform(downloadOkay = true)
+
+        // Query for the path to android.jar. This forces the SdkFullLoadingStrategy to initialize,
+        // which calls SdkHandler.initTarget(), which calls DefaultSdkLoader.getTargetInfo(), which
+        // installs missing SDK components. Like the NDK installation above, this is hacky, but
+        // works well enough.
+        sdkComponentsBuildService
+            .sdkLoader(
+                project.provider { "android-${android.compileSdk}" },
+                project.provider { Revision.parseRevision(android.buildToolsVersion) },
+            )
+            .androidJarProvider
+            .get()
+    }
+
     val tempDir = rcbridgeDir.map { it.dir("temp") }
 
     inputs.files(
