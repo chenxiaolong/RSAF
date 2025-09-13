@@ -11,6 +11,7 @@
 
 * Fix installation of missing Android SDK components when running `./gradlew rcbridge` directly ([Issue #50], [PR #182])
 * Fix missing property exception when running `./gradlew tasks` ([PR #183])
+* Update dependencies ([PR #184])
 
 ### Version 3.15
 
@@ -435,3 +436,4 @@
 [PR #181]: https://github.com/chenxiaolong/RSAF/pull/181
 [PR #182]: https://github.com/chenxiaolong/RSAF/pull/182
 [PR #183]: https://github.com/chenxiaolong/RSAF/pull/183
+[PR #184]: https://github.com/chenxiaolong/RSAF/pull/184
