@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Add PNG icon for F-Droid metadata ([Issue #50], [PR #180])
+* Remove dependency info block from APK ([Issue #50], [PR #181])
 
 ### Version 3.14
 
@@ -426,3 +427,4 @@
 [PR #177]: https://github.com/chenxiaolong/RSAF/pull/177
 [PR #178]: https://github.com/chenxiaolong/RSAF/pull/178
 [PR #180]: https://github.com/chenxiaolong/RSAF/pull/180
+[PR #181]: https://github.com/chenxiaolong/RSAF/pull/181
