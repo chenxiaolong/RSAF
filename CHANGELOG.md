@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.15
 
 * Add PNG icon for F-Droid metadata ([Issue #50], [PR #180])
 * Remove dependency info block from APK ([Issue #50], [PR #181])
