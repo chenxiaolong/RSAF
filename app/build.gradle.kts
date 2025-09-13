@@ -488,6 +488,30 @@ val rcbridge = tasks.register("rcbridge") {
     }
 }
 
+/*
+ * NOTE: This requires the https://crates.io/crates/resvg CLI utility. RSAF's SVG icon uses
+ * transform-origin, which very few SVG parsers support.
+ *
+ * https://gitlab.gnome.org/GNOME/librsvg/-/issues/685
+ * https://gitlab.com/inkscape/inbox/-/issues/4640
+ */
+tasks.register("iconPng") {
+    val inputSvg = File(File(File(rootDir, "app"), "images"), "icon.svg")
+    val outputPng = File(File(File(File(rootDir, "metadata"), "en-US"), "images"), "icon.png")
+
+    inputs.files(inputSvg)
+    outputs.files(outputPng)
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
+    doLast {
+        injected.execOps.exec {
+            executable("resvg")
+            args("-w", "512", "-h", "512", inputSvg, outputPng)
+        }
+    }
+}
+
 android.applicationVariants.all {
     preBuildProvider.configure {
         dependsOn(archive)
