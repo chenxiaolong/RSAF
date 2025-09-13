@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add PNG icon for F-Droid metadata ([Issue #50], [PR #180])
+
 ### Version 3.14
 
 * Add version code to `metadata/version.txt` in the repo instead of in APK filename ([Issue #50], [PR #176])
@@ -421,3 +425,4 @@
 [PR #176]: https://github.com/chenxiaolong/RSAF/pull/176
 [PR #177]: https://github.com/chenxiaolong/RSAF/pull/177
 [PR #178]: https://github.com/chenxiaolong/RSAF/pull/178
+[PR #180]: https://github.com/chenxiaolong/RSAF/pull/180
