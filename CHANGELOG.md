@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.16
 
 * Fix installation of missing Android SDK components when running `./gradlew rcbridge` directly ([Issue #50], [PR #182])
 * Fix missing property exception when running `./gradlew tasks` ([PR #183])
