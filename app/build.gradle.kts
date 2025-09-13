@@ -650,10 +650,10 @@ tasks.register("changelogUpdateLinks") {
 }
 
 tasks.register("changelogPreRelease") {
-    val version = project.property("releaseVersion")
+    val version = project.findProperty("releaseVersion")
 
     doLast {
-        updateChangelog(version.toString(), true)
+        updateChangelog(version!!.toString(), true)
     }
 }
 
@@ -665,11 +665,11 @@ tasks.register("changelogPostRelease") {
 
 tasks.register("versionPreRelease") {
     // This needs to be computed manually since the git tag hasn't been created yet at this point.
-    val version = project.property("releaseVersion")
-    val gitVersionCode = getVersionCode(VersionTriple("v$version", 0, ObjectId.zeroId()))
+    val gitVersionCode = project.findProperty("releaseVersion")
+        ?.let { getVersionCode(VersionTriple("v$it", 0, ObjectId.zeroId())) }
 
     doLast {
-        File(File(rootDir, "metadata"), "version.txt").writeText(gitVersionCode.toString())
+        File(File(rootDir, "metadata"), "version.txt").writeText(gitVersionCode!!.toString())
     }
 }
 
