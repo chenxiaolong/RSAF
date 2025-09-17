@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.17
 
 * Temporarily downgrade AGP to 8.11.1 for compatibility with F-Droid's build server ([Issue #50], [Issue #185])
 
