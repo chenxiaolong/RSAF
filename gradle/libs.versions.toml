@@ -1,6 +1,6 @@
 [versions]
 activity-ktx = "1.11.0"
-android-gradle-plugin = "8.13.0"
+android-gradle-plugin = "8.11.1"
 appcompat = "1.7.1"
 biometric = "1.1.0"
 core-ktx = "1.17.0"
