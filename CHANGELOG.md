@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Temporarily downgrade AGP to 8.11.1 for compatibility with F-Droid's build server ([Issue #50], [Issue #185])
+
 ### Version 3.16
 
 * Fix installation of missing Android SDK components when running `./gradlew rcbridge` directly ([Issue #50], [PR #182])
@@ -317,6 +321,7 @@
 [Issue #119]: https://github.com/chenxiaolong/RSAF/issues/119
 [Issue #155]: https://github.com/chenxiaolong/RSAF/issues/155
 [Issue #158]: https://github.com/chenxiaolong/RSAF/issues/158
+[Issue #185]: https://github.com/chenxiaolong/RSAF/issues/185
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
