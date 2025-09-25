@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.18
 
 * Update rclone to 1.71.1 ([PR #186])
 
