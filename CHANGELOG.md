@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.71.1 ([PR #186])
+
 ### Version 3.17
 
 * Temporarily downgrade AGP to 8.11.1 for compatibility with F-Droid's build server ([Issue #50], [Issue #185])
@@ -442,3 +446,4 @@
 [PR #182]: https://github.com/chenxiaolong/RSAF/pull/182
 [PR #183]: https://github.com/chenxiaolong/RSAF/pull/183
 [PR #184]: https://github.com/chenxiaolong/RSAF/pull/184
+[PR #186]: https://github.com/chenxiaolong/RSAF/pull/186
