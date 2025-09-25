@@ -5,11 +5,11 @@ go 1.24.0
 toolchain go1.25.1
 
 require (
-	github.com/rclone/rclone v1.71.0
-	golang.org/x/mobile v0.0.0-20250813145510-f12310a0cfd9
+	github.com/rclone/rclone v1.71.1
+	golang.org/x/mobile v0.0.0-20250911085028-6912353760cf
 )
 
-replace github.com/rclone/rclone v1.71.0 => github.com/chenxiaolong/rclone v1.71.0-rsaf
+replace github.com/rclone/rclone v1.71.1 => github.com/chenxiaolong/rclone v1.71.1-rsaf
 
 require (
 	cloud.google.com/go/auth v0.16.4 // indirect
@@ -190,8 +190,8 @@ require (
 	golang.org/x/exp v0.0.0-20250811191247-51f88131bc50 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
