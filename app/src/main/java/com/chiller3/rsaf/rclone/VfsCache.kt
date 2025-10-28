@@ -6,25 +6,28 @@
 package com.chiller3.rsaf.rclone
 
 import android.content.Context
-import android.os.ParcelFileDescriptor
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
 import android.util.Log
 import com.chiller3.rsaf.binding.rcbridge.RbError
+import com.chiller3.rsaf.binding.rcbridge.RbVfsOpt
+import com.chiller3.rsaf.binding.rcbridge.RbVfsOptList
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import java.io.File
 
 object VfsCache {
-    data class Progress(val count: Int, val bytesCurrent: Long, val bytesTotal: Long)
+    data class SyncProgress(val uploading: Int)
+
+    data class AsyncProgress(val uploading: Int, val pending: Int) {
+        val total = uploading + pending
+    }
 
     private val TAG = VfsCache::class.java.simpleName
 
-    private val procfsFd = File("/proc/self/fd")
     private lateinit var appDataDir: File
     private lateinit var dataDataDir: File
     private lateinit var vfsCacheDir: File
+
+    private val syncUploads = mutableMapOf<String, Int>()
 
     fun init(context: Context) {
         appDataDir = context.dataDir
@@ -42,55 +45,92 @@ object VfsCache {
         }
     }
 
-    private fun getFdPosAndSize(fd: Int): Pair<Long, Long> =
-        // We dup() the fd to ensure that the pos and size at least refer to the same file.
-        ParcelFileDescriptor.fromFd(fd).use { pfd ->
-            val pos = Os.lseek(pfd.fileDescriptor, 0, OsConstants.SEEK_CUR)
-            val size = pfd.statSize
+    private fun normalizeRemote(s: String): String {
+        return RcloneProvider.splitRemote(s).first.trimEnd(':')
+    }
 
-            pos to size
+    fun syncUploadIncrement(remote: String) {
+        synchronized(syncUploads) {
+            syncUploads[remote] = syncUploads.getOrDefault(remote, 0) + 1
         }
+    }
 
-    fun guessProgress(remote: String?, withSize: Boolean): Progress {
-        var count = 0
-        var totalPos = 0L
-        var totalSize = 0L
-
-        val prefix = if (remote == null) {
-            vfsCacheDir
-        } else {
-            File(vfsCacheDir, remote)
+    fun syncUploadDecrement(remote: String) {
+        synchronized(syncUploads) {
+            val count = syncUploads[remote]!! - 1
+            if (count == 0) {
+                syncUploads.remove(remote)
+            } else {
+                syncUploads[remote] = count
+            }
         }
+    }
 
-        for (file in procfsFd.listFiles() ?: emptyArray()) {
-            val fd = file.name.toInt()
+    fun syncUploadProgress(remote: String?): SyncProgress {
+        synchronized(syncUploads) {
+            var uploading = 0
 
-            val target = try {
-                normalizePath(File(Os.readlink(file.toString())))
-            } catch (_: ErrnoException) {
-                continue
-            }
-
-            if (!target.startsWith(prefix)) {
-                continue
-            }
-
-            count += 1
-
-            if (withSize) {
-                val (filePos, fileSize) = try {
-                    getFdPosAndSize(fd)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to query fd $fd", e)
-                    continue
+            if (remote == null) {
+                for (value in syncUploads.values) {
+                    uploading += value
                 }
-
-                totalPos += filePos
-                totalSize += fileSize
+            } else {
+                uploading += syncUploads[remote] ?: 0
             }
+
+            return SyncProgress(uploading)
+        }
+    }
+
+    fun asyncUploadProgress(remote: String?): AsyncProgress {
+        var uploading = 0
+        var pending = 0
+
+        val vfses = RcloneRpc.vfses.asSequence().filter {
+            remote == null || remote == normalizeRemote(it)
+        }
+        for (vfs in vfses) {
+            val vfsQueueStats = try {
+                RcloneRpc.vfsQueueStats(vfs)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to query VFS queue stats for $vfs", e)
+                continue
+            }
+
+            uploading += vfsQueueStats.inProgress
+            pending += vfsQueueStats.pending
         }
 
-        return Progress(count, totalPos, totalSize)
+        return AsyncProgress(uploading, pending)
+    }
+
+    fun hasOngoingUploads(remote: String?): Boolean =
+        syncUploadProgress(remote).uploading > 0 || asyncUploadProgress(remote).total > 0
+
+    /** Get complete VFS options, falling back to default values when not overridden. */
+    fun getVfsOptions(overrides: Map<String, String>): Map<String, String> {
+        val overridesList = RbVfsOptList()
+        for ((key, value) in overrides) {
+            val opt = RbVfsOpt()
+            opt.key = key
+            opt.value = value
+
+            overridesList.add(opt)
+        }
+
+        val error = RbError()
+        val vfsOptionsList = Rcbridge.rbVfsGetOpts(overridesList, error)
+            ?: throw error.toException("rbVfsGetOpts")
+
+        val vfsOptions = mutableMapOf<String, String>()
+
+        for (i in 0 until vfsOptionsList.size()) {
+            val vfsOption = vfsOptionsList.get(i)
+
+            vfsOptions[vfsOption.key] = vfsOption.value
+        }
+
+        return vfsOptions
     }
 
     fun initDirtyRemotes() {
@@ -116,7 +156,15 @@ object VfsCache {
         for ((remote, config) in RcloneRpc.remoteConfigs) {
             if (!neededRemotes.remove(remote)) {
                 continue
-            } else if (!config.vfsCachingOrDefault) {
+            }
+
+            val vfsOptions = try {
+                getVfsOptions(config.vfsOptions)
+            } catch (e: Exception) {
+                Log.w(TAG, "Invalid VFS option overrides for remote: $remote", e)
+                continue
+            }
+            if (vfsOptions["vfs_cache_mode"] == "off") {
                 // The user will have to re-enable VFS caching to upload these.
                 continue
             }

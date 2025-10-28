@@ -10,41 +10,31 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.text.format.Formatter
-import com.chiller3.rsaf.rclone.VfsCache
-import kotlin.math.roundToInt
+import com.chiller3.rsaf.rclone.KeepAliveService
 
 class Notifications(private val context: Context) {
     companion object {
-        private const val CHANNEL_ID_OPEN_FILES = "open_files"
-        private const val CHANNEL_ID_BACKGROUND_UPLOADS = "background_uploads"
+        private const val CHANNEL_ID_KEEP_ALIVE = "keep_alive"
         private const val CHANNEL_ID_FAILURE = "failure"
 
-        private val LEGACY_CHANNEL_IDS = arrayOf<String>()
+        private val LEGACY_CHANNEL_IDS = arrayOf<String>(
+            "open_files",
+            "background_uploads",
+        )
 
-        const val ID_OPEN_FILES = -1
-        const val ID_BACKGROUND_UPLOADS = -2
+        const val ID_KEEP_ALIVE = -1
     }
 
     private val prefs = Preferences(context)
     private val notificationManager = context.getSystemService(NotificationManager::class.java)
 
-    /** Create a low priority notification channel for the open files notification. */
-    private fun createOpenFilesChannel() = NotificationChannel(
-        CHANNEL_ID_OPEN_FILES,
-        context.getString(R.string.notification_channel_open_files_name),
+    /** Create a low priority notification channel for the keep alive notification. */
+    private fun createKeepAliveChannel() = NotificationChannel(
+        CHANNEL_ID_KEEP_ALIVE,
+        context.getString(R.string.notification_channel_keep_alive_name),
         NotificationManager.IMPORTANCE_LOW,
     ).apply {
-        description = context.getString(R.string.notification_channel_open_files_desc)
-    }
-
-    /** Create a low priority notification channel for the background uploads notification. */
-    private fun createBackgroundUploadsChannel() = NotificationChannel(
-        CHANNEL_ID_BACKGROUND_UPLOADS,
-        context.getString(R.string.notification_channel_background_uploads_name),
-        NotificationManager.IMPORTANCE_LOW,
-    ).apply {
-        description = context.getString(R.string.notification_channel_background_uploads_desc)
+        description = context.getString(R.string.notification_channel_keep_alive_desc)
     }
 
     /** Create a high priority notification channel for failure alerts. */
@@ -63,60 +53,42 @@ class Notifications(private val context: Context) {
      */
     fun updateChannels() {
         notificationManager.createNotificationChannels(listOf(
-            createOpenFilesChannel(),
-            createBackgroundUploadsChannel(),
+            createKeepAliveChannel(),
             createFailureAlertsChannel(),
         ))
         LEGACY_CHANNEL_IDS.forEach { notificationManager.deleteNotificationChannel(it) }
     }
 
-    fun createOpenFilesNotification(count: Int): Notification {
-        val title = context.resources.getQuantityString(
-            R.plurals.notification_open_files_title,
-            count,
-            count,
-        )
+    fun createKeepAliveNotification(state: KeepAliveService.State): Notification {
+        val message = if (state.total == 0) {
+            context.getString(R.string.notification_keep_alive_cleanup_wait_desc)
+        } else {
+            buildString {
+                for ((resId, count) in arrayOf(
+                    R.plurals.notification_keep_alive_files_open_desc to state.open,
+                    R.plurals.notification_keep_alive_files_uploading_desc to
+                            state.syncUploading + state.asyncUploading,
+                    R.plurals.notification_keep_alive_files_pending_desc to state.asyncPending,
+                )) {
+                    if (count == 0) {
+                        continue
+                    } else if (isNotEmpty()) {
+                        append('\n')
+                    }
 
-        return Notification.Builder(context, CHANNEL_ID_OPEN_FILES).run {
-            setContentTitle(title)
-            setSmallIcon(R.drawable.ic_notifications)
-            setOngoing(true)
-            setOnlyAlertOnce(true)
-
-            // Inhibit 10-second delay when showing persistent notification
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+                    append(context.resources.getQuantityString(resId, count, count))
+                }
             }
-
-            build()
         }
-    }
 
-    fun createBackgroundUploadsNotification(progress: VfsCache.Progress): Notification {
-        val title = context.resources.getQuantityString(
-            R.plurals.notification_background_uploads_in_progress_title,
-            progress.count,
-            progress.count,
-        )
-
-        return Notification.Builder(context, CHANNEL_ID_BACKGROUND_UPLOADS).run {
-            setContentTitle(title)
+        return Notification.Builder(context, CHANNEL_ID_KEEP_ALIVE).run {
+            setContentTitle(context.getString(R.string.notification_keep_alive_title))
             setSmallIcon(R.drawable.ic_notifications)
             setOngoing(true)
             setOnlyAlertOnce(true)
 
-            val formattedBytesCurrent = Formatter.formatFileSize(context, progress.bytesCurrent)
-            val formattedBytesTotal = Formatter.formatFileSize(context, progress.bytesTotal)
-            setContentText("$formattedBytesCurrent / $formattedBytesTotal")
-
-            val normalizedBytesTotal = 1000
-            val normalizedBytesCurrent = if (progress.bytesTotal == 0L) {
-                0
-            } else {
-                (progress.bytesCurrent.toDouble() / progress.bytesTotal * normalizedBytesTotal)
-                    .roundToInt()
-            }
-            setProgress(normalizedBytesTotal, normalizedBytesCurrent, progress.bytesTotal == 0L)
+            setContentText(message)
+            style = Notification.BigTextStyle()
 
             // Inhibit 10-second delay when showing persistent notification
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

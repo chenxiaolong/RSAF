@@ -57,22 +57,17 @@
             android:exported="false" />
 
         <service
-            android:name=".rclone.OpenFilesService"
+            android:name=".rclone.KeepAliveService"
             android:foregroundServiceType="specialUse"
             android:exported="false" />
 
         <receiver
-            android:name=".rclone.BackgroundUploadMonitorReceiver"
+            android:name=".rclone.ResumeUploadsBootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".rclone.BackgroundUploadMonitorService"
-            android:foregroundServiceType="specialUse"
-            android:exported="false" />
     </application>
 </manifest>

@@ -107,9 +107,8 @@ class EditRemoteViewModel : ViewModel() {
         }
     }
 
-    // This performs I/O, but only with the in-memory procfs.
     val isVfsCacheDirty: Boolean
-        get() = VfsCache.guessProgress(remote, false).count > 0
+        get() = VfsCache.hasOngoingUploads(remote)
 
     private fun setCustomOpt(
         remote: String,
@@ -148,10 +147,6 @@ class EditRemoteViewModel : ViewModel() {
 
     fun setThumbnails(enabled: Boolean) {
         setCustomOpt(remote, RcloneRpc.RemoteConfig(thumbnails = enabled))
-    }
-
-    fun setVfsCaching(enabled: Boolean) {
-        setCustomOpt(remote, RcloneRpc.RemoteConfig(vfsCaching = enabled))
     }
 
     fun setReportUsage(enabled: Boolean) {

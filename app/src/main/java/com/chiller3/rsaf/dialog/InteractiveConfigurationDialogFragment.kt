@@ -138,14 +138,15 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             getString(R.string.ic_title_edit_remote, remote)
         }
 
+        // Don't lose user state unless the user cancels intentionally.
+        isCancelable = false
+
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setView(binding.root)
             .setPositiveButton(R.string.dialog_action_next, null)
-            .setNegativeButton(R.string.dialog_action_cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .setNeutralButton("placeholder", null)
-            // Don't lose user state unless the user cancels intentionally
-            .setCancelable(false)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {

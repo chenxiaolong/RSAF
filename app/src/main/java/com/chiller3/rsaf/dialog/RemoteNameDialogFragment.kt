@@ -60,7 +60,7 @@ class RemoteNameDialogFragment : TextInputDialogFragment() {
         try {
             RcloneConfig.checkName(input)
             input !in remoteNames
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
 }

@@ -50,8 +50,8 @@ class Preferences(private val context: Context) {
         const val PREF_ALLOW_LOCKED_ACCESS = "allow_locked_access"
         const val PREF_DYNAMIC_SHORTCUT = "dynamic_shortcut"
         const val PREF_THUMBNAILS = "thumbnails"
-        const val PREF_VFS_CACHING = "vfs_caching"
         const val PREF_REPORT_USAGE = "report_usage"
+        const val PREF_VFS_OPTIONS = "vfs_options"
 
         // Not associated with a UI preference
         const val PREF_DEBUG_MODE = "debug_mode"

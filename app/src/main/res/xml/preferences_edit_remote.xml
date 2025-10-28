@@ -80,16 +80,16 @@
             app:defaultValue="true" />
 
         <SwitchPreferenceCompat
-            app:key="vfs_caching"
-            app:persistent="false"
-            app:title="@string/pref_edit_remote_vfs_caching_name"
-            app:iconSpaceReserved="false"
-            app:defaultValue="true" />
-
-        <SwitchPreferenceCompat
             app:key="report_usage"
             app:persistent="false"
             app:title="@string/pref_edit_remote_report_usage_name"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="vfs_options"
+            app:persistent="false"
+            app:title="@string/pref_edit_remote_vfs_options_name"
+            app:summary="@string/pref_edit_remote_vfs_options_desc"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </PreferenceScreen>

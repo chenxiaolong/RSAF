@@ -40,7 +40,7 @@ import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
 import com.chiller3.rsaf.extension.formattedString
-import com.chiller3.rsaf.rclone.BackgroundUploadMonitorService
+import com.chiller3.rsaf.rclone.KeepAliveService
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.view.LongClickablePreference
@@ -130,7 +130,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         val context = requireContext()
 
-        BackgroundUploadMonitorService.startWithScanOnce(context)
+        KeepAliveService.startWithScanOnce(context)
 
         prefs = Preferences(context)
 

@@ -27,6 +27,7 @@ import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
+import com.chiller3.rsaf.dialog.VfsOptionsDialogFragment
 import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.settings.SettingsFragment.Companion.documentsUiIntent
@@ -61,8 +62,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
     private lateinit var prefAllowLockedAccess: SwitchPreferenceCompat
     private lateinit var prefDynamicShortcut: SwitchPreferenceCompat
     private lateinit var prefThumbnails: SwitchPreferenceCompat
-    private lateinit var prefVfsCaching: SwitchPreferenceCompat
     private lateinit var prefReportUsage: SwitchPreferenceCompat
+    private lateinit var prefVfsOptions: Preference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_edit_remote, rootKey)
@@ -96,11 +97,11 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         prefThumbnails = findPreference(Preferences.PREF_THUMBNAILS)!!
         prefThumbnails.onPreferenceChangeListener = this
 
-        prefVfsCaching = findPreference(Preferences.PREF_VFS_CACHING)!!
-        prefVfsCaching.onPreferenceChangeListener = this
-
         prefReportUsage = findPreference(Preferences.PREF_REPORT_USAGE)!!
         prefReportUsage.onPreferenceChangeListener = this
+
+        prefVfsOptions = findPreference(Preferences.PREF_VFS_OPTIONS)!!
+        prefVfsOptions.onPreferenceClickListener = this
 
         viewModel.remote = requireArguments().getString(ARG_REMOTE)!!
 
@@ -139,17 +140,6 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                         prefThumbnails.isChecked = it
                     }
 
-                    prefVfsCaching.isEnabled = state.allowExternalAccessOrDefault == true
-                            && state.features?.putStream == true
-                    state.config?.vfsCachingOrDefault?.let {
-                        prefVfsCaching.isChecked = it
-                    }
-                    prefVfsCaching.summary = when (state.features?.putStream) {
-                        null -> getString(R.string.pref_edit_remote_vfs_caching_desc_loading)
-                        true -> getString(R.string.pref_edit_remote_vfs_caching_desc_optional)
-                        false -> getString(R.string.pref_edit_remote_vfs_caching_desc_required)
-                    }
-
                     prefReportUsage.isEnabled = state.allowExternalAccessOrDefault == true
                             && state.features?.about == true
 
@@ -161,6 +151,8 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                         true -> getString(R.string.pref_edit_remote_report_usage_desc_supported)
                         false -> getString(R.string.pref_edit_remote_report_usage_desc_unsupported)
                     }
+
+                    prefVfsOptions.isEnabled = state.allowExternalAccessOrDefault == true
                 }
             }
         }
@@ -272,6 +264,11 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                 confirmDelete(false)
                 return true
             }
+            prefVfsOptions -> {
+                VfsOptionsDialogFragment.newInstance(viewModel.remote)
+                    .show(parentFragmentManager.beginTransaction(), VfsOptionsDialogFragment.TAG)
+                return true
+            }
         }
 
         return false
@@ -292,9 +289,6 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             }
             prefThumbnails -> {
                 viewModel.setThumbnails(newValue as Boolean)
-            }
-            prefVfsCaching -> {
-                viewModel.setVfsCaching(newValue as Boolean)
             }
             prefReportUsage -> {
                 viewModel.setReportUsage(newValue as Boolean)

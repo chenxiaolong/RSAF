@@ -23,7 +23,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class InactivityTimeoutDialogFragment : DialogFragment() {
     companion object {
-        val TAG = InactivityTimeoutDialogFragment::class.java.simpleName
+        val TAG: String = InactivityTimeoutDialogFragment::class.java.simpleName
 
         const val RESULT_SUCCESS = "success"
     }
@@ -61,11 +61,11 @@ class InactivityTimeoutDialogFragment : DialogFragment() {
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_inactivity_timeout_title)
             .setView(binding.root)
-            .setPositiveButton(R.string.dialog_action_ok) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 prefs.inactivityTimeout = duration!!
                 success = true
             }
-            .setNegativeButton(R.string.dialog_action_cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {

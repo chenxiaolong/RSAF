@@ -59,15 +59,16 @@ object RcloneConfig {
         synchronized(globalStateLock) {
             setDefaultConfigLocked()
             try {
-                loadLocked()
+                loadLocked(false)
             } catch (e: ErrnoException) {
                 if (e.errno == OsConstants.ENOENT) {
                     Log.w(TAG, "Config file does not exist; creating it")
-                    saveLocked()
                 } else {
                     throw e
                 }
             }
+            // Always save, even for loading the existing config, so that migrations are persisted.
+            saveLocked()
         }
     }
 
@@ -114,10 +115,10 @@ object RcloneConfig {
         setConfigLocked(appConfigFile.toString(), hardwareWrappedPassword)
     }
 
-    private fun loadLocked() {
+    private fun loadLocked(deleteCacheDir: Boolean) {
         val error = RbError()
 
-        if (!Rcbridge.rbConfigLoad(error)) {
+        if (!Rcbridge.rbConfigLoad(deleteCacheDir, error)) {
             if (error.code.toInt() == OsConstants.EIO) {
                 // rclone does not have a distinct error type for this, so we're stuck with doing
                 // string matching
@@ -149,11 +150,11 @@ object RcloneConfig {
             synchronized(globalStateLock) {
                 try {
                     setConfigLocked(tempConfig.toString(), password)
-                    loadLocked()
+                    loadLocked(true)
                 } catch (e: Exception) {
                     // Restore prior configuration if import fails
                     setDefaultConfigLocked()
-                    loadLocked()
+                    loadLocked(false)
                     throw e
                 }
 
@@ -209,6 +210,13 @@ object RcloneConfig {
     fun copyRemote(oldRemote: String, newRemote: String) {
         synchronized(globalStateLock) {
             Rcbridge.rbConfigCopySection(oldRemote, newRemote)
+            saveLocked()
+        }
+    }
+
+    fun deleteSectionKey(remote: String, key: String) {
+        synchronized(globalStateLock) {
+            Rcbridge.rbConfigDeleteSectionKey(remote, key)
             saveLocked()
         }
     }

@@ -98,9 +98,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         refreshRemotes()
     }
 
-    // This performs I/O, but only with the in-memory procfs.
     val isAnyVfsCacheDirty: Boolean
-        get() = VfsCache.guessProgress(null, false).count > 0
+        get() = VfsCache.hasOngoingUploads(null)
 
     fun startImportExport(mode: ImportExportMode, uri: Uri) {
         if (importExportState.value != null) {

@@ -16,7 +16,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.chiller3.rsaf.Preferences
-import com.chiller3.rsaf.R
 import com.chiller3.rsaf.databinding.DialogTextInputBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -68,11 +67,11 @@ open class TextInputDialogFragment : DialogFragment() {
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(arguments.getString(ARG_TITLE))
             .setView(binding.root)
-            .setPositiveButton(R.string.dialog_action_ok) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 success = true
                 input = binding.text.text.toString()
             }
-            .setNegativeButton(R.string.dialog_action_cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {

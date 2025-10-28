@@ -19,17 +19,16 @@ import (
 	// This package's init() MUST run first
 	_ "rcbridge/envhack"
 
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"strconv"
-
-	"context"
 	"io"
 	ioFs "io/fs"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	goSync "sync"
 	"syscall"
@@ -41,6 +40,7 @@ import (
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/config"
+	"github.com/rclone/rclone/fs/config/configstruct"
 	"github.com/rclone/rclone/fs/config/obscure"
 	"github.com/rclone/rclone/fs/fshttp"
 	"github.com/rclone/rclone/fs/fspath"
@@ -53,18 +53,16 @@ import (
 )
 
 const (
-	rsafVfsCaching = "rsaf:vfs_caching"
+	rsafLegacyVfsCaching = "rsaf:vfs_caching"
+	rsafVfsPrefix        = "rsaf:vfs:"
 )
 
 var (
-	// The same remote may exist in both vfsStreaming and vfsCaching if the user
-	// toggled the option after performing a VFS operation at least once. This
-	// is preferable to forcing the user to wait for ongoing uploads to complete
-	// before enabling the toggle and is simpler to implement.
-	vfsLock      goSync.Mutex
-	vfsStreaming = make(map[string]*vfs.VFS)
-	vfsCaching   = make(map[string]*vfs.VFS)
-	errMap       = map[error]syscall.Errno{
+	vfsLock          goSync.Mutex
+	vfsInstances     = make(map[string]*vfs.VFS)
+	vfsOptValidKeys  = make(map[string]bool)
+	vfsOptStringKeys = make(map[string]bool)
+	errMap           = map[error]syscall.Errno{
 		vfs.ENOTEMPTY:                  syscall.ENOTEMPTY,
 		vfs.ESPIPE:                     syscall.ESPIPE,
 		vfs.EBADF:                      syscall.EBADF,
@@ -91,6 +89,30 @@ var (
 	caCertsLock goSync.Mutex
 	caCertsPool *x509.CertPool
 )
+
+func init() {
+	items, err := configstruct.Items(&vfscommon.Opt)
+	if err != nil {
+		// Can't fail.
+		panic(err)
+	}
+
+	for _, item := range items {
+		if item.Name == "vfs_write_back" {
+			// This is never configurable by the user and does not have a static
+			// value due to the workaround described in getVfsOpts(). Don't
+			// report the value nor allow it to be set.
+			continue
+		}
+
+		vfsOptValidKeys[item.Name] = true
+
+		switch item.Value.(type) {
+		case string:
+			vfsOptStringKeys[item.Name] = true
+		}
+	}
+}
 
 // Load as many certificates from the PEM data as possible and return the last
 // error, if any.
@@ -316,17 +338,21 @@ func assignError(errOut *RbError, err error, fallback syscall.Errno) {
 
 // Clear fs and vfs instances associated with the specified remote. The vfs
 // instances, if any, will be shut down immediately.
-func RbCacheClearRemote(remote string) {
+func RbCacheClearRemote(remote string, deleteCacheDir bool) {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
-	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
-		v, ok := vfsCache[remote]
-		if ok {
-			v.Shutdown()
+	v, ok := vfsInstances[remote]
+	if ok {
+		fs.Logf(remote, "Removing from VFS cache")
+		v.Shutdown()
+
+		if deleteCacheDir {
+			fs.Logf(remote, "Deleting VFS cache directory")
 			v.CleanUp()
-			delete(vfsCache, remote)
 		}
+
+		delete(vfsInstances, remote)
 	}
 
 	parsed, err := fspath.Parse(remote)
@@ -337,19 +363,40 @@ func RbCacheClearRemote(remote string) {
 
 // Clear cached fs and vfs instances. All vfs instances will be shut down
 // immediately.
-func RbCacheClearAll() {
+func RbCacheClearAll(deleteCacheDir bool) {
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
-	for _, vfsCache := range []map[string]*vfs.VFS{vfsStreaming, vfsCaching} {
-		for k := range vfsCache {
-			vfsCache[k].Shutdown()
-			vfsCache[k].CleanUp()
-			delete(vfsCache, k)
+	for k, vfs := range vfsInstances {
+		fs.Logf(k, "Removing from VFS cache")
+		vfs.Shutdown()
+
+		if deleteCacheDir {
+			fs.Logf(k, "Deleting VFS cache directory")
+			vfs.CleanUp()
 		}
+
+		delete(vfsInstances, k)
 	}
 
 	cache.Clear()
+}
+
+// The number of seconds to wait before all VFS instances with caching enabled
+// have begun one cleanup cycle if all of their timers were to start now.
+func RbCacheCleanupMaxWaitSeconds() int64 {
+	vfsLock.Lock()
+	defer vfsLock.Unlock()
+
+	maxWait := fs.Duration(0)
+
+	for _, vfs := range vfsInstances {
+		if vfs.Opt.CacheMode != vfscommon.CacheModeOff {
+			maxWait = max(maxWait, vfs.Opt.CacheMaxAge+vfs.Opt.CachePollInterval)
+		}
+	}
+
+	return int64(maxWait / fs.Duration(time.Second))
 }
 
 func RbConfigCheckName(name string, errOut *RbError) bool {
@@ -369,6 +416,10 @@ func RbConfigCopySection(oldName string, newName string) {
 			config.Data().SetValue(newName, key, value)
 		}
 	}
+}
+
+func RbConfigDeleteSectionKey(name string, key string) bool {
+	return config.Data().DeleteKey(name, key)
 }
 
 func RbConfigSetPath(path string, errOut *RbError) bool {
@@ -395,7 +446,7 @@ func RbConfigClearPassword() {
 	config.ClearConfigPassword()
 }
 
-func RbConfigLoad(errOut *RbError) bool {
+func RbConfigLoad(deleteCacheDir bool, errOut *RbError) bool {
 	// We explicitly call this instead of config.LoadedData() so that errors can
 	// be reported
 	err := config.Data().Load()
@@ -404,7 +455,29 @@ func RbConfigLoad(errOut *RbError) bool {
 		return false
 	}
 
-	RbCacheClearAll()
+	// Migrate the legacy VFS caching option to the new custom VFS options map.
+	for _, section := range config.Data().GetSectionList() {
+		value, found := config.Data().GetValue(section, rsafLegacyVfsCaching)
+		if found {
+			isCaching, err := strconv.ParseBool(value)
+			if err != nil {
+				assignError(errOut, err, syscall.EINVAL)
+				return false
+			}
+
+			var vfsCacheMode vfscommon.CacheMode
+			if isCaching {
+				vfsCacheMode = vfscommon.CacheModeWrites
+			} else {
+				vfsCacheMode = vfscommon.CacheModeOff
+			}
+
+			config.Data().SetValue(section, rsafVfsPrefix+"vfs_cache_mode", vfsCacheMode.String())
+			config.Data().DeleteKey(section, rsafLegacyVfsCaching)
+		}
+	}
+
+	RbCacheClearAll(deleteCacheDir)
 
 	return true
 }
@@ -486,6 +559,149 @@ func getFsForDoc(doc string, treatAsFile bool) (fs.Fs, string, error) {
 	}
 }
 
+type vfsOverrides map[string]string
+
+func (c vfsOverrides) Get(key string) (value string, ok bool) {
+	value, ok = c[key]
+	return value, ok
+}
+
+func getVfsOverrides(remote string) (vfsOverrides, error) {
+	overrides := vfsOverrides{}
+
+	parsed, err := fspath.Parse(remote)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, key := range config.Data().GetKeyList(parsed.Name) {
+		vfsKey, matches := strings.CutPrefix(key, rsafVfsPrefix)
+		if !matches {
+			continue
+		}
+
+		vfsValue, found := config.Data().GetValue(parsed.Name, key)
+		if !found {
+			continue
+		}
+
+		overrides[vfsKey] = vfsValue
+	}
+
+	return overrides, nil
+}
+
+func getVfsOpts(overrides vfsOverrides) (vfscommon.Options, error) {
+	opts := vfscommon.Opt
+
+	// Significantly shorten the time that directory entries are cached so that
+	// file listings are more likely to reflect reality after external file
+	// operations made outside of rclone or local operations that touch the
+	// backend directly, like copying/moving. There's no public nor internal API
+	// for just invalidating the directory cache. The RC API has vfs/refresh but
+	// that forces an unnecessary reread of directories.
+	opts.DirCacheTime = fs.Duration(5 * time.Second)
+
+	// Required for O_RDWR.
+	opts.CacheMode = vfscommon.CacheModeWrites
+
+	// Clean up cached files as soon as possible. The VFS cache monitor service
+	// will stop as soon as all files are closed and Android will SIGSTOP the
+	// process soon after that. The default poll interval generally causes files
+	// to not be cleaned up until the next time the user actively interacts with
+	// RSAF. If RSAF gets restarted in the meantime, the cleanup won't even run
+	// until the next time the VFS is created for this specific remote.
+	opts.CacheMaxAge = fs.Duration(15 * time.Second)
+	opts.CachePollInterval = fs.Duration(20 * time.Second)
+
+	// Adjust read buffering to be more appropriate for a mobile app.
+	opts.ChunkSize = 2 * fs.Mebi
+	opts.ChunkSizeLimit = 8 * fs.Mebi
+
+	// Override our defaults with the custom options the user has configured.
+	err := configstruct.Set(overrides, &opts)
+	if err != nil {
+		return opts, err
+	}
+
+	// configstruct silently ignores empty values, but we want to ensure the
+	// user knows that the value is aware that the option is doing nothing.
+	for key, value := range overrides {
+		if !vfsOptValidKeys[key] {
+			return opts, fmt.Errorf("invalid VFS option: %q", key)
+		} else if len(value) == 0 && !vfsOptStringKeys[key] {
+			return opts, fmt.Errorf("cannot have an empty value: %q", key)
+		}
+	}
+
+	// This is initially asynchronous so that vfs.New() -> vfs.Item.reload()
+	// does not block if there are dirty items in the VFS cache. This is the
+	// one option that cannot be overridden. getVfs() will reset this back to
+	// 0 after the VFS is initialized.
+	opts.WriteBack = fs.Duration(1 * time.Millisecond)
+
+	return opts, nil
+}
+
+type RbVfsOpt struct {
+	Key   string
+	Value string
+}
+
+type RbVfsOptList struct {
+	items []RbVfsOpt
+}
+
+func (list *RbVfsOptList) Add(item *RbVfsOpt) {
+	list.items = append(list.items, *item)
+}
+
+func (list *RbVfsOptList) Get(index int) *RbVfsOpt {
+	return &list.items[index]
+}
+
+func (list *RbVfsOptList) Size() int {
+	return len(list.items)
+}
+
+func RbVfsGetOpts(overrides *RbVfsOptList, errOut *RbError) *RbVfsOptList {
+	overridesMap := vfsOverrides{}
+
+	for _, override := range overrides.items {
+		overridesMap[override.Key] = override.Value
+	}
+
+	opts, err := getVfsOpts(overridesMap)
+	if err != nil {
+		assignError(errOut, err, syscall.EINVAL)
+		return nil
+	}
+
+	items, err := configstruct.Items(&opts)
+	result := []RbVfsOpt{}
+
+	for _, item := range items {
+		if !vfsOptValidKeys[item.Name] {
+			continue
+		}
+
+		value, err := configstruct.InterfaceToString(item.Value)
+		if err != nil {
+			assignError(errOut, err, syscall.EINVAL)
+			return nil
+		}
+
+		result = append(result, RbVfsOpt{
+			Key:   item.Name,
+			Value: value,
+		})
+	}
+
+	return &RbVfsOptList{
+		items: result,
+	}
+}
+
 // Create a vfs instance for the given remote. The path can point to the root
 // of the remote or a subdirectory. The vfs is configured to allow caching
 // writes to disk in order to allow opening files for both reading and writing
@@ -496,81 +712,29 @@ func getVfs(remote string) (*vfs.VFS, error) {
 		return nil, err
 	}
 
-	parsed, err := fspath.Parse(remote)
-	if err != nil {
-		return nil, err
-	}
-
-	isCachingStr, found := config.Data().GetValue(parsed.Name, rsafVfsCaching)
-	if !found {
-		fs.Logf(remote, "No VFS caching preference. Enabling VFS caching")
-		isCachingStr = "true"
-	}
-
-	isCaching, err := strconv.ParseBool(isCachingStr)
-	if err != nil {
-		return nil, err
-	}
-
-	if !isCaching && f.Features().PutStream == nil {
-		fs.Logf(remote, "Streaming is not supported. Enabling VFS caching")
-		isCaching = true
-	}
-
 	vfsLock.Lock()
 	defer vfsLock.Unlock()
 
-	var vfsCache map[string]*vfs.VFS
-	if isCaching {
-		vfsCache = vfsCaching
-	} else {
-		vfsCache = vfsStreaming
-	}
-
-	v, ok := vfsCache[remote]
+	v, ok := vfsInstances[remote]
 	if !ok {
-		opts := vfscommon.Opt
+		fs.Logf(remote, "Creating new VFS instance")
 
-		// Significantly shorten the time that directory entries are cached so
-		// that file listings are more likely to reflect reality after external
-		// file operations made outside of rclone or local operations that touch
-		// the backend directly, like copying/moving. There's no public nor
-		// internal API for just invalidating the directory cache. The RC API
-		// has vfs/refresh but that forces an unnecessary reread of directories.
-		opts.DirCacheTime = fs.Duration(5 * time.Second)
-
-		if isCaching {
-			// This is required for O_RDWR.
-			opts.CacheMode = vfscommon.CacheModeWrites
-		} else {
-			opts.CacheMode = vfscommon.CacheModeOff
+		overrides, err := getVfsOverrides(remote)
+		if err != nil {
+			return nil, err
 		}
 
-		// Clean up cached files as soon as possible. The background upload
-		// monitor service will stop as soon as all files are closed and Android
-		// will SIGSTOP the process soon after that. The default poll interval
-		// generally causes files to not be cleaned up until the next time the
-		// user actively interacts with RSAF. If RSAF gets restarted in the
-		// meantime, the cleanup won't even run until the next time the VFS is
-		// created for this specific remote.
-		opts.CacheMaxAge = fs.Duration(15 * time.Second)
-		opts.CachePollInterval = fs.Duration(20 * time.Second)
-
-		// Adjust read buffering to be more appropriate for a mobile app.
-		// Maybe make this configurable in the future.
-		opts.ChunkSize = 2 * fs.Mebi
-		opts.ChunkSizeLimit = 8 * fs.Mebi
-
-		// This is initially asynchronous so that vfs.New() -> vfs.Item.reload()
-		// does not block if there are dirty items in the VFS cache.
-		opts.WriteBack = fs.Duration(1 * time.Millisecond)
+		opts, err := getVfsOpts(overrides)
+		if err != nil {
+			fs.Logf(remote, "Failed to apply VFS options overrides: %+v", overrides)
+			return nil, err
+		}
 
 		v = vfs.New(f, &opts)
-		vfsCache[remote] = v
+		vfsInstances[remote] = v
 
-		// Then we make Close() synchronous again because we rely on this for
-		// the in-use file tracker in RcloneProvider and also for upload error
-		// reporting.
+		// Make Close() synchronous again because we rely on this for the in-use
+		// file tracker in RcloneProvider and also for upload error reporting.
 		v.Opt.WriteBack = 0
 	}
 
@@ -595,13 +759,12 @@ func getVfsForDoc(doc string) (*vfs.VFS, string, error) {
 }
 
 type RbRemoteFeaturesResult struct {
-	Copy      bool
-	Move      bool
-	PutStream bool
-	About     bool
+	Copy  bool
+	Move  bool
+	About bool
 }
 
-// Return whether the specified remote supports streaming.
+// Return supported features about the specified remote.
 func RbRemoteFeatures(remote string, errOut *RbError) *RbRemoteFeaturesResult {
 	f, err := getFs(remote)
 	if err != nil {
@@ -612,10 +775,9 @@ func RbRemoteFeatures(remote string, errOut *RbError) *RbRemoteFeaturesResult {
 	features := f.Features()
 
 	result := RbRemoteFeaturesResult{
-		Copy:      features.Copy != nil,
-		Move:      features.Move != nil,
-		PutStream: features.PutStream != nil,
-		About:     features.About != nil,
+		Copy:  features.Copy != nil,
+		Move:  features.Move != nil,
+		About: features.About != nil,
 	}
 
 	return &result
@@ -713,11 +875,11 @@ type RbDirEntryList struct {
 	items []RbDirEntry
 }
 
-func (list RbDirEntryList) Get(index int) *RbDirEntry {
+func (list *RbDirEntryList) Get(index int) *RbDirEntry {
 	return &list.items[index]
 }
 
-func (list RbDirEntryList) Size() int {
+func (list *RbDirEntryList) Size() int {
 	return len(list.items)
 }
 

@@ -48,13 +48,14 @@ open class AuthorizeDialogFragment : DialogFragment() {
 
         binding = DialogAuthorizeBinding.inflate(layoutInflater)
 
+        isCancelable = false
+
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_authorize_title)
             .setView(binding.root)
-            .setNegativeButton(R.string.dialog_action_cancel) { _, _ ->
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
                 viewModel.cancel()
             }
-            .setCancelable(false)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {

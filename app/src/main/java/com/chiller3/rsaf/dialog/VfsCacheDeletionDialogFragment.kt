@@ -37,7 +37,7 @@ class VfsCacheDeletionDialogFragment : DialogFragment() {
             .setPositiveButton(R.string.dialog_action_proceed_anyway) { _, _ ->
                 success = true
             }
-            .setNegativeButton(R.string.dialog_action_cancel, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {

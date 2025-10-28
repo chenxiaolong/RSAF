@@ -937,7 +937,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     private inner class ProxyFd(
         private val documentId: String,
         private val handle: RbFile,
-        private val isWrite: Boolean
+        private val isWrite: Boolean,
     ) : ProxyFileDescriptorCallback() {
         init {
             markUsed()
@@ -945,7 +945,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             val context = context!!
 
             if (Permissions.isInhibitingBatteryOpt(context)) {
-                context.startForegroundService(OpenFilesService.createIncrementIntent(context))
+                context.startForegroundService(KeepAliveService.createIntent(context, +1, 0, false))
             }
         }
 
@@ -1005,14 +1005,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             debugLog("onRelease()")
 
             val context = context!!
+            val remote = splitRemote(documentId).first.trimEnd(':')
 
-            if (Permissions.isInhibitingBatteryOpt(context)) {
-                context.startForegroundService(OpenFilesService.createDecrementIntent(context))
+            if (isWrite) {
+                VfsCache.syncUploadIncrement(remote)
 
-                if (isWrite) {
-                    context.startForegroundService(
-                        BackgroundUploadMonitorService.createIntent(context, false),
-                    )
+                if (Permissions.isInhibitingBatteryOpt(context)) {
+                    // Mark this file as uploading instead of open.
+                    context.startForegroundService(KeepAliveService.createIntent(context, -1, +1, false))
                 }
             }
 
@@ -1030,6 +1030,22 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                         exception.toSingleLineString(),
                     )
                 }
+            }
+
+            if (isWrite) {
+                VfsCache.syncUploadDecrement(remote)
+            }
+
+            if (Permissions.isInhibitingBatteryOpt(context)) {
+                val (adjOpen, adjUploading) = if (isWrite) {
+                    Pair(0, -1)
+                } else {
+                    Pair(-1, 0)
+                }
+
+                context.startForegroundService(
+                    KeepAliveService.createIntent(context, adjOpen, adjUploading, false),
+                )
             }
 
             markUnused()

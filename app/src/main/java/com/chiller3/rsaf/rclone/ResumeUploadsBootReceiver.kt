@@ -9,12 +9,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
-class BackgroundUploadMonitorReceiver : BroadcastReceiver() {
+class ResumeUploadsBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent?.action != Intent.ACTION_BOOT_COMPLETED) {
             return
         }
 
-        BackgroundUploadMonitorService.startWithScanOnce(context)
+        KeepAliveService.startWithScanOnce(context)
     }
 }

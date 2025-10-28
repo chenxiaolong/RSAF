@@ -5,30 +5,26 @@
 
 package com.chiller3.rsaf.rclone
 
-import android.util.Log
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
 object RcloneRpc {
-    private val TAG = RcloneRpc::class.java.simpleName
-
     private const val CUSTOM_OPT_PREFIX = "rsaf:"
     // This is called hidden due to backwards compatibility.
     private const val CUSTOM_OPT_HARD_BLOCKED = CUSTOM_OPT_PREFIX + "hidden"
     private const val CUSTOM_OPT_SOFT_BLOCKED = CUSTOM_OPT_PREFIX + "soft_blocked"
     private const val CUSTOM_OPT_DYNAMIC_SHORTCUT = CUSTOM_OPT_PREFIX + "dynamic_shortcut"
     private const val CUSTOM_OPT_THUMBNAILS = CUSTOM_OPT_PREFIX + "thumbnails"
-    private const val CUSTOM_OPT_VFS_CACHING = CUSTOM_OPT_PREFIX + "vfs_caching"
     private const val CUSTOM_OPT_REPORT_USAGE = CUSTOM_OPT_PREFIX + "report_usage"
+    private const val CUSTOM_OPT_VFS_OPTIONS_PREFIX = CUSTOM_OPT_PREFIX + "vfs:"
 
     // Keep in sync with preferences_edit_remote.xml
     private const val DEFAULT_HARD_BLOCKED = false
     private const val DEFAULT_SOFT_BLOCKED = false
     private const val DEFAULT_DYNAMIC_SHORTCUT = false
     private const val DEFAULT_THUMBNAILS = true
-    private const val DEFAULT_VFS_CACHING = true
     private const val DEFAULT_REPORT_USAGE = false
 
     /**
@@ -41,7 +37,6 @@ object RcloneRpc {
 
         when (method) {
             "config/create", "config/delete", "config/update" -> RcloneConfig.notifyConfigChanged()
-            else -> Log.d(TAG, "No backup notification required for $method RPC call")
         }
 
         if (result.status != 200L) {
@@ -164,7 +159,7 @@ object RcloneRpc {
 
         // The RPC call will not clear out fs/vfs caches, so we'll do that manually here. Otherwise,
         // we might reference stale data if the user creates a new remote with the same name.
-        Rcbridge.rbCacheClearRemote("$remote:")
+        Rcbridge.rbCacheClearRemote("$remote:", true)
     }
 
     @Suppress("unused")
@@ -379,13 +374,23 @@ object RcloneRpc {
     }
 
     /** Directly and non-interactively set config key/value pairs for a remote. */
-    private fun setRemoteOptions(remote: String, options: Map<String, String>) {
+    private fun setRemoteOptions(remote: String, options: Map<String, String?>) {
+        // The RPC API can add and update keys, but cannot delete them. This is done before
+        // config/update because the RPC call will trigger the notification to the backup manager.
+        for ((k, v) in options.entries) {
+            if (v == null) {
+                RcloneConfig.deleteSectionKey(remote, k)
+            }
+        }
+
         invoke("config/update", JSONObject()
             .put("name", remote)
             .put("parameters", JSONObject()
                 .apply {
                     for ((k, v) in options.entries) {
-                        put(k, v)
+                        if (v != null) {
+                            put(k, v)
+                        }
                     }
                 }
             )
@@ -410,16 +415,20 @@ object RcloneRpc {
         val softBlocked: Boolean? = null,
         val dynamicShortcut: Boolean? = null,
         val thumbnails: Boolean? = null,
-        val vfsCaching: Boolean? = null,
         val reportUsage: Boolean? = null,
+        val vfsOptions: Map<String, String> = emptyMap(),
     ) {
         constructor(config: Map<String, String>) : this(
             hardBlocked = config[CUSTOM_OPT_HARD_BLOCKED]?.toBooleanStrictOrNull(),
             softBlocked = config[CUSTOM_OPT_SOFT_BLOCKED]?.toBooleanStrictOrNull(),
             dynamicShortcut = config[CUSTOM_OPT_DYNAMIC_SHORTCUT]?.toBooleanStrictOrNull(),
             thumbnails = config[CUSTOM_OPT_THUMBNAILS]?.toBooleanStrictOrNull(),
-            vfsCaching = config[CUSTOM_OPT_VFS_CACHING]?.toBooleanStrictOrNull(),
             reportUsage = config[CUSTOM_OPT_REPORT_USAGE]?.toBooleanStrictOrNull(),
+            vfsOptions = config
+                .asSequence()
+                .filter { it.key.startsWith(CUSTOM_OPT_VFS_OPTIONS_PREFIX) }
+                .map { it.key.substring(CUSTOM_OPT_VFS_OPTIONS_PREFIX.length) to it.value }
+                .toMap(),
         )
 
         fun toMap(): Map<String, String> = buildMap {
@@ -427,8 +436,8 @@ object RcloneRpc {
             softBlocked?.let { put(CUSTOM_OPT_SOFT_BLOCKED, it.toString()) }
             dynamicShortcut?.let { put(CUSTOM_OPT_DYNAMIC_SHORTCUT, it.toString()) }
             thumbnails?.let { put(CUSTOM_OPT_THUMBNAILS, it.toString()) }
-            vfsCaching?.let { put(CUSTOM_OPT_VFS_CACHING, it.toString()) }
             reportUsage?.let { put(CUSTOM_OPT_REPORT_USAGE, it.toString()) }
+            vfsOptions.mapKeysTo(this) { CUSTOM_OPT_VFS_OPTIONS_PREFIX + it.key }
         }
 
         val hardBlockedOrDefault: Boolean
@@ -439,14 +448,23 @@ object RcloneRpc {
             get() = dynamicShortcut ?: DEFAULT_DYNAMIC_SHORTCUT
         val thumbnailsOrDefault: Boolean
             get() = thumbnails ?: DEFAULT_THUMBNAILS
-        val vfsCachingOrDefault: Boolean
-            get() = vfsCaching ?: DEFAULT_VFS_CACHING
         val reportUsageOrDefault: Boolean
             get() = reportUsage ?: DEFAULT_REPORT_USAGE
     }
 
     fun setRemoteConfig(remote: String, config: RemoteConfig) {
-        setRemoteOptions(remote, config.toMap())
+        // Ensure we don't leave behind legacy options.
+        val updates = mutableMapOf<String, String?>()
+
+        remoteConfigsRaw[remote]
+            ?.asSequence()
+            ?.filter { (key, _) -> key.startsWith(CUSTOM_OPT_PREFIX) }
+            ?.map { (key, _) -> key to null }
+            ?.toMap(updates)
+
+        updates.putAll(config.toMap())
+
+        setRemoteOptions(remote, updates)
     }
 
     data class Usage(
@@ -477,5 +495,39 @@ object RcloneRpc {
             getOptLong("free"),
             getOptLong("objects"),
         )
+    }
+
+    val vfses: Array<String>
+        get() {
+            val output = invoke("vfs/list", JSONObject())
+            val vfses = output.optJSONArray("vfses") ?: return emptyArray()
+
+            return Array(vfses.length()) {
+                vfses.getString(it)
+            }
+        }
+
+    data class VfsQueueStats(
+        val inProgress: Int,
+        val pending: Int,
+    )
+
+    fun vfsQueueStats(vfs: String): VfsQueueStats {
+        val output = invoke("vfs/queue", JSONObject().put("fs", vfs))
+        val jsonQueue = output.getJSONArray("queue")
+        var inProgress = 0
+        var pending = 0
+
+        for (i in 0 until jsonQueue.length()) {
+            val jsonQueueItem = jsonQueue.getJSONObject(i)
+
+            if (jsonQueueItem.getBoolean("uploading")) {
+                inProgress += 1
+            } else {
+                pending += 1
+            }
+        }
+
+        return VfsQueueStats(inProgress, pending)
     }
 }

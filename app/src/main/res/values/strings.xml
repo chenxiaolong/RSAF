@@ -73,14 +73,12 @@
     <string name="pref_edit_remote_dynamic_shortcut_desc">Include this remote in the list of shortcuts when long pressing RSAF\'s launcher icon.</string>
     <string name="pref_edit_remote_thumbnails_name">Enable thumbnails</string>
     <string name="pref_edit_remote_thumbnails_desc">Allow showing thumbnails for images, videos, and music (album art). This may result in additional network traffic when browsing files.</string>
-    <string name="pref_edit_remote_vfs_caching_name">Enable VFS caching</string>
-    <string name="pref_edit_remote_vfs_caching_desc_loading">(Checking if streaming is supported…)</string>
-    <string name="pref_edit_remote_vfs_caching_desc_optional">VFS caching enables support for random writes and allows failed uploads to be retried. However, files do not begin uploading until the client app closes them.</string>
-    <string name="pref_edit_remote_vfs_caching_desc_required">VFS caching cannot be disabled because this remote type does not support streaming uploads.</string>
     <string name="pref_edit_remote_report_usage_name">Report filesystem usage</string>
     <string name="pref_edit_remote_report_usage_desc_loading">(Checking if filesystem usage reporting is supported…)</string>
     <string name="pref_edit_remote_report_usage_desc_supported">Report free space and total space to client apps. For some remote types, this can significantly slow down client apps when they fetch the list of remotes.</string>
     <string name="pref_edit_remote_report_usage_desc_unsupported">This remote type does not support reporting its free space and total space.</string>
+    <string name="pref_edit_remote_vfs_options_name">Custom VFS options</string>
+    <string name="pref_edit_remote_vfs_options_desc">Set custom rclone VFS options supported by <tt>rclone mount</tt>.</string>
 
     <!-- Main alerts -->
     <string name="alert_list_remotes_failure">Failed to get list of remotes: %1$s</string>
@@ -109,8 +107,6 @@
 
     <!-- Dialogs -->
     <string name="dialog_action_next">Next</string>
-    <string name="dialog_action_ok">OK</string>
-    <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_authorize">Authorize</string>
     <string name="dialog_action_reset">Reset</string>
     <string name="dialog_action_proceed_anyway">Proceed anyway</string>
@@ -140,20 +136,31 @@
     <string name="ic_text_box_helper_not_required">Value can be empty.</string>
     <string name="ic_header_examples">Example options:</string>
 
+    <!-- VFS options dialog -->
+    <string name="vfs_options_title">VFS options: %1$s</string>
+    <string name="vfs_options_message">Enter custom rclone VFS options as <tt>key=value</tt> with one option on each line. The key is the command line argument without <tt>--</tt> at the beginning and all other hyphens replaced with underscores. See <annotation type="rclone_vfs_docs">the rclone documentation</annotation> for the list of available options.</string>
+    <string name="vfs_options_reload_warning"><b>NOTE</b>: The VFS must be reloaded for the changes to take effect, which will interrupt ongoing file operations for this remote.</string>
+    <string name="vfs_options_save_and_reload">Save and reload</string>
+    <string name="vfs_options_save_only">Save only</string>
+
     <!-- Notifications -->
-    <string name="notification_channel_open_files_name">Open files</string>
-    <string name="notification_channel_open_files_desc">Keeps process alive while files are open</string>
-    <string name="notification_channel_background_uploads_name">Background uploads</string>
-    <string name="notification_channel_background_uploads_desc">Show in-progress background uploads</string>
+    <string name="notification_channel_keep_alive_name">Background services</string>
+    <string name="notification_channel_keep_alive_desc">Keeps process alive while files are open or being uploaded</string>
     <string name="notification_channel_failure_name">Failure alerts</string>
     <string name="notification_channel_failure_desc">Alerts for errors during background uploads</string>
-    <plurals name="notification_open_files_title">
-        <item quantity="one">%d open file</item>
-        <item quantity="other">%d open files</item>
+    <string name="notification_keep_alive_title">File operations in progress</string>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d file open</item>
+        <item quantity="other">%d files open</item>
     </plurals>
-    <plurals name="notification_background_uploads_in_progress_title">
-        <item quantity="one">Uploading %d file to remote</item>
-        <item quantity="other">Uploading %d files to remotes</item>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d file uploading</item>
+        <item quantity="other">%d files uploading</item>
     </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d file pending upload</item>
+        <item quantity="other">%d files pending upload</item>
+    </plurals>
+    <string name="notification_keep_alive_cleanup_wait_desc">Waiting for VFS cache cleanup</string>
     <string name="notification_background_upload_failed_title">Failed to upload file to remote</string>
 </resources>
