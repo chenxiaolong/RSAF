@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Make message text selectable when configuring a remote ([Issue #193], [PR #194])
+
 ### Version 3.20
 
 * Add support for setting arbitrary rclone VFS options ([Issue #190], [PR #192])
@@ -337,6 +341,7 @@
 [Issue #158]: https://github.com/chenxiaolong/RSAF/issues/158
 [Issue #185]: https://github.com/chenxiaolong/RSAF/issues/185
 [Issue #190]: https://github.com/chenxiaolong/RSAF/issues/190
+[Issue #193]: https://github.com/chenxiaolong/RSAF/issues/193
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -460,3 +465,4 @@
 [PR #186]: https://github.com/chenxiaolong/RSAF/pull/186
 [PR #191]: https://github.com/chenxiaolong/RSAF/pull/191
 [PR #192]: https://github.com/chenxiaolong/RSAF/pull/192
+[PR #194]: https://github.com/chenxiaolong/RSAF/pull/194
