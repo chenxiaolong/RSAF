@@ -9,7 +9,7 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
-### Unreleased
+### Version 3.22
 
 * Work around Android bug where `system_server` crashes when file close operations take too long ([Issue #157], [PR #197])
 
