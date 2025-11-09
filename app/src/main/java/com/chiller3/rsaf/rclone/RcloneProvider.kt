@@ -1012,7 +1012,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             // holding the same lock. Since monitor() is registered with Android's watchdog service,
             // the slow unmount causes system_server to be killed, which, to the user, appears as if
             // the system rebooted. This is a pretty nasty Android bug that allows denial of service
-            // from allows any unprivileged app.
+            // from any unprivileged app.
             //
             // With RSAF defaulting to vfs_cache_mode=writes for rclone's VFS, files do not begin to
             // upload until they are closed. This operation could take an indefinite amount of time.
