@@ -1004,6 +1004,24 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         override fun onRelease() {
             debugLog("onRelease()")
 
+            // Do not block this FUSE operation. StorageManagerService.AppFuseMountScope.close() has
+            // a comment that indicates the AOSP devs were aware that unmounting the FUSE mountpoint
+            // could take a while, so it's done on a background thread. However, they didn't account
+            // for the fact that IVold.unmountAppFuse() holds the main vold lock until the operation
+            // completes. StorageManagerService.monitor() calls IVold.monitor(), which also requires
+            // holding the same lock. Since monitor() is registered with Android's watchdog service,
+            // the slow unmount causes system_server to be killed, which, to the user, appears as if
+            // the system rebooted. This is a pretty nasty Android bug that allows denial of service
+            // from allows any unprivileged app.
+            //
+            // With RSAF defaulting to vfs_cache_mode=writes for rclone's VFS, files do not begin to
+            // upload until they are closed. This operation could take an indefinite amount of time.
+            Thread(::onReleaseBackground).start()
+        }
+
+        private fun onReleaseBackground() {
+            debugLog("onReleaseBackground()")
+
             val context = context!!
             val remote = splitRemote(documentId).first.trimEnd(':')
 
@@ -1050,7 +1068,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
             markUnused()
 
-            debugLog("onRelease() complete")
+            debugLog("onReleaseBackground() complete")
         }
 
         private fun markUsed() {
