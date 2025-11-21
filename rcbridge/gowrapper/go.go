@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Andrew Gunnerson
+// SPDX-License-Identifier: GPL-3.0-only
+
 // `gomobile bind` generates a go.mod file with a `replace` directive that
 // points to an absolute path. This shows up in the .go.buildinfo ELF section
 // even if building with -trimpath. This program is an ugly wrapper around `go`
