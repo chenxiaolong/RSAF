@@ -288,6 +288,8 @@ func RbSetLogVerbosity(verbosity int) {
 	} else {
 		ci.LogLevel = fs.LogLevelNotice
 	}
+
+	fs.LogReload(ci)
 }
 
 type RbRpcResult struct {
