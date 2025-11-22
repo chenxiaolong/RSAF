@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Update rclone to 1.72.0 ([PR #201])
+* Use the same `User-Agent` header as upstream rclone ([PR #202])
 
 ### Version 3.22
 
@@ -477,3 +478,4 @@
 [PR #194]: https://github.com/chenxiaolong/RSAF/pull/194
 [PR #197]: https://github.com/chenxiaolong/RSAF/pull/197
 [PR #201]: https://github.com/chenxiaolong/RSAF/pull/201
+[PR #202]: https://github.com/chenxiaolong/RSAF/pull/202
