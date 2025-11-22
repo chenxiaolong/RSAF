@@ -249,9 +249,14 @@ func perRequestHook(config *tls.Config) {
 func RbInit() {
 	librclone.Initialize()
 
-	// Don't allow interactive password prompts
 	ci := fs.GetConfig(context.Background())
+
+	// Don't allow interactive password prompts.
 	ci.AskPassword = false
+
+	// Use the same user agent header as rclone. Without this, the default user
+	// agent is just "rclone/".
+	ci.UserAgent = fmt.Sprintf("rclone/%s", fs.VersionTag)
 
 	fshttp.SetRoundTripHook(perRequestHook)
 }
