@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2022-2025 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -17,17 +17,20 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 
 object Permissions {
-    private val NOTIFICATION: Array<String> =
+    val NOTIFICATION: Array<String> =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(Manifest.permission.POST_NOTIFICATIONS)
         } else {
             arrayOf()
         }
 
-    val REQUIRED: Array<String> = NOTIFICATION
+    val LEGACY_STORAGE: Array<String> = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    )
 
     /** Check if all permissions have been granted. */
-    fun haveRequired(context: Context): Boolean = REQUIRED.all {
+    fun have(context: Context, permissions: Array<String>): Boolean = permissions.all {
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 

@@ -284,12 +284,6 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
     override fun onResume() {
         super.onResume()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            prefLocalStorageAccess.isChecked = Environment.isExternalStorageManager()
-        } else {
-            prefLocalStorageAccess.isVisible = false
-        }
-
         refreshPermissions()
     }
 
@@ -299,10 +293,16 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         val allowedInhibitBatteryOpt = Permissions.isInhibitingBatteryOpt(context)
         prefInhibitBatteryOpt.isVisible = !allowedInhibitBatteryOpt
 
-        val allowedNotifications = Permissions.haveRequired(context)
+        val allowedNotifications = Permissions.have(context, Permissions.NOTIFICATION)
         prefMissingNotifications.isVisible = !allowedNotifications
 
         categoryPermissions.isVisible = !(allowedInhibitBatteryOpt && allowedNotifications)
+
+        prefLocalStorageAccess.isChecked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            Permissions.have(context, Permissions.LEGACY_STORAGE)
+        }
     }
 
     private fun refreshInactivityTimeout() {
@@ -383,7 +383,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 return true
             }
             preference === prefMissingNotifications -> {
-                requestPermissionRequired.launch(Permissions.REQUIRED)
+                requestPermissionRequired.launch(Permissions.NOTIFICATION)
                 return true
             }
             preference === prefAddRemote -> {
@@ -460,6 +460,10 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                     )
 
                     startActivity(intent)
+                } else if (newValue == true) {
+                    requestPermissionRequired.launch(Permissions.LEGACY_STORAGE)
+                } else {
+                    startActivity(Permissions.getAppInfoIntent(requireContext()))
                 }
 
                 // We rely on onPause() to adjust the switch state when the user comes back from the
