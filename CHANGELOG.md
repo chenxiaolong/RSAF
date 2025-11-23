@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Add support for "allow local storage access" option in Android <=10 ([Issue #164], [PR #204])
+
 ### Version 3.23
 
 * Update rclone to 1.72.0 ([PR #201])
@@ -351,6 +355,7 @@
 [Issue #155]: https://github.com/chenxiaolong/RSAF/issues/155
 [Issue #157]: https://github.com/chenxiaolong/RSAF/issues/157
 [Issue #158]: https://github.com/chenxiaolong/RSAF/issues/158
+[Issue #164]: https://github.com/chenxiaolong/RSAF/issues/164
 [Issue #185]: https://github.com/chenxiaolong/RSAF/issues/185
 [Issue #190]: https://github.com/chenxiaolong/RSAF/issues/190
 [Issue #193]: https://github.com/chenxiaolong/RSAF/issues/193
@@ -482,3 +487,4 @@
 [PR #201]: https://github.com/chenxiaolong/RSAF/pull/201
 [PR #202]: https://github.com/chenxiaolong/RSAF/pull/202
 [PR #203]: https://github.com/chenxiaolong/RSAF/pull/203
+[PR #204]: https://github.com/chenxiaolong/RSAF/pull/204
