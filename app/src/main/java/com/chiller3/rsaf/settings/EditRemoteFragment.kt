@@ -7,9 +7,6 @@ package com.chiller3.rsaf.settings
 
 import android.os.Bundle
 import android.util.Log
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
@@ -29,7 +26,6 @@ import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
 import com.chiller3.rsaf.dialog.VfsOptionsDialogFragment
 import com.chiller3.rsaf.rclone.RcloneProvider
-import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.settings.SettingsFragment.Companion.documentsUiIntent
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -107,15 +103,6 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.remoteConfigs.collect {
-                    Log.d(TAG, "Updating dynamic shortcuts")
-                    updateShortcuts(it)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.remoteState.collect { state ->
                     prefOpenRemote.isEnabled = state.allowExternalAccessOrDefault == true
 
@@ -171,8 +158,7 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.activityActions.collect {
                     if (it.refreshRoots) {
-                        Log.d(TAG, "Notifying system of new SAF roots")
-                        RcloneProvider.notifyRootsChanged(requireContext().contentResolver)
+                        RcloneProvider.notifyRootsChanged(requireContext())
                     }
                     it.editNewRemote?.let { newRemote ->
                         Log.d(TAG, "Editing new remote: $newRemote")
@@ -346,42 +332,6 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
             ).show(parentFragmentManager.beginTransaction(), TAG_DELETE_REMOTE_CONFIRM)
         } else {
             viewModel.deleteRemote()
-        }
-    }
-
-    private fun updateShortcuts(remoteConfigs: Map<String, RcloneRpc.RemoteConfig>) {
-        val context = requireContext()
-
-        val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
-        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
-        val shortcuts = mutableListOf<ShortcutInfoCompat>()
-        var rank = 0
-
-        for ((remote, config) in remoteConfigs) {
-            if (config.hardBlockedOrDefault || !config.dynamicShortcutOrDefault) {
-                continue
-            }
-
-            if (rank < maxShortcuts) {
-                val shortcut = ShortcutInfoCompat.Builder(context, remote)
-                    .setShortLabel(remote)
-                    .setIcon(icon)
-                    .setIntent(documentsUiIntent(remote))
-                    .setRank(rank)
-                    .build()
-
-                shortcuts.add(shortcut)
-            }
-
-            rank += 1
-        }
-
-        if (rank > maxShortcuts) {
-            Log.w(TAG, "Truncating dynamic shortcuts from $rank to $maxShortcuts")
-        }
-
-        if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {
-            Log.w(TAG, "Failed to update dynamic shortcuts")
         }
     }
 }

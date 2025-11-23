@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentResultListener
@@ -262,8 +261,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.activityActions.collect {
                     if (it.refreshRoots) {
-                        Log.d(TAG, "Notifying system of new SAF roots")
-                        RcloneProvider.notifyRootsChanged(requireContext().contentResolver)
+                        RcloneProvider.notifyRootsChanged(requireContext())
                     }
                     viewModel.activityActionCompleted()
                 }

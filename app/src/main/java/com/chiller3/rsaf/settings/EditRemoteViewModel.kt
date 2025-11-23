@@ -142,7 +142,9 @@ class EditRemoteViewModel : ViewModel() {
     }
 
     fun setDynamicShortcut(enabled: Boolean) {
-        setCustomOpt(remote, RcloneRpc.RemoteConfig(dynamicShortcut = enabled))
+        setCustomOpt(remote, RcloneRpc.RemoteConfig(dynamicShortcut = enabled)) {
+            _activityActions.update { it.copy(refreshRoots = true) }
+        }
     }
 
     fun setThumbnails(enabled: Boolean) {

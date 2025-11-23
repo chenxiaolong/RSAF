@@ -6,7 +6,6 @@
 package com.chiller3.rsaf.rclone
 
 import android.content.BroadcastReceiver
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -31,6 +30,9 @@ import android.system.OsConstants
 import android.util.Log
 import android.util.Size
 import android.webkit.MimeTypeMap
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.chiller3.rsaf.AppLock
 import com.chiller3.rsaf.BuildConfig
 import com.chiller3.rsaf.Notifications
@@ -43,6 +45,8 @@ import com.chiller3.rsaf.binding.rcbridge.RbFile
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
+import com.chiller3.rsaf.rclone.RcloneProvider.Companion.MIME_TYPE_BINARY
+import com.chiller3.rsaf.settings.SettingsFragment.Companion.documentsUiIntent
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -108,14 +112,52 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 projection
             }
 
+        private fun updateShortcuts(context: Context, remoteConfigs: Map<String, RcloneRpc.RemoteConfig>) {
+            val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)
+            val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
+            val shortcuts = mutableListOf<ShortcutInfoCompat>()
+            var rank = 0
+
+            for ((remote, config) in remoteConfigs) {
+                if (config.hardBlockedOrDefault || !config.dynamicShortcutOrDefault) {
+                    continue
+                }
+
+                if (rank < maxShortcuts) {
+                    val shortcut = ShortcutInfoCompat.Builder(context, remote)
+                        .setShortLabel(remote)
+                        .setIcon(icon)
+                        .setIntent(documentsUiIntent(remote))
+                        .setRank(rank)
+                        .build()
+
+                    shortcuts.add(shortcut)
+                }
+
+                rank += 1
+            }
+
+            if (rank > maxShortcuts) {
+                Log.w(TAG, "Truncating dynamic shortcuts from $rank to $maxShortcuts")
+            }
+
+            if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {
+                Log.w(TAG, "Failed to update dynamic shortcuts")
+            }
+        }
+
         /**
          * Notify SAF that [queryRoots] should be performed again.
          *
          * This should be called whenever the remotes or [Preferences.pretendLocal] change.
          */
-        fun notifyRootsChanged(resolver: ContentResolver) {
+        fun notifyRootsChanged(context: Context) {
+            Log.d(TAG, "Notifying system of new SAF roots")
             val rootsUri = DocumentsContract.buildRootsUri(BuildConfig.DOCUMENTS_AUTHORITY)
-            resolver.notifyChange(rootsUri, null)
+            context.contentResolver.notifyChange(rootsUri, null)
+
+            Log.d(TAG, "Updating dynamic shortcuts")
+            updateShortcuts(context, RcloneRpc.remoteConfigs)
         }
 
         /** Split a document ID into the remote and path. */
@@ -442,7 +484,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            Preferences.PREF_PRETEND_LOCAL -> notifyRootsChanged(context!!.contentResolver)
+            Preferences.PREF_PRETEND_LOCAL -> notifyRootsChanged(context!!)
             Preferences.PREF_DEBUG_MODE, Preferences.PREF_VERBOSE_RCLONE_LOGS ->
                 updateRcloneVerbosity()
         }
