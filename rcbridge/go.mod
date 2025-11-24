@@ -9,7 +9,7 @@ require (
 	golang.org/x/mobile v0.0.0-20251113184115-a159579294ab
 )
 
-replace github.com/rclone/rclone v1.72.0 => github.com/chenxiaolong/rclone v1.72.0-rsaf.1
+replace github.com/rclone/rclone v1.72.0 => github.com/chenxiaolong/rclone v1.72.0-rsaf.2
 
 require (
 	cloud.google.com/go/auth v0.17.0 // indirect
