@@ -161,8 +161,8 @@ github.com/calebcase/tmpfile v1.0.3/go.mod h1:UAUc01aHeC+pudPagY/lWvt2qS9ZO5Zzof
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/chenxiaolong/rclone v1.72.0-rsaf h1:Do6rzELnuIcwzdZx5WWdQnQucOYtVGSUfP4hegx33xg=
-github.com/chenxiaolong/rclone v1.72.0-rsaf/go.mod h1:QjmSgz98CjQZZJhROIeYHYjpN5kN7rTA+jtChj/+3Do=
+github.com/chenxiaolong/rclone v1.72.0-rsaf.1 h1:l9SVyqBW6GmT4kUUspl9Q2Bv+EthOgvjgiXnBZ7EQCw=
+github.com/chenxiaolong/rclone v1.72.0-rsaf.1/go.mod h1:QjmSgz98CjQZZJhROIeYHYjpN5kN7rTA+jtChj/+3Do=
 github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9 h1:z0uK8UQqjMVYzvk4tiiu3obv2B44+XBsvgEJREQfnO8=
 github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9/go.mod h1:Jl2neWsQaDanWORdqZ4emBl50J4/aRBBS4FyyG9/PFo=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
