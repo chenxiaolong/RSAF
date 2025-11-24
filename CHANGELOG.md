@@ -12,6 +12,8 @@
 ### Unreleased
 
 * Fix dynamic shortcuts not updating immediately after importing a config ([PR #206])
+* Fix deadlock when uploading files with the mega backend ([Issue #200], [PR #207])
+    * This was a regression introduced in RSAF 3.1. Due to a bug in how RSAF integrates with rclone for loading TLS certificates, if a backend made a new HTTP request while in the middle of processing an existing request, the process would deadlock. This may have affected other backends too.
 
 ### Version 3.24
 
@@ -363,6 +365,7 @@
 [Issue #185]: https://github.com/chenxiaolong/RSAF/issues/185
 [Issue #190]: https://github.com/chenxiaolong/RSAF/issues/190
 [Issue #193]: https://github.com/chenxiaolong/RSAF/issues/193
+[Issue #200]: https://github.com/chenxiaolong/RSAF/issues/200
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -493,3 +496,4 @@
 [PR #203]: https://github.com/chenxiaolong/RSAF/pull/203
 [PR #204]: https://github.com/chenxiaolong/RSAF/pull/204
 [PR #206]: https://github.com/chenxiaolong/RSAF/pull/206
+[PR #207]: https://github.com/chenxiaolong/RSAF/pull/207
