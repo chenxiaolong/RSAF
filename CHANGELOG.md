@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Add support for showing more detailed error messages and copying them ([Issue #209], [PR #212])
+
 ### Version 3.25
 
 * Fix dynamic shortcuts not updating immediately after importing a config ([PR #206])
@@ -366,6 +370,7 @@
 [Issue #190]: https://github.com/chenxiaolong/RSAF/issues/190
 [Issue #193]: https://github.com/chenxiaolong/RSAF/issues/193
 [Issue #200]: https://github.com/chenxiaolong/RSAF/issues/200
+[Issue #209]: https://github.com/chenxiaolong/RSAF/issues/209
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -498,3 +503,4 @@
 [PR #206]: https://github.com/chenxiaolong/RSAF/pull/206
 [PR #207]: https://github.com/chenxiaolong/RSAF/pull/207
 [PR #208]: https://github.com/chenxiaolong/RSAF/pull/208
+[PR #212]: https://github.com/chenxiaolong/RSAF/pull/212
