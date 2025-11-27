@@ -9,7 +9,7 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
-### Unreleased
+### Version 3.26
 
 * Add support for showing more detailed error messages and copying them ([Issue #209], [PR #212])
 * Fix crash when translating unhashable error types to errno error codes ([Issue #211], [PR #213])
