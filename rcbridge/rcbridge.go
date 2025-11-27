@@ -62,32 +62,8 @@ var (
 	vfsInstances     = make(map[string]*vfs.VFS)
 	vfsOptValidKeys  = make(map[string]bool)
 	vfsOptStringKeys = make(map[string]bool)
-	errMap           = map[error]syscall.Errno{
-		vfs.ENOTEMPTY:                  syscall.ENOTEMPTY,
-		vfs.ESPIPE:                     syscall.ESPIPE,
-		vfs.EBADF:                      syscall.EBADF,
-		vfs.EROFS:                      syscall.EROFS,
-		vfs.ENOSYS:                     syscall.ENOSYS,
-		vfs.ELOOP:                      syscall.ELOOP,
-		vfs.ENOENT:                     syscall.ENOENT,
-		vfs.EEXIST:                     syscall.EEXIST,
-		vfs.EPERM:                      syscall.EPERM,
-		vfs.EINVAL:                     syscall.EINVAL,
-		vfs.ECLOSED:                    syscall.EBADF,
-		fs.ErrorDirExists:              syscall.EEXIST,
-		fs.ErrorDirNotFound:            syscall.ENOENT,
-		fs.ErrorObjectNotFound:         syscall.ENOENT,
-		fs.ErrorIsFile:                 syscall.ENOTDIR,
-		fs.ErrorIsDir:                  syscall.EISDIR,
-		fs.ErrorDirectoryNotEmpty:      syscall.ENOTEMPTY,
-		fs.ErrorPermissionDenied:       syscall.EACCES,
-		fs.ErrorNotImplemented:         syscall.ENOSYS,
-		fs.ErrorCommandNotFound:        syscall.ENOENT,
-		fs.ErrorFileNameTooLong:        syscall.ENAMETOOLONG,
-		config.ErrorConfigFileNotFound: syscall.ENOENT,
-	}
-	caCertsLock goSync.Mutex
-	caCertsPool *x509.CertPool
+	caCertsLock      goSync.Mutex
+	caCertsPool      *x509.CertPool
 )
 
 func init() {
@@ -333,13 +309,54 @@ func assignError(errOut *RbError, err error, fallback syscall.Errno) {
 			return
 		}
 
-		errno, ok = errMap[err]
-		if ok {
-			errOut.Code = int(errno)
-			return
+		switch err {
+		case vfs.ENOTEMPTY:
+			errOut.Code = int(syscall.ENOTEMPTY)
+		case vfs.ESPIPE:
+			errOut.Code = int(syscall.ESPIPE)
+		case vfs.EBADF:
+			errOut.Code = int(syscall.EBADF)
+		case vfs.EROFS:
+			errOut.Code = int(syscall.EROFS)
+		case vfs.ENOSYS:
+			errOut.Code = int(syscall.ENOSYS)
+		case vfs.ELOOP:
+			errOut.Code = int(syscall.ELOOP)
+		case vfs.ENOENT:
+			errOut.Code = int(syscall.ENOENT)
+		case vfs.EEXIST:
+			errOut.Code = int(syscall.EEXIST)
+		case vfs.EPERM:
+			errOut.Code = int(syscall.EPERM)
+		case vfs.EINVAL:
+			errOut.Code = int(syscall.EINVAL)
+		case vfs.ECLOSED:
+			errOut.Code = int(syscall.EBADF)
+		case fs.ErrorDirExists:
+			errOut.Code = int(syscall.EEXIST)
+		case fs.ErrorDirNotFound:
+			errOut.Code = int(syscall.ENOENT)
+		case fs.ErrorObjectNotFound:
+			errOut.Code = int(syscall.ENOENT)
+		case fs.ErrorIsFile:
+			errOut.Code = int(syscall.ENOTDIR)
+		case fs.ErrorIsDir:
+			errOut.Code = int(syscall.EISDIR)
+		case fs.ErrorDirectoryNotEmpty:
+			errOut.Code = int(syscall.ENOTEMPTY)
+		case fs.ErrorPermissionDenied:
+			errOut.Code = int(syscall.EACCES)
+		case fs.ErrorNotImplemented:
+			errOut.Code = int(syscall.ENOSYS)
+		case fs.ErrorCommandNotFound:
+			errOut.Code = int(syscall.ENOENT)
+		case fs.ErrorFileNameTooLong:
+			errOut.Code = int(syscall.ENAMETOOLONG)
+		case config.ErrorConfigFileNotFound:
+			errOut.Code = int(syscall.ENOENT)
+		default:
+			errOut.Code = int(fallback)
 		}
-
-		errOut.Code = int(fallback)
 	}
 }
 
