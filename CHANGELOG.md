@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Add support for showing more detailed error messages and copying them ([Issue #209], [PR #212])
+* Fix crash when translating unhashable error types to errno error codes ([Issue #211], [PR #213])
 
 ### Version 3.25
 
@@ -371,6 +372,7 @@
 [Issue #193]: https://github.com/chenxiaolong/RSAF/issues/193
 [Issue #200]: https://github.com/chenxiaolong/RSAF/issues/200
 [Issue #209]: https://github.com/chenxiaolong/RSAF/issues/209
+[Issue #211]: https://github.com/chenxiaolong/RSAF/issues/211
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -504,3 +506,4 @@
 [PR #207]: https://github.com/chenxiaolong/RSAF/pull/207
 [PR #208]: https://github.com/chenxiaolong/RSAF/pull/208
 [PR #212]: https://github.com/chenxiaolong/RSAF/pull/212
+[PR #213]: https://github.com/chenxiaolong/RSAF/pull/213
