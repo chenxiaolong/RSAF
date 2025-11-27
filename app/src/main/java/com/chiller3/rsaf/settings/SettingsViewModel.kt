@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.chiller3.rsaf.Logcat
+import com.chiller3.rsaf.extension.toSingleLineString
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.rclone.VfsCache
@@ -84,7 +85,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _remotes.update { r }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to refresh remotes", e)
-            _alerts.update { it + SettingsAlert.ListRemotesFailed(e.toString()) }
+            _alerts.update { it + SettingsAlert.ListRemotesFailed(e.toSingleLineString()) }
         }
     }
 
@@ -189,7 +190,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to perform import/export", e)
-                _alerts.update { it + failure(e.toString()) }
+                _alerts.update { it + failure(e.toSingleLineString()) }
                 _importExportState.update { null }
 
                 if (state.mode == ImportExportMode.IMPORT) {
@@ -231,7 +232,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 _alerts.update { it + SettingsAlert.LogcatSucceeded(uri) }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to dump logs to $uri", e)
-                _alerts.update { it + SettingsAlert.LogcatFailed(uri, e.toString()) }
+                _alerts.update { it + SettingsAlert.LogcatFailed(uri, e.toSingleLineString()) }
             }
         }
     }

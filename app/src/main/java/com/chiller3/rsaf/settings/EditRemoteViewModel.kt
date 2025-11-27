@@ -12,6 +12,7 @@ import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.RbRemoteFeaturesResult
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
+import com.chiller3.rsaf.extension.toSingleLineString
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
 import com.chiller3.rsaf.rclone.VfsCache
@@ -97,7 +98,7 @@ class EditRemoteViewModel : ViewModel() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to refresh remotes", e)
-            _alerts.update { it + EditRemoteAlert.ListRemotesFailed(e.toString()) }
+            _alerts.update { it + EditRemoteAlert.ListRemotesFailed(e.toSingleLineString()) }
         }
     }
 
@@ -126,7 +127,9 @@ class EditRemoteViewModel : ViewModel() {
                 Log.w(TAG, "Failed to set $remote config $config", e)
                 // We only set one option at a time.
                 val opt = config.toMap().keys.first()
-                _alerts.update { it + EditRemoteAlert.SetConfigFailed(remote, opt, e.toString()) }
+                _alerts.update {
+                    it + EditRemoteAlert.SetConfigFailed(remote, opt, e.toSingleLineString())
+                }
             }
         }
     }
@@ -187,7 +190,7 @@ class EditRemoteViewModel : ViewModel() {
             } catch (e: Exception) {
                 val action = if (delete) { "rename" } else { "duplicate" }
                 Log.e(TAG, "Failed to $action remote $remote to $newRemote", e)
-                _alerts.update { it + failure(remote, newRemote, e.toString()) }
+                _alerts.update { it + failure(remote, newRemote, e.toSingleLineString()) }
             }
         }
     }
@@ -210,7 +213,9 @@ class EditRemoteViewModel : ViewModel() {
                 _activityActions.update { it.copy(refreshRoots = true, finish = true) }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to delete remote $remote", e)
-                _alerts.update { it + EditRemoteAlert.RemoteDeleteFailed(remote, e.toString()) }
+                _alerts.update {
+                    it + EditRemoteAlert.RemoteDeleteFailed(remote, e.toSingleLineString())
+                }
             }
         }
     }

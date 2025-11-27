@@ -80,25 +80,29 @@
     <string name="pref_edit_remote_vfs_options_name">Custom VFS options</string>
     <string name="pref_edit_remote_vfs_options_desc">Set custom rclone VFS options supported by <tt>rclone mount</tt>.</string>
 
+    <!-- Alerts -->
+    <string name="action_details">Details</string>
+    <string name="dialog_error_details_title">Error details</string>
+
     <!-- Main alerts -->
-    <string name="alert_list_remotes_failure">Failed to get list of remotes: %1$s</string>
+    <string name="alert_list_remotes_failure">Failed to get list of remotes</string>
     <string name="alert_add_remote_success">Successfully added new remote %1$s</string>
     <string name="alert_add_remote_partial">Partially added new remote %1$s due to interruption</string>
     <string name="alert_import_success">Successfully imported configuration</string>
-    <string name="alert_import_failure">Failed to import configuration: %1$s</string>
+    <string name="alert_import_failure">Failed to import configuration</string>
     <string name="alert_import_cancelled">Configuration import cancelled</string>
     <string name="alert_export_success">Successfully exported configuration</string>
-    <string name="alert_export_failure">Failed to export configuration: %1$s</string>
+    <string name="alert_export_failure">Failed to export configuration</string>
     <string name="alert_export_cancelled">Configuration export cancelled</string>
     <string name="alert_logcat_success">Successfully saved logs to %1$s</string>
-    <string name="alert_logcat_failure">Failed to save logs to %1$s: %2$s</string>
+    <string name="alert_logcat_failure">Failed to save logs to %1$s</string>
 
     <!-- Edit remote alerts -->
     <string name="alert_edit_remote_success">Successfully edited remote %1$s</string>
-    <string name="alert_delete_remote_failure">Failed to delete remote %1$s: %2$s</string>
-    <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s: %3$s</string>
-    <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s: %3$s</string>
-    <string name="alert_set_config_failure">Failed to set %1$s config option for remote %2$s: %3$s</string>
+    <string name="alert_delete_remote_failure">Failed to delete remote %1$s</string>
+    <string name="alert_rename_remote_failure">Failed to rename remote %1$s to %2$s</string>
+    <string name="alert_duplicate_remote_failure">Failed to duplicate remote %1$s to %2$s</string>
+    <string name="alert_set_config_failure">Failed to set %1$s config option for remote %2$s</string>
 
     <!-- Biometric -->
     <string name="biometric_title">Unlock configuration</string>

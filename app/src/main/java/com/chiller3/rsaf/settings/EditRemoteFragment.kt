@@ -21,6 +21,7 @@ import com.chiller3.rsaf.PreferenceBaseFragment
 import com.chiller3.rsaf.Preferences
 import com.chiller3.rsaf.R
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
+import com.chiller3.rsaf.dialog.MessageDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
@@ -286,26 +287,45 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
 
     private fun onAlert(alert: EditRemoteAlert) {
         val msg = when (alert) {
-            is EditRemoteAlert.ListRemotesFailed ->
-                getString(R.string.alert_list_remotes_failure, alert.error)
+            is EditRemoteAlert.ListRemotesFailed -> getString(R.string.alert_list_remotes_failure)
             is EditRemoteAlert.RemoteEditSucceeded ->
                 getString(R.string.alert_edit_remote_success, alert.remote)
             is EditRemoteAlert.RemoteDeleteFailed ->
-                getString(R.string.alert_delete_remote_failure, alert.remote, alert.error)
+                getString(R.string.alert_delete_remote_failure, alert.remote)
             is EditRemoteAlert.RemoteRenameFailed ->
-                getString(R.string.alert_rename_remote_failure, alert.oldRemote, alert.newRemote,
-                    alert.error)
+                getString(R.string.alert_rename_remote_failure, alert.oldRemote, alert.newRemote)
             is EditRemoteAlert.RemoteDuplicateFailed ->
-                getString(R.string.alert_duplicate_remote_failure, alert.oldRemote, alert.newRemote,
-                    alert.error)
+                getString(R.string.alert_duplicate_remote_failure, alert.oldRemote, alert.newRemote)
             is EditRemoteAlert.SetConfigFailed ->
-                getString(R.string.alert_set_config_failure, alert.opt, alert.remote, alert.error)
+                getString(R.string.alert_set_config_failure, alert.opt, alert.remote)
         }
 
-        Snackbar.make(requireView(), msg, Snackbar.LENGTH_LONG)
+        val details = when (alert) {
+            is EditRemoteAlert.ListRemotesFailed -> alert.error
+            is EditRemoteAlert.RemoteEditSucceeded -> null
+            is EditRemoteAlert.RemoteDeleteFailed -> alert.error
+            is EditRemoteAlert.RemoteRenameFailed -> alert.error
+            is EditRemoteAlert.RemoteDuplicateFailed -> alert.error
+            is EditRemoteAlert.SetConfigFailed -> alert.error
+        }
+
+        // Give users a chance to read the message. LENGTH_LONG is only 2750ms.
+        Snackbar.make(requireView(), msg, 5000)
+            .apply {
+                if (details != null) {
+                    setAction(R.string.action_details) {
+                        MessageDialogFragment.newInstance(
+                            getString(R.string.dialog_error_details_title),
+                            details,
+                        ).show(parentFragmentManager.beginTransaction(), MessageDialogFragment.TAG)
+                    }
+                }
+            }
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    viewModel.acknowledgeFirstAlert()
+                    if (event != DISMISS_EVENT_CONSECUTIVE) {
+                        viewModel.acknowledgeFirstAlert()
+                    }
                 }
             })
             .show()

@@ -34,6 +34,7 @@ import com.chiller3.rsaf.R
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.dialog.InactivityTimeoutDialogFragment
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
+import com.chiller3.rsaf.dialog.MessageDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
 import com.chiller3.rsaf.dialog.TextInputDialogFragment
@@ -475,28 +476,54 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
 
     private fun onAlert(alert: SettingsAlert) {
         val msg = when (alert) {
-            is SettingsAlert.ListRemotesFailed ->
-                getString(R.string.alert_list_remotes_failure, alert.error)
+            is SettingsAlert.ListRemotesFailed -> getString(R.string.alert_list_remotes_failure)
             is SettingsAlert.RemoteAddSucceeded ->
                 getString(R.string.alert_add_remote_success, alert.remote)
             is SettingsAlert.RemoteAddPartiallySucceeded ->
                 getString(R.string.alert_add_remote_partial, alert.remote)
             SettingsAlert.ImportSucceeded -> getString(R.string.alert_import_success)
             SettingsAlert.ExportSucceeded -> getString(R.string.alert_export_success)
-            is SettingsAlert.ImportFailed -> getString(R.string.alert_import_failure, alert.error)
-            is SettingsAlert.ExportFailed -> getString(R.string.alert_export_failure, alert.error)
+            is SettingsAlert.ImportFailed -> getString(R.string.alert_import_failure)
+            is SettingsAlert.ExportFailed -> getString(R.string.alert_export_failure)
             SettingsAlert.ImportCancelled -> getString(R.string.alert_import_cancelled)
             SettingsAlert.ExportCancelled -> getString(R.string.alert_export_cancelled)
             is SettingsAlert.LogcatSucceeded ->
                 getString(R.string.alert_logcat_success, alert.uri.formattedString)
             is SettingsAlert.LogcatFailed ->
-                getString(R.string.alert_logcat_failure, alert.uri.formattedString, alert.error)
+                getString(R.string.alert_logcat_failure, alert.uri.formattedString)
         }
 
-        Snackbar.make(requireView(), msg, Snackbar.LENGTH_LONG)
+        val details = when (alert) {
+            is SettingsAlert.ListRemotesFailed -> alert.error
+            is SettingsAlert.RemoteAddSucceeded -> null
+            is SettingsAlert.RemoteAddPartiallySucceeded -> null
+            SettingsAlert.ImportSucceeded -> null
+            SettingsAlert.ExportSucceeded -> null
+            is SettingsAlert.ImportFailed -> alert.error
+            is SettingsAlert.ExportFailed -> alert.error
+            SettingsAlert.ImportCancelled -> null
+            SettingsAlert.ExportCancelled -> null
+            is SettingsAlert.LogcatSucceeded -> null
+            is SettingsAlert.LogcatFailed -> alert.error
+        }
+
+        // Give users a chance to read the message. LENGTH_LONG is only 2750ms.
+        Snackbar.make(requireView(), msg, 5000)
+            .apply {
+                if (details != null) {
+                    setAction(R.string.action_details) {
+                        MessageDialogFragment.newInstance(
+                            getString(R.string.dialog_error_details_title),
+                            details,
+                        ).show(parentFragmentManager.beginTransaction(), MessageDialogFragment.TAG)
+                    }
+                }
+            }
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    viewModel.acknowledgeFirstAlert()
+                    if (event != DISMISS_EVENT_CONSECUTIVE) {
+                        viewModel.acknowledgeFirstAlert()
+                    }
                 }
             })
             .show()
