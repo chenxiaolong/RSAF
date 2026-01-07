@@ -78,6 +78,23 @@ func findGo() (string, error) {
 	return "", errors.New("original go executable not found in PATH")
 }
 
+func replaceAbsPaths(basePath string, data map[string]any) error {
+	relDir, err := filepath.Rel(basePath, data["Dir"].(string))
+	if err != nil {
+		return fmt.Errorf("failed to compute relative path: %v: %w", data["Dir"], err)
+	}
+
+	relGoMod, err := filepath.Rel(basePath, data["GoMod"].(string))
+	if err != nil {
+		return fmt.Errorf("failed to compute relative path: %v: %w", data["GoMod"], err)
+	}
+
+	data["Dir"] = relDir
+	data["GoMod"] = relGoMod
+
+	return nil
+}
+
 func run() (int, error) {
 	args := os.Args[1:]
 
@@ -118,20 +135,18 @@ func run() (int, error) {
 				return -1, fmt.Errorf("failed to decode JSON: %v: %w", string(output), err)
 			}
 
-			_, ok := data["Main"]
-			if ok {
-				relDir, err := filepath.Rel(basePath, data["Dir"].(string))
-				if err != nil {
-					return -1, fmt.Errorf("failed to compute relative path: %v: %w", data["Dir"], err)
+			if _, ok := data["Main"]; ok {
+				if err = replaceAbsPaths(basePath, data); err != nil {
+					return -1, err
 				}
-
-				relGoMod, err := filepath.Rel(basePath, data["GoMod"].(string))
-				if err != nil {
-					return -1, fmt.Errorf("failed to compute relative path: %v: %w", data["GoMod"], err)
+			} else if replaceRaw, ok := data["Replace"]; ok {
+				if replace, ok := replaceRaw.(map[string]any); ok {
+					if _, ok = replace["Path"]; ok {
+						if err = replaceAbsPaths(basePath, replace); err != nil {
+							return -1, err
+						}
+					}
 				}
-
-				data["Dir"] = relDir
-				data["GoMod"] = relGoMod
 			}
 
 			encoded, err := json.MarshalIndent(data, "", "\t")
