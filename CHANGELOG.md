@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Update rclone to 1.72.1 ([PR #218])
+* Resume interrupted uploads (caused by a crash) after an app update, not just when the device reboots ([PR #219])
 
 ### Version 3.26
 
@@ -512,3 +513,4 @@
 [PR #212]: https://github.com/chenxiaolong/RSAF/pull/212
 [PR #213]: https://github.com/chenxiaolong/RSAF/pull/213
 [PR #218]: https://github.com/chenxiaolong/RSAF/pull/218
+[PR #219]: https://github.com/chenxiaolong/RSAF/pull/219
