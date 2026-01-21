@@ -1,8 +1,9 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+import com.android.build.api.variant.ResValue
 import com.android.build.gradle.internal.UsesSdkComponentsBuildService
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
 import com.android.repository.Revision
@@ -17,7 +18,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 java {
@@ -141,13 +141,6 @@ android {
 
         resValue("string", "app_name", "@string/app_name_release")
     }
-    sourceSets {
-        getByName("main") {
-            assets {
-                srcDir(archiveDir)
-            }
-        }
-    }
     signingConfigs {
         create("release") {
             val keystore = System.getenv("RELEASE_KEYSTORE")
@@ -172,16 +165,13 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
-    applicationVariants.all {
-        // This is set here so that applicationIdSuffix will be respected
-        resValue("string", "documents_authority", "$applicationId.documents")
-    }
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_21)
         targetCompatibility(JavaVersion.VERSION_21)
     }
     buildFeatures {
         buildConfig = true
+        resValues = true
         viewBinding = true
     }
     splits {
@@ -197,6 +187,20 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+}
+
+androidComponents.onVariants { variant ->
+    variant.sources.assets!!.addGeneratedSourceDirectory(archive) {
+        project.objects.directoryProperty().apply {
+            set(archiveDir)
+        }
+    }
+
+    // This is set here so that applicationIdSuffix will be respected.
+    variant.resValues.put(
+        variant.makeResValueKey("string", "documents_authority"),
+        ResValue("${variant.applicationId.get()}.documents"),
+    )
 }
 
 kotlin {
@@ -530,11 +534,9 @@ tasks.register("iconPng") {
     }
 }
 
-android.applicationVariants.all {
-    preBuildProvider.configure {
-        dependsOn(archive)
-        dependsOn(rcbridge)
-    }
+androidComponents.onVariants { variant ->
+    variant.lifecycleTasks.registerPreBuild(archive)
+    variant.lifecycleTasks.registerPreBuild(rcbridge)
 }
 
 data class LinkRef(val type: String, val number: Int) : Comparable<LinkRef> {
