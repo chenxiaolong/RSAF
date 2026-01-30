@@ -1,5 +1,5 @@
 [versions]
-activity-ktx = "1.12.2"
+activity-ktx = "1.12.3"
 android-gradle-plugin = "9.0.0"
 appcompat = "1.7.1"
 biometric = "1.1.0"
