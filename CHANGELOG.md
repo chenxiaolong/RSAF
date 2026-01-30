@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Update AGP to 9.0.0 ([PR #222])
+* Update rclone to 1.73.0 ([PR #224])
 
 ### Version 3.27
 
@@ -519,3 +520,4 @@
 [PR #218]: https://github.com/chenxiaolong/RSAF/pull/218
 [PR #219]: https://github.com/chenxiaolong/RSAF/pull/219
 [PR #222]: https://github.com/chenxiaolong/RSAF/pull/222
+[PR #224]: https://github.com/chenxiaolong/RSAF/pull/224
