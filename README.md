@@ -99,6 +99,9 @@ Before building, the following tools must be installed:
 * Android SDK
 * Android NDK
 * `go` (golang compiler)
+  * We use a fork of golang that includes a fix for MTE-related crashes. However, an existing golang compiler must still be installed in order to build the fork from source.
+    * https://github.com/golang/go/issues/27610
+    * https://github.com/golang/go/issues/59090
 
 Once the dependencies are installed, RSAF can be built like most other Android apps using Android Studio or the gradle command line.
 

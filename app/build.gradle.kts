@@ -13,6 +13,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
 import org.eclipse.jgit.lib.ObjectId
 import org.gradle.kotlin.dsl.environment
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
@@ -259,11 +260,39 @@ interface InjectedExecOps {
 
 val rcbridgeSrcDir = File(rootDir, "rcbridge")
 
+val golang = tasks.register("golang") {
+    val goDir = File(File(rootDir, "external"), "go")
+    val goSrcDir = File(goDir, "src")
+    val goBinDir = File(goDir, "bin")
+    val goGitDir = File(File(File(File(rootDir, ".git"), "modules"), "external"), "go")
+
+    inputs.files(
+        File(goGitDir, "HEAD"),
+    )
+    outputs.files(
+        File(goBinDir, "go"),
+        File(goBinDir, "gofmt"),
+    )
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
+    doLast {
+        injected.execOps.exec {
+            if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) {
+                executable("cmd.exe")
+                args("/C", "make.bat")
+            } else {
+                executable("./make.bash")
+            }
+            workingDir(goSrcDir)
+        }
+    }
+}
+
 val goenv = tasks.register("goenv") {
     val envVars = arrayOf(
         "GOPROXY",
         "GOSUMDB",
-        "GOTOOLCHAIN",
         "GOFLAGS",
     ).associateWith { System.getenv(it) }
     val goModFile = File(rcbridgeSrcDir, "go.mod")
@@ -275,21 +304,11 @@ val goenv = tasks.register("goenv") {
     outputs.files(outputFile)
 
     doLast {
-        val prefix = "toolchain "
-        val goToolchain = goModFile.useLines { lines ->
-            lines.find { it.startsWith(prefix) }
-                ?.substring(prefix.length)
-                ?: throw IllegalStateException("go.sum does not contain toolchain version")
-        }
-
         val defaultEnvVars = mapOf(
             // Needed for building on Fedora prior to:
             // https://src.fedoraproject.org/rpms/golang/c/1a696ebca1b2d5227921924d3f9885e18cf445b5
             "GOPROXY" to "https://proxy.golang.org,direct",
             "GOSUMDB" to "sum.golang.org",
-            // Pin to the specified toolchain version, even if the local toolchain is newer, for
-            // more reproducible builds.
-            "GOTOOLCHAIN" to goToolchain,
             "GOFLAGS" to "-ldflags=-buildid= -buildvcs=false",
         )
 
@@ -297,7 +316,7 @@ val goenv = tasks.register("goenv") {
 
         val properties = Properties()
         (defaultEnvVars.keys + envVars.keys).forEach { key ->
-            properties.put(key, envVars[key] ?: defaultEnvVars[key])
+            properties[key] = envVars[key] ?: defaultEnvVars[key]
         }
 
         outputFile.get().asFile.writer().use {
@@ -319,6 +338,7 @@ val gomobile = tasks.register("gomobile") {
 
     inputs.files(
         File(rcbridgeSrcDir, "go.sum"),
+        golang.map { it.outputs.files },
         goenv.map { it.outputs.files },
     )
     outputs.files(
@@ -329,11 +349,12 @@ val gomobile = tasks.register("gomobile") {
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
+        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
         val outputStream = ByteArrayOutputStream()
 
         injected.execOps.exec {
-            executable("go")
-            args = listOf("mod", "graph")
+            executable(goExecutable)
+            args("mod", "graph")
             addGoEnvironment(this)
             workingDir(rcbridgeSrcDir)
             standardOutput = outputStream
@@ -347,7 +368,7 @@ val gomobile = tasks.register("gomobile") {
             ?: throw IllegalStateException("go.sum does not contain gomobile version")
 
         injected.execOps.exec {
-            executable("go")
+            executable(goExecutable)
             args(
                 "install",
                 "golang.org/x/mobile/cmd/gobind@$version",
@@ -370,6 +391,7 @@ val gowrapper = tasks.register("gowrapper") {
         File(gowrapperDir, "go.go"),
         File(rcbridgeSrcDir, "go.mod"),
         File(rcbridgeSrcDir, "go.sum"),
+        golang.map { it.outputs.files },
         goenv.map { it.outputs.files },
     )
     outputs.files(
@@ -379,8 +401,10 @@ val gowrapper = tasks.register("gowrapper") {
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
+        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
+
         injected.execOps.exec {
-            executable("go")
+            executable(goExecutable)
             args("install", "go.go")
 
             environment("GOBIN", binDir.get().asFile.absolutePath)
@@ -426,6 +450,7 @@ val rcbridge = tasks.register("rcbridge") {
         File(rcbridgeSrcDir, "go.sum"),
         File(rcbridgeSrcDir, "rcbridge.go"),
         File(File(rcbridgeSrcDir, "envhack"), "envhack.go"),
+        golang.map { it.outputs.files },
         goenv.map { it.outputs.files },
         gomobile.map { it.outputs.files },
         gowrapper.map { it.outputs.files },
@@ -450,6 +475,8 @@ val rcbridge = tasks.register("rcbridge") {
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
+        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
+        val goBinDir = goExecutable.parentFile
         val gomobileExecutable = gomobile.get().outputs.files.find { it.name == "gomobile" }!!
         val binDir = gomobileExecutable.parentFile
 
@@ -466,8 +493,9 @@ val rcbridge = tasks.register("rcbridge") {
                 ".",
             )
             environment(
-                // gomobile only supports finding gobind in $PATH.
-                "PATH" to "$binDir${File.pathSeparator}${environment["PATH"]}",
+                // gomobile only supports finding gobind in $PATH. binDir is listed before goBinDir
+                // so that gowrapper is used.
+                "PATH" to "$binDir${File.pathSeparator}$goBinDir${File.pathSeparator}${environment["PATH"]}",
                 "ANDROID_HOME" to androidComponents.sdkComponents.sdkDirectory.get()
                     .asFile.absolutePath,
                 "ANDROID_NDK_HOME" to androidComponents.sdkComponents.ndkDirectory.get()
@@ -485,11 +513,9 @@ val rcbridge = tasks.register("rcbridge") {
 
             workingDir(rcbridgeSrcDir)
         }
-    }
 
-    // gomobile fails to clean up its temp directories after it switched to using go modules. These
-    // directories are never reused, so delete them.
-    doLast {
+        // gomobile fails to clean up its temp directories after it switched to using go modules.
+        // These directories are never reused, so delete them.
         val subDirs = tempDir.get().asFile.listFiles { _, name: String ->
             name.startsWith("gomobile-work-")
         }
@@ -498,8 +524,8 @@ val rcbridge = tasks.register("rcbridge") {
                 println("Cleaning up gomobile leftovers: $subDir")
 
                 injected.execOps.exec {
-                    executable("go")
-                    args = listOf("clean", "-modcache")
+                    executable(goExecutable)
+                    args("clean", "-modcache")
                     environment("GOPATH", subDir.absolutePath)
                 }
 
