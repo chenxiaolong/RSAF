@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Fix obfuscated log tags after proguard changes in version 3.30 ([PR #231])
+
 ### Version 3.30
 
 * Reenable default proguard optimizations ([PR #228])
@@ -536,3 +540,4 @@
 [PR #228]: https://github.com/chenxiaolong/RSAF/pull/228
 [PR #229]: https://github.com/chenxiaolong/RSAF/pull/229
 [PR #230]: https://github.com/chenxiaolong/RSAF/pull/230
+[PR #231]: https://github.com/chenxiaolong/RSAF/pull/231
