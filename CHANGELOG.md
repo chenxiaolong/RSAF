@@ -9,6 +9,11 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Reenable default proguard optimizations ([PR #228])
+  * For folks who want to decode stack traces from log files, the mapping files are now included with the official releases in `mappings.tar.zst`
+
 ### Version 3.29
 
 * Enable MTE on supported devices ([PR #226])
@@ -526,3 +531,4 @@
 [PR #222]: https://github.com/chenxiaolong/RSAF/pull/222
 [PR #224]: https://github.com/chenxiaolong/RSAF/pull/224
 [PR #226]: https://github.com/chenxiaolong/RSAF/pull/226
+[PR #228]: https://github.com/chenxiaolong/RSAF/pull/228
