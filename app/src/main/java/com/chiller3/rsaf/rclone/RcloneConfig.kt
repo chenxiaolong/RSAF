@@ -192,7 +192,7 @@ object RcloneConfig {
     }
 
     fun exportConfigurationUri(uri: Uri, password: String) {
-        val output = applicationContext.contentResolver.openOutputStream(uri)
+        val output = applicationContext.contentResolver.openOutputStream(uri, "wt")
             ?: throw IOException("Failed to open for writing: $uri")
 
         output.use {

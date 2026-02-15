@@ -51,7 +51,7 @@ object Logcat {
 
             Log.d(TAG, "Moving $tempFile to $uri")
 
-            val out = applicationContext.contentResolver.openOutputStream(uri)
+            val out = applicationContext.contentResolver.openOutputStream(uri, "wt")
                 ?: throw IOException("Failed to open URI: $uri")
             out.use { outStream ->
                 tempFile.inputStream().use { inStream ->
