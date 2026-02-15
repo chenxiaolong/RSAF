@@ -14,6 +14,7 @@
 * Reenable default proguard optimizations ([PR #228])
   * For folks who want to decode stack traces from log files, the mapping files are now included with the official releases in `mappings.tar.zst`
 * Fix corruption in exported rclone configs or logs when overwriting an existing file that is larger than the new file ([PR #229])
+* Update dependencies ([PR #230])
 
 ### Version 3.29
 
@@ -534,3 +535,4 @@
 [PR #226]: https://github.com/chenxiaolong/RSAF/pull/226
 [PR #228]: https://github.com/chenxiaolong/RSAF/pull/228
 [PR #229]: https://github.com/chenxiaolong/RSAF/pull/229
+[PR #230]: https://github.com/chenxiaolong/RSAF/pull/230
