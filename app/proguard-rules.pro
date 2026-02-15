@@ -11,3 +11,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Keep log tags.
+-keepclasseswithmembers,allowoptimization,allowshrinking class com.chiller3.rsaf.** {
+    static final java.lang.String TAG;
+}
