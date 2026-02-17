@@ -346,56 +346,129 @@ class RcloneProviderTest {
         }
     }
 
-    @Test
-    fun openDocument() {
-        // Since VFS cache writeback is asynchronous, we have to resort to manual polling.
-        val timeout = 2000L
+    private fun setVfsCaching(enabled: Boolean?) {
+        val config = RcloneRpc.remoteConfigs[remote]!!
+        val vfsOptions = config.vfsOptions.toMutableMap()
 
-        val file = File(rootDir, "file.txt")
-        val uri = docUriFromRoot(file.name)
-
-        appContext.contentResolver.openFileDescriptor(uri, "w")!!.use {
-            Os.write(it.fileDescriptor, "helloworld".toByteArray(), 0, 10)
-            Os.fsync(it.fileDescriptor)
-        }
-        retryTimeout(timeout) {
-            assertEquals("helloworld", file.readText())
+        when (enabled) {
+            true -> vfsOptions["vfs_cache_mode"] = "writes"
+            false -> vfsOptions["vfs_cache_mode"] = "off"
+            null -> vfsOptions.remove("vfs_cache_mode")
         }
 
-        appContext.contentResolver.openFileDescriptor(uri, "rw")!!.use {
-            Os.lseek(it.fileDescriptor, 5, OsConstants.SEEK_SET)
-            Os.write(it.fileDescriptor, "WORLD".toByteArray(), 0, 5)
-        }
-        retryTimeout(timeout) {
-            assertEquals("helloWORLD", file.readText())
-        }
+        RcloneRpc.setRemoteConfig(remote, config.copy(vfsOptions = vfsOptions))
+        Rcbridge.rbCacheClearRemote("$remote:", false)
+    }
 
-        appContext.contentResolver.openFileDescriptor(uri, "rwt")!!.use {
-            Os.write(it.fileDescriptor, "bye".toByteArray(), 0, 3)
-        }
-        retryTimeout(timeout) {
-            assertEquals("bye", file.readText())
-        }
-
-        appContext.contentResolver.openFileDescriptor(uri, "rwa")!!.use {
-            Os.write(it.fileDescriptor, "world".toByteArray(), 0, 5)
-        }
-        retryTimeout(timeout) {
-            assertEquals("byeworld", file.readText())
-        }
-
-        appContext.contentResolver.openFileDescriptor(uri, "r")!!.use {
-            val data = ByteArray(8)
-            Os.read(it.fileDescriptor, data, 0, data.size)
-            assertArrayEquals("byeworld".toByteArray(), data)
-
-            // EOF
-            assertEquals(0, Os.read(it.fileDescriptor, data, 0, data.size))
+    private fun <R> withVfsCaching(enabled: Boolean, block: () -> R): R {
+        try {
+            setVfsCaching(enabled)
+            return block()
+        } finally {
+            setVfsCaching(null)
         }
     }
 
     @Test
-    fun createDocumentNaming() {
+    fun openDocumentCaching() {
+        withVfsCaching(true) {
+            // FUSE file close is asynchronous so we have to resort to manual polling.
+            val timeout = 2000L
+
+            val file = File(rootDir, "file.txt")
+            val uri = docUriFromRoot(file.name)
+
+            appContext.contentResolver.openFileDescriptor(uri, "w")!!.use {
+                Os.write(it.fileDescriptor, "helloworld".toByteArray(), 0, 10)
+                Os.fsync(it.fileDescriptor)
+            }
+            retryTimeout(timeout) {
+                assertEquals("helloworld", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rw")!!.use {
+                Os.lseek(it.fileDescriptor, 5, OsConstants.SEEK_SET)
+                Os.write(it.fileDescriptor, "WORLD".toByteArray(), 0, 5)
+            }
+            retryTimeout(timeout) {
+                assertEquals("helloWORLD", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rwt")!!.use {
+                Os.write(it.fileDescriptor, "bye".toByteArray(), 0, 3)
+            }
+            retryTimeout(timeout) {
+                assertEquals("bye", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rwa")!!.use {
+                Os.write(it.fileDescriptor, "world".toByteArray(), 0, 5)
+            }
+            retryTimeout(timeout) {
+                assertEquals("byeworld", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "r")!!.use {
+                val data = ByteArray(8)
+                Os.read(it.fileDescriptor, data, 0, data.size)
+                assertArrayEquals("byeworld".toByteArray(), data)
+
+                // EOF
+                assertEquals(0, Os.read(it.fileDescriptor, data, 0, data.size))
+            }
+        }
+    }
+
+    @Test
+    fun openDocumentStreaming() {
+        withVfsCaching(false) {
+            // FUSE file close is asynchronous so we have to resort to manual polling.
+            val timeout = 2000L
+
+            val file = File(rootDir, "file.txt")
+            val uri = docUriFromRoot(file.name)
+
+            appContext.contentResolver.openFileDescriptor(uri, "w")!!.use {
+                Os.write(it.fileDescriptor, "helloworld".toByteArray(), 0, 10)
+                Os.fsync(it.fileDescriptor)
+            }
+            retryTimeout(timeout) {
+                assertEquals("helloworld", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rw")!!.use {
+                Os.write(it.fileDescriptor, "WORLD".toByteArray(), 0, 5)
+            }
+            retryTimeout(timeout) {
+                assertEquals("WORLD", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rwt")!!.use {
+                Os.write(it.fileDescriptor, "bye".toByteArray(), 0, 3)
+            }
+            retryTimeout(timeout) {
+                assertEquals("bye", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "rwa")!!.use {
+                Os.write(it.fileDescriptor, "world".toByteArray(), 0, 5)
+            }
+            retryTimeout(timeout) {
+                assertEquals("world", file.readText())
+            }
+
+            appContext.contentResolver.openFileDescriptor(uri, "r")!!.use {
+                val data = ByteArray(5)
+                Os.read(it.fileDescriptor, data, 0, data.size)
+                assertArrayEquals("world".toByteArray(), data)
+
+                // EOF
+                assertEquals(0, Os.read(it.fileDescriptor, data, 0, data.size))
+            }
+        }
+    }
+
+    fun testCreateDocumentNaming() {
         data class TestCase(
             val addExt: Boolean,
             val mime: String,
@@ -424,7 +497,20 @@ class RcloneProviderTest {
     }
 
     @Test
-    fun createDocument() {
+    fun createDocumentNamingCaching() {
+        withVfsCaching(true) {
+            testCreateDocumentNaming()
+        }
+    }
+
+    @Test
+    fun createDocumentNamingStreaming() {
+        withVfsCaching(false) {
+            testCreateDocumentNaming()
+        }
+    }
+
+    fun testCreateDocument() {
         for ((mime, name) in arrayOf(
             Pair(MIME_TEXT, "file"),
             Pair(MIME_DIR, "dir"),
@@ -444,6 +530,20 @@ class RcloneProviderTest {
             }
 
             assertEquals(RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS, uniqueUris.size)
+        }
+    }
+
+    @Test
+    fun createDocumentCaching() {
+        withVfsCaching(true) {
+            testCreateDocument()
+        }
+    }
+
+    @Test
+    fun createDocumentStreaming() {
+        withVfsCaching(false) {
+            testCreateDocument()
         }
     }
 
