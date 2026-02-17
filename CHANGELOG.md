@@ -17,6 +17,7 @@
 * Fix file conflict handling when VFS caching is disabled ([PR #235])
   * Files will now have the numeric suffix properly appended instead of being overwritten.
 * Fix harmless "file already closed" error notification when writing files while VFS caching is disabled ([PR #236])
+* Add CreateDocument and OpenDocument tests with VFS caching disabled ([PR #237])
 
 ### Version 3.31
 
@@ -555,3 +556,4 @@
 [PR #234]: https://github.com/chenxiaolong/RSAF/pull/234
 [PR #235]: https://github.com/chenxiaolong/RSAF/pull/235
 [PR #236]: https://github.com/chenxiaolong/RSAF/pull/236
+[PR #237]: https://github.com/chenxiaolong/RSAF/pull/237
