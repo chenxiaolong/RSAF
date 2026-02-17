@@ -800,23 +800,9 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val base = Rcbridge.rbPathJoin(parentDocumentId, baseName)
         val error = RbError()
 
-        // We can skip the stat and avoid TOCTOU when creating files because it properly fails with
-        // EEXIST. Unfortunately, this is not the case with mkdir.
-        val method = if (isDir) {
-            ConflictDetection.STAT
-        } else {
-            ConflictDetection.EEXIST
-        }
-
-        return retryUnique(base, ext, method) {
+        return retryUnique(base, ext, ConflictDetection.EEXIST) {
             if (isDir) {
                 if (!Rcbridge.rbDocMkdir(it, DIRECTORY_PERMS.toLong(), error)) {
-                    // This is unfortunately racy, but we need to use a different error code than
-                    // EEXIST when the user tries to create a directory on top of a file
-                    if (!documentIsDir(it)) {
-                        error.code = OsConstants.ENOTDIR.toLong()
-                    }
-
                     throw error.toException("rbDocMkdir")
                 }
             } else {

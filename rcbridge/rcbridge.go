@@ -1007,6 +1007,22 @@ func RbDocMkdir(doc string, perms int, errOut *RbError) bool {
 		return false
 	}
 
+	// rclone does not ever return EEXIST, so we'll have to simulate it
+	// ourselves, sadly with TOCTOU.
+	fi, err := v.Stat(path)
+	if err != nil {
+		if err != vfs.ENOENT {
+			assignError(errOut, err, syscall.EIO)
+			return false
+		}
+	} else if fi.Mode().IsRegular() {
+		assignError(errOut, fs.ErrorIsFile, syscall.ENOTDIR)
+		return false
+	} else {
+		assignError(errOut, vfs.EEXIST, syscall.EEXIST)
+		return false
+	}
+
 	err = v.Mkdir(path, ioFs.FileMode(perms&int(ioFs.ModePerm)))
 	if err != nil {
 		assignError(errOut, err, syscall.EIO)
@@ -1168,9 +1184,30 @@ func RbDocOpen(doc string, flags int, mode int, errOut *RbError) *RbFile {
 		return nil
 	}
 
-	if v.Opt.CacheMode < vfscommon.CacheModeWrites && flags&(os.O_WRONLY|os.O_RDWR) != 0 {
-		fs.Logf(nil, "Forcing O_TRUNC for writable file due to streaming")
-		flags |= os.O_TRUNC
+	if v.Opt.CacheMode < vfscommon.CacheModeWrites {
+		if flags&(os.O_WRONLY|os.O_RDWR) != 0 {
+			fs.Logf(nil, "Forcing O_TRUNC for writable file due to streaming")
+			flags |= os.O_TRUNC
+		}
+
+		// rclone only properly returns EEXIST when newRWFileHandle() is called,
+		// but that only happens via openRW() when caching is enabled, not with
+		// openWrite().
+		if flags&os.O_CREATE != 0 && flags&os.O_EXCL != 0 {
+			fi, err := v.Stat(path)
+			if err != nil {
+				if err != vfs.ENOENT {
+					assignError(errOut, err, syscall.EIO)
+					return nil
+				}
+			} else if fi.Mode().IsDir() {
+				assignError(errOut, fs.ErrorIsDir, syscall.EISDIR)
+				return nil
+			} else {
+				assignError(errOut, vfs.EEXIST, syscall.EEXIST)
+				return nil
+			}
+		}
 	}
 
 	handle, err := v.OpenFile(path, flags, ioFs.FileMode(mode&int(ioFs.ModePerm)))
