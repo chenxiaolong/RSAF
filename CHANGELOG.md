@@ -16,6 +16,7 @@
   * rclone tries to write to the system temp directory when `vfs_cache_mode=off` is set and the backend does not support streaming uploads.
 * Fix file conflict handling when VFS caching is disabled ([PR #235])
   * Files will now have the numeric suffix properly appended instead of being overwritten.
+* Fix harmless "file already closed" error notification when writing files while VFS caching is disabled ([PR #236])
 
 ### Version 3.31
 
@@ -553,3 +554,4 @@
 [PR #233]: https://github.com/chenxiaolong/RSAF/pull/233
 [PR #234]: https://github.com/chenxiaolong/RSAF/pull/234
 [PR #235]: https://github.com/chenxiaolong/RSAF/pull/235
+[PR #236]: https://github.com/chenxiaolong/RSAF/pull/236
