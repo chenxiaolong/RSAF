@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+// SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
 // SPDX-License-Identifier: GPL-3.0-only
 
 // This is a thin wrapper around rclone's RPC calls and VFS system.
@@ -67,6 +67,17 @@ var (
 )
 
 func init() {
+	// Older Android versions do not set TMPDIR, causing bionic and the go
+	// runtime to default to /data/local/tmp, which we can't write to. rclone
+	// uses the system temp directory for creating spool files.
+	//
+	// https://android.googlesource.com/platform/frameworks/base/+/d5ccb038f69193fb63b5169d7adc5da19859c9d8%5E%21/
+	if _, ok := os.LookupEnv("TMPDIR"); !ok {
+		// This will never fail since we unconditionally set XDG_CACHE_HOME.
+		cacheDir, _ := os.UserCacheDir()
+		os.Setenv("TMPDIR", cacheDir)
+	}
+
 	items, err := configstruct.Items(&vfscommon.Opt)
 	if err != nil {
 		// Can't fail.
