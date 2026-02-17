@@ -514,17 +514,19 @@ object RcloneRpc {
 
     fun vfsQueueStats(vfs: String): VfsQueueStats {
         val output = invoke("vfs/queue", JSONObject().put("fs", vfs))
-        val jsonQueue = output.getJSONArray("queue")
+        val jsonQueue = output.optJSONArray("queue")
         var inProgress = 0
         var pending = 0
 
-        for (i in 0 until jsonQueue.length()) {
-            val jsonQueueItem = jsonQueue.getJSONObject(i)
+        if (jsonQueue != null) {
+            for (i in 0 until jsonQueue.length()) {
+                val jsonQueueItem = jsonQueue.getJSONObject(i)
 
-            if (jsonQueueItem.getBoolean("uploading")) {
-                inProgress += 1
-            } else {
-                pending += 1
+                if (jsonQueueItem.getBoolean("uploading")) {
+                    inProgress += 1
+                } else {
+                    pending += 1
+                }
             }
         }
 
