@@ -14,6 +14,8 @@
 * Fix log spam when querying VFS stats if no remotes are using the VFS ([PR #233])
 * Set `TMPDIR` explicitly to support old versions of Android ([Issue #232], [PR #234])
   * rclone tries to write to the system temp directory when `vfs_cache_mode=off` is set and the backend does not support streaming uploads.
+* Fix file conflict handling when VFS caching is disabled ([PR #235])
+  * Files will now have the numeric suffix properly appended instead of being overwritten.
 
 ### Version 3.31
 
@@ -550,3 +552,4 @@
 [PR #231]: https://github.com/chenxiaolong/RSAF/pull/231
 [PR #233]: https://github.com/chenxiaolong/RSAF/pull/233
 [PR #234]: https://github.com/chenxiaolong/RSAF/pull/234
+[PR #235]: https://github.com/chenxiaolong/RSAF/pull/235
