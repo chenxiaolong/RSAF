@@ -1173,7 +1173,9 @@ func RbDocCopyOrMove(sourceDoc string, targetDoc string, copy bool, errOut *RbEr
 }
 
 type RbFile struct {
-	file vfs.Handle
+	file            vfs.Handle
+	nonCachingWrite bool
+	flushed         bool
 }
 
 // Open a file in the VFS at the given path. This works like POSIX open().
@@ -1184,10 +1186,15 @@ func RbDocOpen(doc string, flags int, mode int, errOut *RbError) *RbFile {
 		return nil
 	}
 
+	nonCachingWrite := false
+
 	if v.Opt.CacheMode < vfscommon.CacheModeWrites {
 		if flags&(os.O_WRONLY|os.O_RDWR) != 0 {
 			fs.Logf(nil, "Forcing O_TRUNC for writable file due to streaming")
 			flags |= os.O_TRUNC
+
+			// See Close() for details.
+			nonCachingWrite = true
 		}
 
 		// rclone only properly returns EEXIST when newRWFileHandle() is called,
@@ -1217,7 +1224,9 @@ func RbDocOpen(doc string, flags int, mode int, errOut *RbError) *RbFile {
 	}
 
 	return &RbFile{
-		file: handle,
+		file:            handle,
+		nonCachingWrite: nonCachingWrite,
+		flushed:         false,
 	}
 }
 
@@ -1226,7 +1235,9 @@ func RbDocOpen(doc string, flags int, mode int, errOut *RbError) *RbFile {
 // Even if an error is returned, the file handle should be considered closed.
 func (rbfile *RbFile) Close(errOut *RbError) bool {
 	err := rbfile.file.Close()
-	if err != nil {
+	// WriteFileHandle's Flush() method calls the internal close() method, which
+	// can only be done once.
+	if err != nil && !(err == vfs.ECLOSED && rbfile.nonCachingWrite && rbfile.flushed) {
 		assignError(errOut, err, syscall.EIO)
 		return false
 	}
@@ -1274,6 +1285,8 @@ func (rbfile *RbFile) Flush(errOut *RbError) bool {
 		assignError(errOut, err, syscall.EIO)
 		return false
 	}
+
+	rbfile.flushed = true
 
 	return true
 }
