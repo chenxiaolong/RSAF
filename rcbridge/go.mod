@@ -1,15 +1,13 @@
 module rcbridge
 
-go 1.24.4
-
-toolchain go1.25.1
+go 1.25.0
 
 require (
-	github.com/rclone/rclone v1.73.0
-	golang.org/x/mobile v0.0.0-20260120165949-40bd9ace6ce4
+	github.com/rclone/rclone v1.73.1
+	golang.org/x/mobile v0.0.0-20260217195705-b56b3793a9c4
 )
 
-replace github.com/rclone/rclone v1.73.0 => github.com/chenxiaolong/rclone v1.73.0-rsaf.0
+replace github.com/rclone/rclone v1.73.1 => github.com/chenxiaolong/rclone v1.73.1-rsaf.0
 
 require (
 	cloud.google.com/go/auth v0.17.0 // indirect
@@ -22,7 +20,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azfile v1.5.3 // indirect
 	github.com/Azure/go-ntlmssp v0.0.2-0.20251110135918-10b7b7e7cd26 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.6.0 // indirect
-	github.com/FilenCloudDienste/filen-sdk-go v0.0.35 // indirect
+	github.com/FilenCloudDienste/filen-sdk-go v0.0.37 // indirect
 	github.com/Files-com/files-sdk-go/v3 v3.2.264 // indirect
 	github.com/IBM/go-sdk-core/v5 v5.21.0 // indirect
 	github.com/Max-Sum/base32768 v0.0.0-20230304063302-18e6ce5945fd // indirect
@@ -91,7 +89,7 @@ require (
 	github.com/flynn/noise v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.11 // indirect
 	github.com/geoffgarside/ber v1.2.0 // indirect
-	github.com/go-chi/chi/v5 v5.2.3 // indirect
+	github.com/go-chi/chi/v5 v5.2.5 // indirect
 	github.com/go-darwin/apfs v0.0.0-20211011131704-f84b94dbf348 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -120,7 +118,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/internxt/rclone-adapter v0.0.0-20260130171252-c3c6ebb49276 // indirect
+	github.com/internxt/rclone-adapter v0.0.0-20260213125353-6f59c89fcb7c // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect
@@ -206,13 +204,13 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/image v0.35.0 // indirect
+	golang.org/x/image v0.36.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.255.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251103181224-f26f9409b101 // indirect
