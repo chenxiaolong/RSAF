@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Update rclone to 1.73.1 ([PR #238])
+
 ### Version 3.32
 
 * Fix log spam when querying VFS stats if no remotes are using the VFS ([PR #233])
@@ -557,3 +561,4 @@
 [PR #235]: https://github.com/chenxiaolong/RSAF/pull/235
 [PR #236]: https://github.com/chenxiaolong/RSAF/pull/236
 [PR #237]: https://github.com/chenxiaolong/RSAF/pull/237
+[PR #238]: https://github.com/chenxiaolong/RSAF/pull/238
