@@ -35,9 +35,9 @@ import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.dialog.InactivityTimeoutDialogFragment
 import com.chiller3.rsaf.dialog.InteractiveConfigurationDialogFragment
 import com.chiller3.rsaf.dialog.MessageDialogFragment
+import com.chiller3.rsaf.dialog.PasswordDialogFragment
 import com.chiller3.rsaf.dialog.RemoteNameDialogAction
 import com.chiller3.rsaf.dialog.RemoteNameDialogFragment
-import com.chiller3.rsaf.dialog.TextInputDialogFragment
 import com.chiller3.rsaf.dialog.VfsCacheDeletionDialogFragment
 import com.chiller3.rsaf.extension.formattedString
 import com.chiller3.rsaf.rclone.KeepAliveService
@@ -237,20 +237,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                     if (state.status == ImportExportState.Status.NEED_PASSWORD &&
                         parentFragmentManager.findFragmentByTag(
                             TAG_IMPORT_EXPORT_PASSWORD) == null) {
-                        val (title, message, hint) = when (state.mode) {
-                            ImportExportMode.IMPORT -> Triple(
-                                getString(R.string.dialog_import_password_title),
-                                getString(R.string.dialog_import_password_message),
-                                getString(R.string.dialog_import_password_hint),
-                            )
-                            ImportExportMode.EXPORT -> Triple(
-                                getString(R.string.dialog_export_password_title),
-                                getString(R.string.dialog_export_password_message),
-                                getString(R.string.dialog_export_password_hint),
-                            )
-                        }
-
-                        TextInputDialogFragment.newInstance(title, message, hint, true)
+                        PasswordDialogFragment.newInstance(context, state.mode)
                             .show(parentFragmentManager.beginTransaction(),
                                 TAG_IMPORT_EXPORT_PASSWORD)
                     }
@@ -342,7 +329,7 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
         when (requestKey) {
             TAG_ADD_REMOTE_NAME -> {
                 if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
-                    val remote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
+                    val remote = bundle.getString(RemoteNameDialogFragment.RESULT_NAME)!!
 
                     InteractiveConfigurationDialogFragment.newInstance(remote, true)
                         .show(parentFragmentManager.beginTransaction(),
@@ -350,9 +337,9 @@ class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
                 }
             }
             TAG_IMPORT_EXPORT_PASSWORD -> {
-                if (bundle.getBoolean(TextInputDialogFragment.RESULT_SUCCESS)) {
-                    val password = bundle.getString(TextInputDialogFragment.RESULT_INPUT)!!
-                    viewModel.setImportExportPassword(password)
+                if (bundle.getBoolean(PasswordDialogFragment.RESULT_SUCCESS)) {
+                    val password = bundle.getString(PasswordDialogFragment.RESULT_PASSWORD)!!
+                    viewModel.setImportExportPassword(RcloneConfig.Password(password))
                 } else {
                     viewModel.cancelPendingImportExport()
                 }

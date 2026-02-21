@@ -193,14 +193,14 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
         when (requestKey) {
             TAG_RENAME_REMOTE -> {
                 if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
-                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
+                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_NAME)!!
 
                     viewModel.renameRemote(newRemote)
                 }
             }
             TAG_DUPLICATE_REMOTE -> {
                 if (bundle.getBoolean(RemoteNameDialogFragment.RESULT_SUCCESS)) {
-                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_INPUT)!!
+                    val newRemote = bundle.getString(RemoteNameDialogFragment.RESULT_NAME)!!
 
                     viewModel.duplicateRemote(newRemote)
                 }

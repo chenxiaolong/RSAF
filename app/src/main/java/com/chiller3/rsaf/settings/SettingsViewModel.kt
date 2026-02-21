@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -36,7 +36,7 @@ enum class ImportExportMode {
 data class ImportExportState(
     val mode: ImportExportMode,
     val uri: Uri,
-    val password: String?,
+    val password: RcloneConfig.Password,
     val status: Status,
 ) {
     enum class Status {
@@ -113,14 +113,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             ImportExportMode.EXPORT -> ImportExportState.Status.NEED_PASSWORD
         }
 
-        _importExportState.update { ImportExportState(mode, uri, null, status) }
+        _importExportState.update {
+            ImportExportState(mode, uri, RcloneConfig.Password(""), status)
+        }
 
         if (status == ImportExportState.Status.IN_PROGRESS) {
             performImportExport()
         }
     }
 
-    fun setImportExportPassword(password: String) {
+    fun setImportExportPassword(password: RcloneConfig.Password) {
         if (importExportState.value == null) {
             throw IllegalStateException("Import/export not started")
         }
@@ -173,7 +175,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    operation(state.uri, state.password ?: "")
+                    operation(state.uri, state.password)
                 }
 
                 _alerts.update { it + success }

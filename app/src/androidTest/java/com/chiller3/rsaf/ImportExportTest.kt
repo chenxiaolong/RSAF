@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -92,7 +92,7 @@ class ImportExportTest {
     @Test
     fun testPlainText() {
         val outputStream = ByteArrayOutputStream()
-        RcloneConfig.exportConfiguration(outputStream, "")
+        RcloneConfig.exportConfiguration(outputStream, RcloneConfig.Password(""))
 
         val config = parseConfig(outputStream.toString(Charsets.UTF_8))
         assertTrue(config.containsKey(remote))
@@ -102,7 +102,7 @@ class ImportExportTest {
         RcloneRpc.deleteRemote(remote)
 
         val inputStream = ByteArrayInputStream(outputStream.toByteArray())
-        RcloneConfig.importConfiguration(inputStream, "")
+        RcloneConfig.importConfiguration(inputStream, RcloneConfig.Password(""))
 
         assertTrue(RcloneRpc.remoteNames.contains(remote))
     }
@@ -110,7 +110,7 @@ class ImportExportTest {
     @Test
     fun testEncrypted() {
         val outputStream = ByteArrayOutputStream()
-        RcloneConfig.exportConfiguration(outputStream, "test")
+        RcloneConfig.exportConfiguration(outputStream, RcloneConfig.Password("test"))
 
         val rawConfig = outputStream.toString(Charsets.UTF_8)
         assertTrue(isEncryptedConfig(rawConfig))
@@ -119,12 +119,12 @@ class ImportExportTest {
 
         assertThrows(RcloneConfig.BadPasswordException::class.java) {
             val inputStream = ByteArrayInputStream(outputStream.toByteArray())
-            RcloneConfig.importConfiguration(inputStream, "wrong")
+            RcloneConfig.importConfiguration(inputStream, RcloneConfig.Password("wrong"))
         }
         assertFalse(RcloneRpc.remoteNames.contains(remote))
 
         val inputStream = ByteArrayInputStream(outputStream.toByteArray())
-        RcloneConfig.importConfiguration(inputStream, "test")
+        RcloneConfig.importConfiguration(inputStream, RcloneConfig.Password("test"))
         assertTrue(RcloneRpc.remoteNames.contains(remote))
     }
 }

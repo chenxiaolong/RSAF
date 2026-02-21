@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -30,23 +30,26 @@ sealed interface RemoteNameDialogAction {
     }
 }
 
-class RemoteNameDialogFragment : TextInputDialogFragment() {
+class RemoteNameDialogFragment : TextInputDialogFragment<String>() {
     companion object {
         private const val ARG_REMOTE_NAMES = "blacklist"
         const val RESULT_SUCCESS = TextInputDialogFragment.RESULT_SUCCESS
-        const val RESULT_INPUT = TextInputDialogFragment.RESULT_INPUT
+        const val RESULT_NAME = RESULT_VALUE
 
-        fun newInstance(context: Context, action: RemoteNameDialogAction, remoteNames: Array<String>) =
-            RemoteNameDialogFragment().apply {
-                arguments = toArgs(
-                    action.getTitle(context),
-                    context.getString(R.string.dialog_remote_name_message),
-                    context.getString(R.string.dialog_remote_name_hint),
-                    false,
-                ).apply {
-                    putStringArray(ARG_REMOTE_NAMES, remoteNames)
-                }
+        fun newInstance(
+            context: Context,
+            action: RemoteNameDialogAction,
+            remoteNames: Array<String>,
+        ) = RemoteNameDialogFragment().apply {
+            arguments = TextInputParams(
+                inputType = TextInputType.NORMAL,
+                title = action.getTitle(context),
+                message = context.getString(R.string.dialog_remote_name_message),
+                hint = context.getString(R.string.dialog_remote_name_hint),
+            ).toArgs().apply {
+                putStringArray(ARG_REMOTE_NAMES, remoteNames)
             }
+        }
     }
 
     private lateinit var remoteNames: Array<String>
@@ -56,11 +59,16 @@ class RemoteNameDialogFragment : TextInputDialogFragment() {
         return super.onCreateDialog(savedInstanceState)
     }
 
-    override fun isValid(input: String): Boolean =
+    override fun translateInput(input: String): String? {
         try {
             RcloneConfig.checkName(input)
-            input !in remoteNames
+            if (input !in remoteNames) {
+                return input
+            }
         } catch (_: Exception) {
-            false
+            // Ignore
         }
+
+        return null
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -24,6 +24,10 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 object RcloneConfig {
+    data class Password(val value: String) {
+        override fun toString(): String = "<password>"
+    }
+
     private val TAG = RcloneConfig::class.java.simpleName
 
     const val FILENAME = "rclone.conf"
@@ -44,6 +48,7 @@ object RcloneConfig {
      * Rclone's configuration system is all global state. Anything that touches the configuration
      * must do so with the mutex locked.
      */
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val globalStateLock = Object()
 
     /** Initialize global config state and load config file. */
@@ -84,28 +89,28 @@ object RcloneConfig {
      * hardware keystore itself. If the password has not yet been generated, a new 128-byte random
      * password is generated and stored.
      */
-    private val hardwareWrappedPassword: String
+    private val hardwareWrappedPassword: Password
         get() {
             synchronized(passwordStore) {
                 if (passwordStore.password == null) {
                     passwordStore.password = RandomUtils.generatePassword(128)
                 }
 
-                return passwordStore.password!!
+                return Password(passwordStore.password!!)
             }
         }
 
-    private fun setConfigLocked(path: String, password: String) {
+    private fun setConfigLocked(path: String, password: Password) {
         val error = RbError()
 
         if (!Rcbridge.rbConfigSetPath(path, error)) {
             throw error.toException("rbConfigSetPath")
         }
 
-        if (password.isEmpty()) {
+        if (password.value.isEmpty()) {
             Rcbridge.rbConfigClearPassword()
         } else {
-            if (!Rcbridge.rbConfigSetPassword(password, error)) {
+            if (!Rcbridge.rbConfigSetPassword(password.value, error)) {
                 throw error.toException("rbConfigSetPassword")
             }
         }
@@ -141,7 +146,7 @@ object RcloneConfig {
         notifyConfigChanged()
     }
 
-    fun importConfiguration(input: InputStream, password: String) {
+    fun importConfiguration(input: InputStream, password: Password) {
         withTempFile(applicationContext, "import.conf") { tempConfig ->
             tempConfig.outputStream().use { out ->
                 input.copyTo(out)
@@ -165,7 +170,7 @@ object RcloneConfig {
         }
     }
 
-    fun importConfigurationUri(uri: Uri, password: String) {
+    fun importConfigurationUri(uri: Uri, password: Password) {
         val input = applicationContext.contentResolver.openInputStream(uri)
             ?: throw IOException("Failed to open for reading: $uri")
 
@@ -174,7 +179,7 @@ object RcloneConfig {
         }
     }
 
-    fun exportConfiguration(output: OutputStream, password: String) {
+    fun exportConfiguration(output: OutputStream, password: Password) {
         withTempFile(applicationContext, "export.conf") { tempConfig ->
             synchronized(globalStateLock) {
                 try {
@@ -191,7 +196,7 @@ object RcloneConfig {
         }
     }
 
-    fun exportConfigurationUri(uri: Uri, password: String) {
+    fun exportConfigurationUri(uri: Uri, password: Password) {
         val output = applicationContext.contentResolver.openOutputStream(uri, "wt")
             ?: throw IOException("Failed to open for writing: $uri")
 
@@ -224,11 +229,11 @@ object RcloneConfig {
     class BadPasswordException(message: String?, cause: Throwable? = null)
         : Exception(message, cause)
 
-    fun revealPassword(obscured: String): String {
+    fun revealPassword(obscured: String): Password {
         val error = RbError()
         val result = Rcbridge.rbPasswordReveal(obscured, error)
             ?: throw error.toException("rbPasswordReveal")
 
-        return result.plainText
+        return Password(result.plainText)
     }
 }

@@ -129,6 +129,7 @@
     <string name="dialog_export_password_title">Config export</string>
     <string name="dialog_export_password_message">Enter a password to encrypt the exported config file or leave empty to store it in plain text.</string>
     <string name="dialog_export_password_hint">Encryption password</string>
+    <string name="dialog_export_password_confirm_hint">Confirm password</string>
     <string name="dialog_inactivity_timeout_title">Inactivity timeout</string>
     <string name="dialog_inactivity_timeout_message">Enter a duration in seconds.</string>
     <string name="dialog_vfs_cache_deletion_message">There are pending uploads in progress that may be interrupted. These will be permanently deleted from the VFS cache.</string>

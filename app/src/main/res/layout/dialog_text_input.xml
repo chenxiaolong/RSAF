@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    SPDX-FileCopyrightText: 2023 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -25,6 +25,19 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/confirm_text_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/abc_dialog_title_divider_material">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/confirm_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1" />

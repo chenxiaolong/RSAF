@@ -67,7 +67,7 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
 
             if (isPassword) {
                 try {
-                    value = RcloneConfig.revealPassword(text)
+                    value = RcloneConfig.revealPassword(text).value
                 } catch (e: ErrnoException) {
                     Log.w(TAG, "Failed to reveal password", e)
                 }

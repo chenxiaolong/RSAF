@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -57,7 +57,7 @@ class RcloneConfigBackupHelper : BackupHelper {
     ) {
         try {
             val payloadStream = ByteArrayOutputStream()
-            RcloneConfig.exportConfiguration(payloadStream, "")
+            RcloneConfig.exportConfiguration(payloadStream, RcloneConfig.Password(""))
 
             val payload = payloadStream.toByteArray()
             val oldPayloadHash = oldState?.let { readHashFromState(it) }
@@ -86,7 +86,7 @@ class RcloneConfigBackupHelper : BackupHelper {
         Log.i(TAG, "Restoring ${data.size()} byte payload")
 
         try {
-            RcloneConfig.importConfiguration(EntityInputStream(data), "")
+            RcloneConfig.importConfiguration(EntityInputStream(data), RcloneConfig.Password(""))
             Log.i(TAG, "Successfully restored rclone configuration")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restore rclone configuration", e)
