@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Ensure that the golang fork is always used, even if the host toolchain is newer ([PR #241])
+
 ### Version 3.33
 
 * Update rclone to 1.73.1 ([PR #238])
@@ -562,3 +566,4 @@
 [PR #236]: https://github.com/chenxiaolong/RSAF/pull/236
 [PR #237]: https://github.com/chenxiaolong/RSAF/pull/237
 [PR #238]: https://github.com/chenxiaolong/RSAF/pull/238
+[PR #241]: https://github.com/chenxiaolong/RSAF/pull/241
