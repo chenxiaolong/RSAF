@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Ensure that the golang fork is always used, even if the host toolchain is newer ([PR #241])
+* Ask for password confirmation when exporting the config ([PR #242])
 
 ### Version 3.33
 
@@ -567,3 +568,4 @@
 [PR #237]: https://github.com/chenxiaolong/RSAF/pull/237
 [PR #238]: https://github.com/chenxiaolong/RSAF/pull/238
 [PR #241]: https://github.com/chenxiaolong/RSAF/pull/241
+[PR #242]: https://github.com/chenxiaolong/RSAF/pull/242
