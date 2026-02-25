@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -52,8 +52,8 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
             } else {
                 // We can't know the reason.
                 onAuthenticationError(
-                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
-                    getString(R.string.biometric_error_no_device_credential),
+                    BiometricPrompt.ERROR_USER_CANCELED,
+                    getString(R.string.biometric_error_cancelled),
                 )
             }
         }
@@ -235,9 +235,9 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
     private fun startLegacyDeviceCredentialAuth() {
         Log.d(tag, "Starting legacy device credential authentication")
 
-        val keyGuardManager = getSystemService(KeyguardManager::class.java)
+        val keyguardManager = getSystemService(KeyguardManager::class.java)
         @Suppress("DEPRECATION")
-        val intent = keyGuardManager?.createConfirmDeviceCredentialIntent(
+        val intent = keyguardManager?.createConfirmDeviceCredentialIntent(
             getString(R.string.biometric_title),
             "",
         )
@@ -247,13 +247,23 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         } else {
             onAuthenticationError(
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
-                getString(R.string.biometric_error_no_device_credential),
+                getString(R.string.biometric_ignore),
             )
         }
     }
 
     fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
         Log.d(tag, "Authentication error: $errorCode: $errString")
+
+        if (errorCode == BiometricPrompt.ERROR_NO_BIOMETRICS
+                || errorCode == BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL) {
+            Log.w(tag, "No biometrics or device credential; allowing access")
+
+            Toast.makeText(this, R.string.biometric_ignore, Toast.LENGTH_LONG).show()
+
+            onAuthenticationSucceeded()
+            return
+        }
 
         Toast.makeText(
             this,
