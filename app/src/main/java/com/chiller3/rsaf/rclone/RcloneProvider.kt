@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -380,8 +380,6 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
     private lateinit var prefs: Preferences
     private lateinit var notifications: Notifications
-    private val ioThread = HandlerThread(javaClass.simpleName).apply { start() }
-    private val ioHandler = Handler(ioThread.looper)
     // Because it is impossible to make close() blocking, we can't force the client app to wait for
     // file uploads to complete. This causes a problem with the design pattern where a file is
     // initially written to a temp file and then renamed when complete. The rename can happen while
@@ -693,12 +691,23 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
 
         val error = RbError()
-
         val handle = Rcbridge.rbDocOpen(documentId, fcntlMode.toLong(), FILE_PERMS.toLong(), error)
             ?: throw error.toException("rbDocOpen")
 
+        // We spawn a new thread for every opened file to handle I/O. When opening a file with
+        // StorageManager.openProxyFileDescriptor(), which calls IVold.openAppFuseFile(), a
+        // FUSE_LOOKUP request is sent to FuseAppLoop. The response depends on onGetSize(), which
+        // runs on the I/O thread. If a single I/O thread is used, a slow onGetSize(), onRead(),
+        // onWrite(), or onFsync() operation on a different file will prevent FuseAppLoop from
+        // responding to FUSE_LOOKUP for the newly opened file quickly. Since openAppFuseFile()
+        // holds the main vold lock, IVold.monitor() will be blocked from acquiring the main lock as
+        // well and the watchdog will kill system_server. See onRelease() for a similar issue that
+        // needs to be worked around when closing files too.
+        val ioThread = HandlerThread(javaClass.simpleName).apply { start() }
+        val ioHandler = Handler(ioThread.looper)
+
         val storageManager = context!!.getSystemService(StorageManager::class.java)
-        val proxyFd = ProxyFd(documentId, handle, isWrite)
+        val proxyFd = ProxyFd(ioThread, documentId, handle, isWrite)
 
         try {
             return storageManager.openProxyFileDescriptor(pfdMode, proxyFd, ioHandler)
@@ -706,6 +715,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             Log.e(TAG, "Failed to open proxy file descriptor", e)
             // openProxyFileDescriptor can throw an exception without invoking onRelease
             handle.close(null)
+            ioThread.quit()
             proxyFd.markUnused()
             throw e
         }
@@ -963,6 +973,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     }
 
     private inner class ProxyFd(
+        private val ioThread: HandlerThread,
         private val documentId: String,
         private val handle: RbFile,
         private val isWrite: Boolean,
@@ -1049,6 +1060,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         private fun onReleaseBackground() {
             debugLog("onReleaseBackground()")
+
+            ioThread.quit()
 
             val context = context!!
             val remote = splitRemote(documentId).first.trimEnd(':')
