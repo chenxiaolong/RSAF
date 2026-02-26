@@ -9,7 +9,7 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
-### Unreleased
+### Version 3.35
 
 * Ignore app lock when device has no screen lock configured ([PR #246])
 * Spawn a new I/O thread for every opened file ([Issue #243], [PR #248])
