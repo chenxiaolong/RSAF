@@ -67,7 +67,6 @@
 
         <receiver
             android:name=".rclone.ResumeUploadsBootReceiver"
-            android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
