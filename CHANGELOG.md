@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Switch to using upstream golang MTE fix ([PR #249], [PR #250])
+* Update rclone to 1.73.2 ([PR #251])
 
 ### Version 3.35
 
@@ -585,3 +586,4 @@
 [PR #248]: https://github.com/chenxiaolong/RSAF/pull/248
 [PR #249]: https://github.com/chenxiaolong/RSAF/pull/249
 [PR #250]: https://github.com/chenxiaolong/RSAF/pull/250
+[PR #251]: https://github.com/chenxiaolong/RSAF/pull/251
