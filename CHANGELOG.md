@@ -11,7 +11,7 @@
 
 ### Unreleased
 
-* Switch to using upstream golang MTE fix ([PR #249])
+* Switch to using upstream golang MTE fix ([PR #249], [PR #250])
 
 ### Version 3.35
 
@@ -584,3 +584,4 @@
 [PR #246]: https://github.com/chenxiaolong/RSAF/pull/246
 [PR #248]: https://github.com/chenxiaolong/RSAF/pull/248
 [PR #249]: https://github.com/chenxiaolong/RSAF/pull/249
+[PR #250]: https://github.com/chenxiaolong/RSAF/pull/250
