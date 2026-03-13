@@ -1,0 +1,173 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2026 adhu2018 (translation)
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<resources>
+    <!-- Preference headers -->
+    <string name="pref_header_permissions">权限</string>
+    <string name="pref_header_remotes">远程存储</string>
+    <string name="pref_header_remote">远程存储</string>
+    <string name="pref_header_configuration">配置</string>
+    <string name="pref_header_behavior">行为</string>
+    <string name="pref_header_ui">界面</string>
+    <string name="pref_header_app_lock">应用锁定</string>
+    <string name="pref_header_advanced">高级</string>
+    <string name="pref_header_about">关于</string>
+    <string name="pref_header_debug">调试</string>
+
+    <!-- Main preferences -->
+    <string name="pref_inhibit_battery_opt_name">禁用电池优化</string>
+    <string name="pref_inhibit_battery_opt_desc">需要在后台上传文件。</string>
+    <string name="pref_missing_notifications_name">缺少通知权限</string>
+    <string name="pref_missing_notifications_desc">需要在后台上传文件时显示通知。</string>
+    <string name="pref_add_remote_name">添加远程存储</string>
+    <string name="pref_add_remote_desc">添加新的 rclone 远程存储配置。</string>
+    <string name="pref_import_configuration_name">导入配置</string>
+    <string name="pref_import_configuration_desc">导入现有的 rclone 配置文件。</string>
+    <string name="pref_export_configuration_name">导出配置</string>
+    <string name="pref_export_configuration_desc">将当前 rclone 配置导出到文件。</string>
+    <string name="pref_add_file_extension_name">添加文件扩展名</string>
+    <string name="pref_add_file_extension_desc">创建新文件时，自动添加与文件类型对应的文件扩展名。</string>
+    <string name="pref_pretend_local_name">伪装成本地存储</string>
+    <string name="pref_pretend_local_desc">将 rclone 远程存储作为本地存储呈现给存储访问框架。这将强制与只允许选择本地文件的应用兼容。</string>
+    <string name="pref_local_storage_access_name">允许本地存储访问</string>
+    <string name="pref_local_storage_access_desc">允许包装远程存储（如 <tt>crypt</tt>）访问 <tt>/sdcard</tt> 下的本地存储。</string>
+    <string name="pref_dialogs_at_bottom_name">在底部显示对话框</string>
+    <string name="pref_dialogs_at_bottom_desc">使单手操作更容易，并防止对话框按钮移动。</string>
+    <string name="pref_require_auth_name">需要身份验证</string>
+    <string name="pref_require_auth_desc">需要生物识别解锁或屏幕锁定 PIN/密码才能查看和更改 RSAF 设置。</string>
+    <string name="pref_inactivity_timeout_name">非活动超时</string>
+    <plurals name="pref_inactivity_timeout_desc">
+        <item quantity="one">离开应用 %d 秒后锁定。</item>
+        <item quantity="other">离开应用 %d 秒后锁定。</item>
+    </plurals>
+    <string name="pref_lock_now_name">立即锁定</string>
+    <string name="pref_lock_now_desc">立即锁定应用，而不是等待非活动超时。</string>
+    <string name="pref_allow_backup_name">允许 Android 备份</string>
+    <string name="pref_allow_backup_desc">如果 Android 声称传输是端到端加密的，或者正在直接传输到另一台设备，则允许备份应用数据。RSAF 无法知道这些条件是否真的成立。</string>
+    <string name="pref_version_name">版本</string>
+    <string name="pref_verbose_rclone_logs_name">详细的 rclone 日志</string>
+    <string name="pref_verbose_rclone_logs_desc">警告：详细日志可能包含敏感信息，如身份验证令牌。</string>
+    <string name="pref_save_logs_name">保存日志</string>
+    <string name="pref_save_logs_desc">将 logcat 日志保存到文件。请注意，日志可能包含已访问的远程文件的名称。</string>
+    <string name="pref_add_internal_cache_remote_name">添加 rclone 内部缓存远程存储</string>
+    <string name="pref_add_internal_cache_remote_desc">添加一个新的指向 rclone 内部缓存目录的 <tt>alias</tt> 远程存储。这对于排查 VFS 问题可能很有用。</string>
+
+    <!-- Remote preferences -->
+    <string name="pref_edit_remote_open_name">打开远程存储</string>
+    <string name="pref_edit_remote_open_desc">在系统文件管理器中打开此远程存储。</string>
+    <string name="pref_edit_remote_configure_name">配置远程存储</string>
+    <string name="pref_edit_remote_configure_desc">重新运行 rclone 配置向导。</string>
+    <string name="pref_edit_remote_rename_name">重命名远程存储</string>
+    <string name="pref_edit_remote_rename_desc">更改此远程存储的名称。如果其他远程存储依赖于此存储，则需要手动更新为新名称。</string>
+    <string name="pref_edit_remote_duplicate_name">复制远程存储</string>
+    <string name="pref_edit_remote_duplicate_desc">创建具有相同配置的此远程存储的副本。</string>
+    <string name="pref_edit_remote_delete_name">删除远程存储</string>
+    <string name="pref_edit_remote_delete_desc">从配置中删除此远程存储。</string>
+    <string name="pref_edit_remote_allow_external_access_name">允许外部应用访问</string>
+    <string name="pref_edit_remote_allow_external_access_desc">允许外部应用通过系统文件管理器访问此远程存储。如果此远程存储只是另一个远程存储的后端，则不需要访问权限。</string>
+    <string name="pref_edit_remote_allow_locked_access_name">允许在锁定时访问</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">当 RSAF 被锁定时，文件仍然可供已获访问权限的外部应用使用。</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">当 RSAF 被锁定时，文件对外部应用隐藏，新的文件操作被阻止。与已打开文件的持续操作不受影响。</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">在启动器快捷方式中显示</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">长按 RSAF 启动器图标时，将此远程存储包含在快捷方式列表中。</string>
+    <string name="pref_edit_remote_thumbnails_name">启用缩略图</string>
+    <string name="pref_edit_remote_thumbnails_desc">允许显示图像、视频和音乐（专辑封面）的缩略图。浏览文件时可能会产生额外的网络流量。</string>
+    <string name="pref_edit_remote_report_usage_name">报告文件系统使用情况</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">(正在检查是否支持报告文件系统使用情况…)</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">向客户端应用报告可用空间和总空间。对于某些远程存储类型，当客户端应用获取远程存储列表时，这可能会显著减慢它们的速度。</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">此远程存储类型不支持报告其可用空间和总空间。</string>
+    <string name="pref_edit_remote_vfs_options_name">自定义 VFS 选项</string>
+    <string name="pref_edit_remote_vfs_options_desc">设置 <tt>rclone mount</tt> 支持的自定义 rclone VFS 选项。</string>
+
+    <!-- Alerts -->
+    <string name="action_details">详情</string>
+    <string name="dialog_error_details_title">错误详情</string>
+
+    <!-- Main alerts -->
+    <string name="alert_list_remotes_failure">获取远程存储列表失败</string>
+    <string name="alert_add_remote_success">成功添加新的远程存储 %1$s</string>
+    <string name="alert_add_remote_partial">由于中断，部分添加了新的远程存储 %1$s</string>
+    <string name="alert_import_success">成功导入配置</string>
+    <string name="alert_import_failure">导入配置失败</string>
+    <string name="alert_import_cancelled">配置导入已取消</string>
+    <string name="alert_export_success">成功导出配置</string>
+    <string name="alert_export_failure">导出配置失败</string>
+    <string name="alert_export_cancelled">配置导出已取消</string>
+    <string name="alert_logcat_success">成功将日志保存到 %1$s</string>
+    <string name="alert_logcat_failure">将日志保存到 %1$s 失败</string>
+
+    <!-- Edit remote alerts -->
+    <string name="alert_edit_remote_success">成功编辑远程存储 %1$s</string>
+    <string name="alert_delete_remote_failure">删除远程存储 %1$s 失败</string>
+    <string name="alert_rename_remote_failure">将远程存储 %1$s 重命名为 %2$s 失败</string>
+    <string name="alert_duplicate_remote_failure">将远程存储 %1$s 复制为 %2$s 失败</string>
+    <string name="alert_set_config_failure">为远程存储 %2$s 设置 %1$s 配置选项失败</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">解锁配置</string>
+    <string name="biometric_error">生物识别身份验证错误：%1$s</string>
+    <string name="biometric_error_cancelled">解锁操作已取消</string>
+    <string name="biometric_ignore">忽略应用锁定，因为设备未配置屏幕锁定</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_action_next">下一步</string>
+    <string name="dialog_action_authorize">授权</string>
+    <string name="dialog_action_reset">重置</string>
+    <string name="dialog_action_proceed_anyway">继续进行</string>
+    <string name="dialog_remote_name_message">为远程存储输入名称。</string>
+    <string name="dialog_remote_name_hint">远程存储名称</string>
+    <string name="dialog_add_remote_title">添加远程存储</string>
+    <string name="dialog_rename_remote_title">重命名 %1$s</string>
+    <string name="dialog_duplicate_remote_title">复制 %1$s</string>
+    <string name="dialog_delete_remote_title">删除 %1$s</string>
+    <string name="dialog_authorize_title">等待授权</string>
+    <string name="dialog_authorize_message_loading">等待 rclone webserver 启动。</string>
+    <string name="dialog_authorize_message_url">打开以下链接以授权 rclone 访问后端。授权后，令牌将自动插入到上一个屏幕中。</string>
+    <string name="dialog_import_password_title">配置导入</string>
+    <string name="dialog_import_password_message">所选配置文件已加密。输入解密密码以导入它。</string>
+    <string name="dialog_import_password_hint">解密密码</string>
+    <string name="dialog_export_password_title">配置导出</string>
+    <string name="dialog_export_password_message">输入密码以加密导出的配置文件，或留空以纯文本形式存储。</string>
+    <string name="dialog_export_password_hint">加密密码</string>
+    <string name="dialog_export_password_confirm_hint">确认密码</string>
+    <string name="dialog_inactivity_timeout_title">非活动超时</string>
+    <string name="dialog_inactivity_timeout_message">输入以秒为单位的持续时间。</string>
+    <string name="dialog_vfs_cache_deletion_message">有正在进行的上传可能被中断。这些将从 VFS 缓存中被永久删除。</string>
+
+    <!-- Interactive configuration -->
+    <string name="ic_title_add_remote">添加远程存储：%1$s</string>
+    <string name="ic_title_edit_remote">编辑远程存储：%1$s</string>
+    <string name="ic_text_box_helper_required">值不能为空。</string>
+    <string name="ic_text_box_helper_not_required">值可以为空。</string>
+    <string name="ic_header_examples">示例选项：</string>
+
+    <!-- VFS options dialog -->
+    <string name="vfs_options_title">VFS 选项：%1$s</string>
+    <string name="vfs_options_message">以 <tt>key=value</tt> 格式输入自定义 rclone VFS 选项，每行一个选项。键是不带 <tt>--</tt> 前缀且所有其他连字符替换为下划线的命令行参数。有关可用选项列表，请参阅 <annotation type="rclone_vfs_docs">rclone 文档</annotation>。</string>
+    <string name="vfs_options_reload_warning"><b>注意</b>：必须重新加载 VFS 才能使更改生效，这将中断此远程存储正在进行的文件操作。</string>
+    <string name="vfs_options_save_and_reload">保存并重新加载</string>
+    <string name="vfs_options_save_only">仅保存</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_keep_alive_name">后台服务</string>
+    <string name="notification_channel_keep_alive_desc">在文件打开或正在上传时保持进程运行</string>
+    <string name="notification_channel_failure_name">失败警报</string>
+    <string name="notification_channel_failure_desc">后台上传期间错误警报</string>
+    <string name="notification_keep_alive_title">文件操作进行中</string>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d 个文件已打开</item>
+        <item quantity="other">%d 个文件已打开</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d 个文件正在上传</item>
+        <item quantity="other">%d 个文件正在上传</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d 个文件等待上传</item>
+        <item quantity="other">%d 个文件等待上传</item>
+    </plurals>
+    <string name="notification_keep_alive_cleanup_wait_desc">等待 VFS 缓存清理</string>
+    <string name="notification_background_upload_failed_title">上传文件到远程存储失败</string>
+</resources>
