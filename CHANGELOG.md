@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Add Chinese translations ([PR #252])
+
 ### Version 3.36
 
 * Switch to using upstream golang MTE fix ([PR #249], [PR #250])
@@ -587,3 +591,4 @@
 [PR #249]: https://github.com/chenxiaolong/RSAF/pull/249
 [PR #250]: https://github.com/chenxiaolong/RSAF/pull/250
 [PR #251]: https://github.com/chenxiaolong/RSAF/pull/251
+[PR #252]: https://github.com/chenxiaolong/RSAF/pull/252
