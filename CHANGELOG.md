@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Add Chinese translations ([PR #252])
+* Only pass supported error types to client applications ([PR #254])
 
 ### Version 3.36
 
@@ -592,3 +593,4 @@
 [PR #250]: https://github.com/chenxiaolong/RSAF/pull/250
 [PR #251]: https://github.com/chenxiaolong/RSAF/pull/251
 [PR #252]: https://github.com/chenxiaolong/RSAF/pull/252
+[PR #254]: https://github.com/chenxiaolong/RSAF/pull/254
