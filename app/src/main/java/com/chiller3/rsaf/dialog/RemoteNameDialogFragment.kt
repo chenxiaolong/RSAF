@@ -34,7 +34,7 @@ class RemoteNameDialogFragment : TextInputDialogFragment<String>() {
     companion object {
         private const val ARG_REMOTE_NAMES = "blacklist"
         const val RESULT_SUCCESS = TextInputDialogFragment.RESULT_SUCCESS
-        const val RESULT_NAME = RESULT_VALUE
+        const val RESULT_NAME = "name"
 
         fun newInstance(
             context: Context,
@@ -70,5 +70,9 @@ class RemoteNameDialogFragment : TextInputDialogFragment<String>() {
         }
 
         return null
+    }
+
+    override fun updateResult(result: Bundle, value: String?) {
+        result.putString(RESULT_NAME, value)
     }
 }

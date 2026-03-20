@@ -17,7 +17,7 @@ class Notifications(private val context: Context) {
         private const val CHANNEL_ID_KEEP_ALIVE = "keep_alive"
         private const val CHANNEL_ID_FAILURE = "failure"
 
-        private val LEGACY_CHANNEL_IDS = arrayOf<String>(
+        private val LEGACY_CHANNEL_IDS = arrayOf(
             "open_files",
             "background_uploads",
         )

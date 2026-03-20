@@ -6,6 +6,7 @@
 package com.chiller3.rsaf.dialog
 
 import android.content.Context
+import android.os.Bundle
 import com.chiller3.rsaf.R
 import com.chiller3.rsaf.settings.ImportExportMode
 
@@ -14,7 +15,7 @@ class PasswordDialogFragment : TextInputDialogFragment<String>() {
         val TAG: String = PasswordDialogFragment::class.java.simpleName
 
         const val RESULT_SUCCESS = TextInputDialogFragment.RESULT_SUCCESS
-        const val RESULT_PASSWORD = RESULT_VALUE
+        const val RESULT_PASSWORD = "password"
 
         fun newInstance(context: Context, mode: ImportExportMode) =
             PasswordDialogFragment().apply {
@@ -48,4 +49,8 @@ class PasswordDialogFragment : TextInputDialogFragment<String>() {
     }
 
     override fun translateInput(input: String): String = input
+
+    override fun updateResult(result: Bundle, value: String?) {
+        result.putString(RESULT_PASSWORD, value)
+    }
 }

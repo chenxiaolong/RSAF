@@ -7,7 +7,6 @@ package com.chiller3.rsaf.settings
 
 import android.os.Bundle
 import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.setFragmentResult
@@ -163,9 +162,9 @@ class EditRemoteFragment : PreferenceBaseFragment(), FragmentResultListener,
                     }
                     it.editNewRemote?.let { newRemote ->
                         Log.d(TAG, "Editing new remote: $newRemote")
-                        setFragmentResult(requestTag, bundleOf(
-                            EditRemoteActivity.RESULT_NEW_REMOTE to newRemote,
-                        ))
+                        setFragmentResult(requestTag, Bundle().apply {
+                            putString(EditRemoteActivity.RESULT_NEW_REMOTE, newRemote)
+                        })
                     }
                     if (it.finish) {
                         Log.d(TAG, "Finishing edit remote activity for: ${viewModel.remote}")

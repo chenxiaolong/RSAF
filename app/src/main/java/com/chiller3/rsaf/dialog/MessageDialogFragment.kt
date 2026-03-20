@@ -9,7 +9,6 @@ import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
-import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -22,10 +21,10 @@ class MessageDialogFragment : DialogFragment() {
 
         fun newInstance(title: String?, message: String?): MessageDialogFragment =
             MessageDialogFragment().apply {
-                arguments = bundleOf(
-                    ARG_TITLE to title,
-                    ARG_MESSAGE to message,
-                )
+                arguments = Bundle().apply {
+                    putString(ARG_TITLE, title)
+                    putString(ARG_MESSAGE, message)
+                }
             }
     }
 

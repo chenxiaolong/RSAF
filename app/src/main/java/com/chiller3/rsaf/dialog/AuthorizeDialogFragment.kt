@@ -9,7 +9,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Gravity
-import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
@@ -31,7 +30,7 @@ open class AuthorizeDialogFragment : DialogFragment() {
 
         fun newInstance(cmd: String): AuthorizeDialogFragment =
             AuthorizeDialogFragment().apply {
-                arguments = bundleOf(ARG_CMD to cmd)
+                arguments = Bundle().apply { putString(ARG_CMD, cmd) }
             }
     }
 
@@ -98,6 +97,6 @@ open class AuthorizeDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        setFragmentResult(tag!!, bundleOf(RESULT_CODE to code))
+        setFragmentResult(tag!!, Bundle().apply { putString(RESULT_CODE, code) })
     }
 }

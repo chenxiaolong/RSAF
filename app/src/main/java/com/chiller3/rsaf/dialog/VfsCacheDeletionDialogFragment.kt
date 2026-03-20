@@ -9,7 +9,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Gravity
-import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import com.chiller3.rsaf.Preferences
@@ -22,7 +21,7 @@ class VfsCacheDeletionDialogFragment : DialogFragment() {
         const val RESULT_SUCCESS = "success"
 
         fun newInstance(title: String) = VfsCacheDeletionDialogFragment().apply {
-            arguments = bundleOf(ARG_TITLE to title)
+            arguments = Bundle().apply { putString(ARG_TITLE, title) }
         }
     }
 
@@ -49,6 +48,6 @@ class VfsCacheDeletionDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        setFragmentResult(tag!!, bundleOf(RESULT_SUCCESS to success))
+        setFragmentResult(tag!!, Bundle().apply { putBoolean(RESULT_SUCCESS, success) })
     }
 }

@@ -21,7 +21,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -43,7 +42,7 @@ class VfsOptionsDialogFragment : DialogFragment() {
 
         fun newInstance(remote: String): VfsOptionsDialogFragment =
             VfsOptionsDialogFragment().apply {
-                arguments = bundleOf(ARG_REMOTE to remote)
+                arguments = Bundle().apply { putString(ARG_REMOTE, remote) }
             }
     }
 
@@ -158,7 +157,7 @@ class VfsOptionsDialogFragment : DialogFragment() {
         super.onDismiss(dialog)
 
         // Just to signal completion to the parent.
-        setFragmentResult(tag!!, bundleOf(RESULT_REMOTE to remote))
+        setFragmentResult(tag!!, Bundle().apply { putString(RESULT_REMOTE, remote) })
     }
 
     private fun buildMessage(): SpannableStringBuilder {

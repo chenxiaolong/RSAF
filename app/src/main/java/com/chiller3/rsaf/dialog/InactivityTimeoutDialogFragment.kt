@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -82,7 +81,7 @@ class InactivityTimeoutDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        setFragmentResult(tag!!, bundleOf(RESULT_SUCCESS to success))
+        setFragmentResult(tag!!, Bundle().apply { putBoolean(RESULT_SUCCESS, success) })
     }
 
     private fun refreshOkButtonEnabledState() {

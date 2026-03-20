@@ -7,7 +7,7 @@ package com.chiller3.rsaf.settings
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.os.bundleOf
+import android.os.Bundle
 import com.chiller3.rsaf.PreferenceBaseActivity
 import com.chiller3.rsaf.PreferenceBaseFragment
 
@@ -33,6 +33,6 @@ class EditRemoteActivity : PreferenceBaseActivity() {
     override val showUpButton: Boolean = true
 
     override fun createFragment(): PreferenceBaseFragment = EditRemoteFragment().apply {
-        arguments = bundleOf(EditRemoteFragment.ARG_REMOTE to remote)
+        arguments = Bundle().apply { putString(EditRemoteFragment.ARG_REMOTE, remote) }
     }
 }

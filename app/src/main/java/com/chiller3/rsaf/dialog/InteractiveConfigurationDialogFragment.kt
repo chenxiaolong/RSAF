@@ -18,7 +18,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
@@ -30,9 +29,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.chiller3.rsaf.Preferences
 import com.chiller3.rsaf.R
+import com.chiller3.rsaf.databinding.DialogInteractiveConfigurationBinding
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneRpc
-import com.chiller3.rsaf.databinding.DialogInteractiveConfigurationBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -52,10 +51,10 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
 
         fun newInstance(remote: String, new: Boolean): InteractiveConfigurationDialogFragment =
             InteractiveConfigurationDialogFragment().apply {
-                arguments = bundleOf(
-                    ARG_REMOTE to remote,
-                    ARG_NEW to new,
-                )
+                arguments = Bundle().apply {
+                    putString(ARG_REMOTE, remote)
+                    putBoolean(ARG_NEW, new)
+                }
             }
 
         /** Replace newlines with spaces unless there are multiple newlines in a row. */
@@ -225,12 +224,14 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        // Just to signal completion to the parent
-        setFragmentResult(tag!!, bundleOf(
-            RESULT_REMOTE to requireArguments().getString(ARG_REMOTE),
-            RESULT_NEW to requireArguments().getBoolean(ARG_NEW),
-            RESULT_CANCELLED to cancelled,
-        ))
+        val arguments = requireArguments()
+
+        // Just to signal completion to the parent.
+        setFragmentResult(tag!!, Bundle().apply {
+            putString(RESULT_REMOTE, arguments.getString(ARG_REMOTE))
+            putBoolean(RESULT_NEW, arguments.getBoolean(ARG_NEW))
+            putBoolean(RESULT_CANCELLED, cancelled)
+        })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

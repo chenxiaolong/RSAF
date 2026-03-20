@@ -427,8 +427,7 @@ object RcloneRpc {
             vfsOptions = config
                 .asSequence()
                 .filter { it.key.startsWith(CUSTOM_OPT_VFS_OPTIONS_PREFIX) }
-                .map { it.key.substring(CUSTOM_OPT_VFS_OPTIONS_PREFIX.length) to it.value }
-                .toMap(),
+                .associate { it.key.substring(CUSTOM_OPT_VFS_OPTIONS_PREFIX.length) to it.value },
         )
 
         fun toMap(): Map<String, String> = buildMap {
@@ -459,8 +458,7 @@ object RcloneRpc {
         remoteConfigsRaw[remote]
             ?.asSequence()
             ?.filter { (key, _) -> key.startsWith(CUSTOM_OPT_PREFIX) }
-            ?.map { (key, _) -> key to null }
-            ?.toMap(updates)
+            ?.associateTo(updates) { (key, _) -> key to null }
 
         updates.putAll(config.toMap())
 

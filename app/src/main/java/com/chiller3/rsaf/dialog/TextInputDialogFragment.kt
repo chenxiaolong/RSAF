@@ -10,7 +10,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
@@ -48,21 +47,20 @@ data class TextInputParams(
         origValue = args.getString(ARG_ORIG_VALUE),
     )
 
-    fun toArgs() = bundleOf(
-        ARG_INPUT_TYPE to inputType.ordinal,
-        ARG_TITLE to title,
-        ARG_MESSAGE to message,
-        ARG_HINT to hint,
-        ARG_CONFIRM_HINT to confirmHint,
-        ARG_ORIG_VALUE to origValue,
-    )
+    fun toArgs() = Bundle().apply {
+        putInt(ARG_INPUT_TYPE, inputType.ordinal)
+        putString(ARG_TITLE, title)
+        putString(ARG_MESSAGE, message)
+        putString(ARG_HINT, hint)
+        putString(ARG_CONFIRM_HINT, confirmHint)
+        putString(ARG_ORIG_VALUE, origValue)
+    }
 }
 
 abstract class TextInputDialogFragment<T> : DialogFragment() {
     companion object {
         protected const val RESULT_SUCCESS = "success"
         protected const val RESULT_ORIG_VALUE = "orig_value"
-        protected const val RESULT_VALUE = "value"
     }
 
     private lateinit var binding: DialogTextInputBinding
@@ -121,11 +119,10 @@ abstract class TextInputDialogFragment<T> : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        setFragmentResult(tag!!, bundleOf(
-            RESULT_SUCCESS to success,
-            RESULT_ORIG_VALUE to params.origValue,
-            RESULT_VALUE to value,
-        ).also(::updateResult))
+        setFragmentResult(tag!!, Bundle().apply {
+            putBoolean(RESULT_SUCCESS, success)
+            putString(RESULT_ORIG_VALUE, params.origValue)
+        }.also { updateResult(it, value) })
     }
 
     private fun refreshOkButtonEnabledState() {
@@ -136,5 +133,5 @@ abstract class TextInputDialogFragment<T> : DialogFragment() {
 
     abstract fun translateInput(input: String): T?
 
-    open fun updateResult(result: Bundle) {}
+    abstract fun updateResult(result: Bundle, value: T?)
 }
