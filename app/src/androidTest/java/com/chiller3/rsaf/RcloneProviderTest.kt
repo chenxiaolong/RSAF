@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -22,7 +22,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -518,12 +517,17 @@ class RcloneProviderTest {
             val uniqueUris = mutableSetOf<Uri>()
 
             for (counter in 0..RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
-                val childUri = DocumentsContract.createDocument(
-                    appContext.contentResolver, rootDocUri, mime, name)
-
                 if (counter == RcloneProvider.ANDROID_SEMANTICS_ATTEMPTS) {
-                    assertNull(childUri)
+                    assertThrows(FileNotFoundException::class.java) {
+                        DocumentsContract.createDocument(
+                            appContext.contentResolver, rootDocUri, mime, name,
+                        )
+                    }
                 } else {
+                    val childUri = DocumentsContract.createDocument(
+                        appContext.contentResolver, rootDocUri, mime, name,
+                    )
+
                     assertNotNull(childUri)
                     uniqueUris.add(childUri!!)
                 }

@@ -15,10 +15,13 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.os.BadParcelableException
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.NetworkOnMainThreadException
 import android.os.ParcelFileDescriptor
+import android.os.Parcelable
 import android.os.ProxyFileDescriptorCallback
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
@@ -303,7 +306,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 return documentId
             }
 
-            throw IOException("Failed to find unique file")
+            throw FileNotFoundException("Failed to find unique file")
         }
 
         /**
@@ -499,7 +502,45 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    override fun queryRoots(projection: Array<String>?): Cursor {
+    /** Run [block] but only throw exceptions supported by [android.os.Parcel.writeException]. */
+    private inline fun <R> withParcelableException(fnfOk: Boolean = true, block: () -> R): R {
+        try {
+            return block()
+        } catch (e: Exception) {
+            Log.e(TAG, "Operation failed", e)
+
+            // FileNotFoundException is handled locally in DocumentsProvider. All other exceptions
+            // will be rethrown in the client app as the same type.
+
+            when (e) {
+                // See Parcel.getExceptionCode(). These can be thrown as is.
+                is Parcelable,
+                is SecurityException,
+                is BadParcelableException,
+                is IllegalArgumentException,
+                is NullPointerException,
+                is IllegalStateException,
+                is NetworkOnMainThreadException,
+                is UnsupportedOperationException -> throw e
+
+                is FileNotFoundException -> if (fnfOk) {
+                    throw e
+                }
+
+                is ErrnoException -> if (fnfOk && e.errno == OsConstants.ENOENT) {
+                    throw FileNotFoundException(e.message)
+                } else if (e.errno == OsConstants.EINVAL) {
+                    throw IllegalArgumentException(e.message)
+                } else if (e.errno == OsConstants.ENOSYS) {
+                    throw UnsupportedOperationException(e.message)
+                }
+            }
+
+            throw IllegalStateException(e.message)
+        }
+    }
+
+    override fun queryRoots(projection: Array<String>?): Cursor = withParcelableException {
         debugLog("queryRoots(${projection.contentToString()})")
 
         return MatrixCursor(getRootProjection(projection)).apply {
@@ -549,7 +590,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         parentDocumentId: String,
         projection: Array<String>?,
         sortOrder: String?,
-    ): Cursor {
+    ): Cursor = withParcelableException {
         debugLog("queryChildDocuments($parentDocumentId, ${projection.contentToString()}, $sortOrder)")
         val (remote, config) = remoteConfigForDocument(parentDocumentId)
         enforceNotBlocked(remote, config)
@@ -570,7 +611,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
+    override fun queryDocument(
+        documentId: String,
+        projection: Array<String>?,
+    ): Cursor = withParcelableException {
         debugLog("queryDocument($documentId, ${projection.contentToString()})")
         val (remote, config) = remoteConfigForDocument(documentId)
         enforceNotBlocked(remote, config)
@@ -589,7 +633,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      *
      * This does not perform I/O. The result is computed from the document IDs only.
      */
-    override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
+    override fun isChildDocument(
+        parentDocumentId: String,
+        documentId: String,
+    ): Boolean = withParcelableException(false) {
         debugLog("isChildDocument($parentDocumentId, $documentId)")
         val configs = RcloneRpc.remoteConfigs
         for (id in arrayOf(parentDocumentId, documentId)) {
@@ -615,7 +662,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun findDocumentPath(
         parentDocumentId: String?,
         childDocumentId: String,
-    ): DocumentsContract.Path {
+    ): DocumentsContract.Path = withParcelableException {
         debugLog("findDocumentPath($parentDocumentId, $childDocumentId)")
         val configs = RcloneRpc.remoteConfigs
         for (id in arrayOf(parentDocumentId, childDocumentId)) {
@@ -659,8 +706,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      * This provides a file descriptor that supports random reads and writes. If the rclone backend
      * does not support random writes, the file may be buffered to disk before being uploaded.
      */
-    override fun openDocument(documentId: String, mode: String,
-                              signal: CancellationSignal?): ParcelFileDescriptor {
+    override fun openDocument(
+        documentId: String,
+        mode: String,
+        signal: CancellationSignal?,
+    ): ParcelFileDescriptor = withParcelableException {
         debugLog("openDocument($documentId, $mode, $signal)")
         val (remote, config) = remoteConfigForDocument(documentId)
         enforceNotBlocked(remote, config)
@@ -727,8 +777,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      * This is only implemented for audio, image, and video files. If generating a thumbnail is
      * supported, but the process fails, the client will see an empty file.
      */
-    override fun openDocumentThumbnail(documentId: String, sizeHint: Point,
-                                       signal: CancellationSignal?): AssetFileDescriptor? {
+    override fun openDocumentThumbnail(
+        documentId: String,
+        sizeHint: Point,
+        signal: CancellationSignal?,
+    ): AssetFileDescriptor? = withParcelableException {
         debugLog("openDocumentThumbnail($documentId, $sizeHint, $signal)")
         val (remote, config) = remoteConfigForDocument(documentId)
         enforceNotBlocked(remote, config)
@@ -784,8 +837,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      * @throws IOException if the target already exists and adding a counter suffix was not
      * sufficient to find a unique target
      */
-    override fun createDocument(parentDocumentId: String, mimeType: String,
-                                displayName: String): String {
+    override fun createDocument(
+        parentDocumentId: String,
+        mimeType: String,
+        displayName: String,
+    ): String = withParcelableException {
         debugLog("createDocument($parentDocumentId, $mimeType, $displayName)")
         val (remote, config) = remoteConfigForDocument(parentDocumentId)
         enforceNotBlocked(remote, config)
@@ -841,7 +897,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      * @throws IOException if the target already exists and adding a counter suffix was not
      * sufficient to find a unique target
      */
-    override fun renameDocument(documentId: String, displayName: String): String {
+    override fun renameDocument(
+        documentId: String,
+        displayName: String,
+    ): String = withParcelableException {
         debugLog("renameDocument($documentId, $displayName)")
         val (remote, config) = remoteConfigForDocument(documentId)
         enforceNotBlocked(remote, config)
@@ -860,6 +919,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             }
         }.also {
             notifyChildrenChanged(parent)
+            // DocumentsProvider calls revokeDocumentPermission() already.
         }
     }
 
@@ -868,7 +928,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      *
      * This does not fail if the document has already been deleted.
      */
-    override fun deleteDocument(documentId: String) {
+    override fun deleteDocument(documentId: String) = withParcelableException {
         debugLog("deleteDocument($documentId)")
         val (remote, config) = remoteConfigForDocument(documentId)
         enforceNotBlocked(remote, config)
@@ -881,9 +941,14 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         val (parent, _) = splitPath(documentId)
         notifyChildrenChanged(parent)
+
+        // DocumentsProvider calls revokeDocumentPermission() already.
     }
 
-    override fun removeDocument(documentId: String, parentDocumentId: String) {
+    override fun removeDocument(
+        documentId: String,
+        parentDocumentId: String,
+    ) = withParcelableException {
         debugLog("removeDocument($documentId, $parentDocumentId)")
         val configs = RcloneRpc.remoteConfigs
         for (id in arrayOf(documentId, parentDocumentId)) {
@@ -910,8 +975,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
      * @throws IOException if the target already exists and adding a counter suffix was not
      * sufficient to find a unique target
      */
-    private fun copyOrMove(sourceDocumentId: String, targetParentDocumentId: String,
-                           copy: Boolean): String {
+    private fun copyOrMove(
+        sourceDocumentId: String,
+        targetParentDocumentId: String,
+        copy: Boolean,
+    ): String {
         val (sourceRemote, _) = splitRemote(sourceDocumentId)
         val (targetRemote, _) = splitRemote(targetParentDocumentId)
         if (sourceRemote != targetRemote) {
@@ -943,7 +1011,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         }
     }
 
-    override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
+    override fun copyDocument(
+        sourceDocumentId: String,
+        targetParentDocumentId: String,
+    ): String = withParcelableException {
         debugLog("copyDocument($sourceDocumentId, $targetParentDocumentId)")
         val configs = RcloneRpc.remoteConfigs
         for (id in arrayOf(sourceDocumentId, targetParentDocumentId)) {
@@ -956,8 +1027,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         return copyOrMove(sourceDocumentId, targetParentDocumentId, true)
     }
 
-    override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String,
-                              targetParentDocumentId: String): String {
+    override fun moveDocument(
+        sourceDocumentId: String,
+        sourceParentDocumentId: String,
+        targetParentDocumentId: String,
+    ): String = withParcelableException {
         debugLog("moveDocument($sourceDocumentId, $sourceParentDocumentId, $targetParentDocumentId)")
         val configs = RcloneRpc.remoteConfigs
         for (id in arrayOf(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)) {
