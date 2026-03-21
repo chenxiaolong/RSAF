@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -37,6 +38,9 @@ class InactivityTimeoutDialogFragment : DialogFragment() {
 
         binding = DialogTextInputBinding.inflate(layoutInflater)
         binding.message.text = getString(R.string.dialog_inactivity_timeout_message)
+
+        binding.confirmTextLayout.isVisible = false
+
         binding.text.inputType = InputType.TYPE_CLASS_NUMBER
         binding.text.addTextChangedListener {
             duration = try {

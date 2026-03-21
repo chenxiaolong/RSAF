@@ -128,7 +128,7 @@ abstract class TextInputDialogFragment<T> : DialogFragment() {
     private fun refreshOkButtonEnabledState() {
         (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = value != null
                 && (params.confirmHint == null
-                || binding.text.text?.toString() == binding.confirmText.text?.toString())
+                        || binding.text.text?.toString() == binding.confirmText.text?.toString())
     }
 
     abstract fun translateInput(input: String): T?
