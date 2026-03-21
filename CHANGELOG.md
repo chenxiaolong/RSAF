@@ -13,6 +13,8 @@
 
 * Add Chinese translations ([PR #252])
 * Only pass supported error types to client applications ([PR #254])
+* Remove useless extra text box in the inactivity timeout dialog ([PR #256])
+  * This was a regression introduced in version 3.34.
 * Update dependencies ([PR #255])
 
 ### Version 3.36
@@ -596,3 +598,4 @@
 [PR #252]: https://github.com/chenxiaolong/RSAF/pull/252
 [PR #254]: https://github.com/chenxiaolong/RSAF/pull/254
 [PR #255]: https://github.com/chenxiaolong/RSAF/pull/255
+[PR #256]: https://github.com/chenxiaolong/RSAF/pull/256
