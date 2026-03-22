@@ -9,6 +9,11 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Fix the remaining RSAF settings for a remote getting reset when changing a single setting ([Issue #258], [PR #259])
+  * This was a regression introduced in version 3.20.
+
 ### Version 3.37
 
 * Add Chinese translations ([PR #252])
@@ -439,6 +444,7 @@
 [Issue #211]: https://github.com/chenxiaolong/RSAF/issues/211
 [Issue #232]: https://github.com/chenxiaolong/RSAF/issues/232
 [Issue #243]: https://github.com/chenxiaolong/RSAF/issues/243
+[Issue #258]: https://github.com/chenxiaolong/RSAF/issues/258
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -599,3 +605,4 @@
 [PR #254]: https://github.com/chenxiaolong/RSAF/pull/254
 [PR #255]: https://github.com/chenxiaolong/RSAF/pull/255
 [PR #256]: https://github.com/chenxiaolong/RSAF/pull/256
+[PR #259]: https://github.com/chenxiaolong/RSAF/pull/259
