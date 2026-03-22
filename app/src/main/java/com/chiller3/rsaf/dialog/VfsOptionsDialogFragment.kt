@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2025-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -48,13 +48,11 @@ class VfsOptionsDialogFragment : DialogFragment() {
 
     private lateinit var binding: DialogVfsOptionsBinding
     private lateinit var remote: String
-    private lateinit var config: RcloneRpc.RemoteConfig
     private var overrides: Map<String, String>? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val arguments = requireArguments()
         remote = arguments.getString(ARG_REMOTE)!!
-        config = RcloneRpc.remoteConfigs[remote]!!
 
         binding = DialogVfsOptionsBinding.inflate(layoutInflater)
 
@@ -101,6 +99,8 @@ class VfsOptionsDialogFragment : DialogFragment() {
         }
 
         if (savedInstanceState == null) {
+            val config = RcloneRpc.remoteConfigs[remote]!!
+
             binding.text.setText(buildString {
                 for ((key, value) in config.vfsOptions) {
                     if (isNotEmpty()) {
@@ -196,7 +196,7 @@ class VfsOptionsDialogFragment : DialogFragment() {
     }
 
     private fun save(reload: Boolean) {
-        RcloneRpc.setRemoteConfig(remote, config.copy(vfsOptions = overrides!!))
+        RcloneRpc.setRemoteConfig(remote, RcloneRpc.RemoteConfig(vfsOptions = overrides!!))
 
         if (reload) {
             Rcbridge.rbCacheClearRemote("$remote:", false)

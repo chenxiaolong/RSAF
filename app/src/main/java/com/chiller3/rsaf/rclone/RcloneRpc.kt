@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -26,6 +26,15 @@ object RcloneRpc {
     private const val DEFAULT_DYNAMIC_SHORTCUT = false
     private const val DEFAULT_THUMBNAILS = true
     private const val DEFAULT_REPORT_USAGE = false
+
+    private fun isKnownKey(key: String) =
+        !key.startsWith(CUSTOM_OPT_PREFIX)
+                || key == CUSTOM_OPT_HARD_BLOCKED
+                || key == CUSTOM_OPT_SOFT_BLOCKED
+                || key == CUSTOM_OPT_DYNAMIC_SHORTCUT
+                || key == CUSTOM_OPT_THUMBNAILS
+                || key == CUSTOM_OPT_REPORT_USAGE
+                || key.startsWith(CUSTOM_OPT_VFS_OPTIONS_PREFIX)
 
     /**
      * Perform an rclone RPC call.
@@ -452,12 +461,12 @@ object RcloneRpc {
     }
 
     fun setRemoteConfig(remote: String, config: RemoteConfig) {
-        // Ensure we don't leave behind legacy options.
         val updates = mutableMapOf<String, String?>()
 
+        // Ensure we don't leave behind legacy options.
         remoteConfigsRaw[remote]
             ?.asSequence()
-            ?.filter { (key, _) -> key.startsWith(CUSTOM_OPT_PREFIX) }
+            ?.filter { (key, _) -> !isKnownKey(key) }
             ?.associateTo(updates) { (key, _) -> key to null }
 
         updates.putAll(config.toMap())
