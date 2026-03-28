@@ -11,7 +11,7 @@ RSAF is an Android document provider for the wonderful [rclone](https://rclone.o
 
 RSAF is not itself a file manager, but any file manager supporting SAF, including the one built into Android (Settings -> Storage -> Documents), can make use of it.
 
-<img src="app/images/light.png" alt="light mode screenshot" width="200" /> <img src="app/images/dark.png" alt="dark mode screenshot" width="200" />
+<img src="metadata/en-US/images/phoneScreenshots/light.png" alt="light mode screenshot" width="200" /> <img src="metadata/en-US/images/phoneScreenshots/dark.png" alt="dark mode screenshot" width="200" />
 
 ## Features
 
