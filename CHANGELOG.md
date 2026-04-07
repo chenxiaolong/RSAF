@@ -12,6 +12,7 @@
 ### Unreleased
 
 * Backport upstream golang fix to resolve crash on 32-bit devices running Android <11 ([PR #263])
+* Update golang to 1.26.2 ([PR #264])
 
 ### Version 3.39
 
@@ -616,3 +617,4 @@
 [PR #259]: https://github.com/chenxiaolong/RSAF/pull/259
 [PR #260]: https://github.com/chenxiaolong/RSAF/pull/260
 [PR #263]: https://github.com/chenxiaolong/RSAF/pull/263
+[PR #264]: https://github.com/chenxiaolong/RSAF/pull/264
