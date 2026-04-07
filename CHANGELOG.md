@@ -14,6 +14,7 @@
 * Fix bug where none of the remotes are visible in the file manager if querying disk usage for one fails ([Issue #205], [PR #265])
 * Backport upstream golang fix to resolve crash on 32-bit devices running Android <11 ([PR #263])
 * Update golang to 1.26.2 ([PR #264])
+* Update dependencies ([PR #266])
 
 ### Version 3.39
 
@@ -621,3 +622,4 @@
 [PR #263]: https://github.com/chenxiaolong/RSAF/pull/263
 [PR #264]: https://github.com/chenxiaolong/RSAF/pull/264
 [PR #265]: https://github.com/chenxiaolong/RSAF/pull/265
+[PR #266]: https://github.com/chenxiaolong/RSAF/pull/266
