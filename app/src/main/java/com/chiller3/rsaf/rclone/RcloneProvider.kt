@@ -557,7 +557,12 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
                 val usage = if (config.reportUsageOrDefault) {
                     debugLog("Querying filesystem usage: $remote")
-                    RcloneRpc.getUsage("$remote:")
+                    try {
+                        RcloneRpc.getUsage("$remote:")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to query filesystem usage: $remote", e)
+                        null
+                    }
                 } else {
                     null
                 }
