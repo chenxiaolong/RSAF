@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Backport upstream golang fix to resolve crash on 32-bit devices running Android <11 ([PR #263])
+
 ### Version 3.39
 
 * Update rclone to 1.73.3 ([PR #260])
@@ -611,3 +615,4 @@
 [PR #256]: https://github.com/chenxiaolong/RSAF/pull/256
 [PR #259]: https://github.com/chenxiaolong/RSAF/pull/259
 [PR #260]: https://github.com/chenxiaolong/RSAF/pull/260
+[PR #263]: https://github.com/chenxiaolong/RSAF/pull/263
