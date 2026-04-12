@@ -7,7 +7,11 @@ require (
 	golang.org/x/mobile v0.0.0-20260312152759-81488f6aeb60
 )
 
-replace github.com/rclone/rclone v1.73.4 => github.com/chenxiaolong/rclone v1.73.4-rsaf.0
+replace github.com/rclone/rclone v1.73.4 => github.com/chenxiaolong/rclone v1.73.4-rsaf.1
+
+// https://github.com/chenxiaolong/RSAF/issues/268
+// https://github.com/t3rm1n4l/go-mega/pull/61
+replace github.com/t3rm1n4l/go-mega v0.0.0-20251031123324-a804aaa87491 => github.com/chenxiaolong/go-mega v0.0.0-20260412203312-607e36c7f6ca
 
 require (
 	cloud.google.com/go/auth v0.17.0 // indirect

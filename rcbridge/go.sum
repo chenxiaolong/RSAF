@@ -165,8 +165,10 @@ github.com/calebcase/tmpfile v1.0.3/go.mod h1:UAUc01aHeC+pudPagY/lWvt2qS9ZO5Zzof
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/chenxiaolong/rclone v1.73.4-rsaf.0 h1:TEmXPgT64kYor97KGZf+M0PxJYHuRQoff7dejtrfZ+k=
-github.com/chenxiaolong/rclone v1.73.4-rsaf.0/go.mod h1:WVv8gvA/lEl/Y37e8I8yosm7ZY+Szq7ujXbJS8Ol63o=
+github.com/chenxiaolong/go-mega v0.0.0-20260412203312-607e36c7f6ca h1:y676z2OBLiEJxgzsWTZAEHEoauNH+B+vQwKhCbX1J4U=
+github.com/chenxiaolong/go-mega v0.0.0-20260412203312-607e36c7f6ca/go.mod h1:BF/l2jNyK+2h/BJZ7VLMAz6m/IWjA2F67gTjV1C/+Bo=
+github.com/chenxiaolong/rclone v1.73.4-rsaf.1 h1:I3Kc9lBji1q2WltoCNjjoV/HZ4NC6g2W0sY5pi5fbL4=
+github.com/chenxiaolong/rclone v1.73.4-rsaf.1/go.mod h1:WVv8gvA/lEl/Y37e8I8yosm7ZY+Szq7ujXbJS8Ol63o=
 github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9 h1:z0uK8UQqjMVYzvk4tiiu3obv2B44+XBsvgEJREQfnO8=
 github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9/go.mod h1:Jl2neWsQaDanWORdqZ4emBl50J4/aRBBS4FyyG9/PFo=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
@@ -566,8 +568,6 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/t3rm1n4l/go-mega v0.0.0-20251031123324-a804aaa87491 h1:rrGZv6xYk37hx0tW2sYfgbO0PqStbHqz6Bq6oc9Hurg=
-github.com/t3rm1n4l/go-mega v0.0.0-20251031123324-a804aaa87491/go.mod h1:ykucQyiE9Q2qx1wLlEtZkkNn1IURib/2O+Mvd25i1Fo=
 github.com/tailscale/depaware v0.0.0-20210622194025-720c4b409502/go.mod h1:p9lPsd+cx33L3H9nNoecRRxPssFKUwwI50I3pZ0yT+8=
 github.com/tklauser/go-sysconf v0.3.15 h1:VE89k0criAymJ/Os65CSn1IXaol+1wrsFHEB8Ol49K4=
 github.com/tklauser/go-sysconf v0.3.15/go.mod h1:Dmjwr6tYFIseJw7a3dRLJfsHAMXZ3nEnL/aZY+0IuI4=
