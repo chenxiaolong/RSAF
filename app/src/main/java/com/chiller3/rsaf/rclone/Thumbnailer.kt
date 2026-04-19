@@ -102,8 +102,6 @@ object Thumbnailer {
         } finally {
             retriever.release()
         }
-
-        throw FileNotFoundException("Audio file has no embedded thumbnail")
     }
 
     /**

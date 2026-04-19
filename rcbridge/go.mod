@@ -3,11 +3,11 @@ module rcbridge
 go 1.25.0
 
 require (
-	github.com/rclone/rclone v1.73.4
-	golang.org/x/mobile v0.0.0-20260312152759-81488f6aeb60
+	github.com/rclone/rclone v1.73.5
+	golang.org/x/mobile v0.0.0-20260410095206-2cfb76559b7b
 )
 
-replace github.com/rclone/rclone v1.73.4 => github.com/chenxiaolong/rclone v1.73.4-rsaf.1
+replace github.com/rclone/rclone v1.73.5 => github.com/chenxiaolong/rclone v1.73.5-rsaf.0
 
 // https://github.com/chenxiaolong/RSAF/issues/268
 // https://github.com/t3rm1n4l/go-mega/pull/61
@@ -209,13 +209,13 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/image v0.38.0 // indirect
+	golang.org/x/image v0.39.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/term v0.40.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.255.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
