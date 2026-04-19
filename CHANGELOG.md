@@ -9,6 +9,10 @@
 
 **2025-10-02 Update: RSAF will _not_ be participating in Google's developer verification program ([more details](https://github.com/chenxiaolong/RSAF/issues/189)). This will soon impact your ability to install RSAF on most Android devices.**
 
+### Unreleased
+
+* Update rclone to 1.73.5 ([PR #273])
+
 ### Version 3.42
 
 * Fix upstream rclone bug that causes a crash for Mega remotes when there is no internet connection ([Issue #268], [PR #270])
@@ -636,3 +640,4 @@
 [PR #266]: https://github.com/chenxiaolong/RSAF/pull/266
 [PR #267]: https://github.com/chenxiaolong/RSAF/pull/267
 [PR #270]: https://github.com/chenxiaolong/RSAF/pull/270
+[PR #273]: https://github.com/chenxiaolong/RSAF/pull/273
