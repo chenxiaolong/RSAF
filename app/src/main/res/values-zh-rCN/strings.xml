@@ -39,7 +39,6 @@
     <string name="pref_require_auth_desc">需要生物识别解锁或屏幕锁定 PIN/密码才能查看和更改 RSAF 设置。</string>
     <string name="pref_inactivity_timeout_name">非活动超时</string>
     <plurals name="pref_inactivity_timeout_desc">
-        <item quantity="one">离开应用 %d 秒后锁定。</item>
         <item quantity="other">离开应用 %d 秒后锁定。</item>
     </plurals>
     <string name="pref_lock_now_name">立即锁定</string>
@@ -157,15 +156,12 @@
     <string name="notification_channel_failure_desc">后台上传期间错误警报</string>
     <string name="notification_keep_alive_title">文件操作进行中</string>
     <plurals name="notification_keep_alive_files_open_desc">
-        <item quantity="one">%d 个文件已打开</item>
         <item quantity="other">%d 个文件已打开</item>
     </plurals>
     <plurals name="notification_keep_alive_files_uploading_desc">
-        <item quantity="one">%d 个文件正在上传</item>
         <item quantity="other">%d 个文件正在上传</item>
     </plurals>
     <plurals name="notification_keep_alive_files_pending_desc">
-        <item quantity="one">%d 个文件等待上传</item>
         <item quantity="other">%d 个文件等待上传</item>
     </plurals>
     <string name="notification_keep_alive_cleanup_wait_desc">等待 VFS 缓存清理</string>
