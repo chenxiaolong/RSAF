@@ -765,7 +765,7 @@ func getVfs(remote string) (*vfs.VFS, error) {
 			return nil, err
 		}
 
-		v = vfs.New(f, &opts)
+		v = vfs.New(context.Background(), f, &opts)
 		vfsInstances[remote] = v
 
 		// Make Close() synchronous again because we rely on this for the in-use
