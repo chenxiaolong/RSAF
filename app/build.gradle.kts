@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.ResValue
 import com.android.build.gradle.internal.UsesSdkComponentsBuildService
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
@@ -78,12 +79,13 @@ fun getVersionCode(triple: VersionTriple): Int {
         Pair(0, 0)
     }
 
-    // 8 bits for major version, 8 bits for minor version, and 8 bits for git commit count
-    assert(major in 0 until 1.shl(8))
-    assert(minor in 0 until 1.shl(8))
-    assert(triple.second in 0 until 1.shl(8))
+    // 4 bits for major version, 6 bits for minor version, 6 bits for git commit count, and 4 bits
+    // for the ABI.
+    assert(major in 0 until 1.shl(4))
+    assert(minor in 0 until 1.shl(6))
+    assert(triple.second in 0 until 1.shl(6))
 
-    return major.shl(16) or minor.shl(8) or triple.second
+    return major.shl(6 + 6 + 4) or minor.shl(6 + 4) or triple.second.shl(4)
 }
 
 fun getVersionName(git: Git, triple: VersionTriple): String {
@@ -115,6 +117,8 @@ val extraDir = layout.buildDirectory.map { it.dir("extra") }
 val archiveDir = extraDir.map { it.dir("archive") }
 val rcbridgeDir = extraDir.map { it.dir("rcbridge") }
 val rcbridgeAar = rcbridgeDir.map { it.file("rcbridge.aar") }
+
+val abis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
     namespace = "com.chiller3.rsaf"
@@ -181,7 +185,7 @@ android {
             isEnable = true
             isUniversalApk = false
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include(*abis)
         }
     }
     dependenciesInfo {
@@ -191,6 +195,14 @@ android {
 }
 
 androidComponents.onVariants { variant ->
+    for (output in variant.outputs) {
+        val abi = output.filters
+            .find { it.filterType == FilterConfiguration.FilterType.ABI }!!
+            .identifier
+
+        output.versionCode.set(output.versionCode.get() + abis.indexOf(abi) + 1)
+    }
+
     variant.sources.assets!!.addGeneratedSourceDirectory(archive) {
         project.objects.directoryProperty().apply {
             set(archiveDir)
