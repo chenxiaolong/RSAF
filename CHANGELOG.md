@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Minor bug fix for long-clickable preferences ([PR #276])
+
 ### Version 3.44
 
 * Update rclone to 1.74.0 ([PR #274])
@@ -644,3 +648,4 @@
 [PR #270]: https://github.com/chenxiaolong/RSAF/pull/270
 [PR #273]: https://github.com/chenxiaolong/RSAF/pull/273
 [PR #274]: https://github.com/chenxiaolong/RSAF/pull/274
+[PR #276]: https://github.com/chenxiaolong/RSAF/pull/276
