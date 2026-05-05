@@ -44,11 +44,12 @@ import com.chiller3.rsaf.rclone.KeepAliveService
 import com.chiller3.rsaf.rclone.RcloneConfig
 import com.chiller3.rsaf.rclone.RcloneProvider
 import com.chiller3.rsaf.view.LongClickablePreference
+import com.chiller3.rsaf.view.OnPreferenceLongClickListener
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class SettingsFragment : PreferenceBaseFragment(), FragmentResultListener,
-    Preference.OnPreferenceClickListener, LongClickablePreference.OnPreferenceLongClickListener,
+    Preference.OnPreferenceClickListener, OnPreferenceLongClickListener,
     Preference.OnPreferenceChangeListener {
     companion object {
         private val TAG = SettingsFragment::class.java.simpleName
