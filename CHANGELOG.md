@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Minor bug fix for long-clickable preferences ([PR #276])
+* Use distinct version code for each APK split ([Issue #277], [PR #278])
 
 ### Version 3.44
 
@@ -478,6 +479,7 @@
 [Issue #243]: https://github.com/chenxiaolong/RSAF/issues/243
 [Issue #258]: https://github.com/chenxiaolong/RSAF/issues/258
 [Issue #268]: https://github.com/chenxiaolong/RSAF/issues/268
+[Issue #277]: https://github.com/chenxiaolong/RSAF/issues/277
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -649,3 +651,4 @@
 [PR #273]: https://github.com/chenxiaolong/RSAF/pull/273
 [PR #274]: https://github.com/chenxiaolong/RSAF/pull/274
 [PR #276]: https://github.com/chenxiaolong/RSAF/pull/276
+[PR #278]: https://github.com/chenxiaolong/RSAF/pull/278
