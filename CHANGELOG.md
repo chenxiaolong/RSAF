@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.45
 
 * Minor bug fix for long-clickable preferences ([PR #276])
 * Use distinct version code for each APK split ([Issue #277], [PR #278])
