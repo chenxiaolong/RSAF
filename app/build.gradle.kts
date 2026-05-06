@@ -79,13 +79,13 @@ fun getVersionCode(triple: VersionTriple): Int {
         Pair(0, 0)
     }
 
-    // 4 bits for major version, 6 bits for minor version, 6 bits for git commit count, and 4 bits
+    // 4 bits for major version, 8 bits for minor version, 5 bits for git commit count, and 3 bits
     // for the ABI.
     assert(major in 0 until 1.shl(4))
-    assert(minor in 0 until 1.shl(6))
-    assert(triple.second in 0 until 1.shl(6))
+    assert(minor in 0 until 1.shl(8))
+    assert(triple.second in 0 until 1.shl(5))
 
-    return major.shl(6 + 6 + 4) or minor.shl(6 + 4) or triple.second.shl(4)
+    return major.shl(8 + 5 + 3) or minor.shl(5 + 3) or triple.second.shl(3)
 }
 
 fun getVersionName(git: Git, triple: VersionTriple): String {
