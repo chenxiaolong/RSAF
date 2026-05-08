@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update golang to 1.26.3 ([PR #280])
+
 ### Version 3.45
 
 * Minor bug fix for long-clickable preferences ([PR #276])
@@ -652,3 +656,4 @@
 [PR #274]: https://github.com/chenxiaolong/RSAF/pull/274
 [PR #276]: https://github.com/chenxiaolong/RSAF/pull/276
 [PR #278]: https://github.com/chenxiaolong/RSAF/pull/278
+[PR #280]: https://github.com/chenxiaolong/RSAF/pull/280
