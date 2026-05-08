@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.46
 
 * Update golang to 1.26.3 ([PR #280])
 * Update rclone to 1.74.1 ([PR #281])
