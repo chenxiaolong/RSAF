@@ -3,11 +3,11 @@ module rcbridge
 go 1.25.0
 
 require (
-	github.com/rclone/rclone v1.74.0
+	github.com/rclone/rclone v1.74.1
 	golang.org/x/mobile v0.0.0-20260410095206-2cfb76559b7b
 )
 
-replace github.com/rclone/rclone v1.74.0 => github.com/chenxiaolong/rclone v1.74.0-rsaf.0
+replace github.com/rclone/rclone v1.74.1 => github.com/chenxiaolong/rclone v1.74.1-rsaf.0
 
 // https://github.com/chenxiaolong/RSAF/issues/268
 // https://github.com/t3rm1n4l/go-mega/pull/61
@@ -171,8 +171,8 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/putdotio/go-putio/putio v0.0.0-20200123120452-16d982cac2b8 // indirect
-	github.com/rclone/Proton-API-Bridge v1.0.1 // indirect
-	github.com/rclone/go-proton-api v1.0.1 // indirect
+	github.com/rclone/Proton-API-Bridge v1.0.3 // indirect
+	github.com/rclone/go-proton-api v1.0.2 // indirect
 	github.com/relvacode/iso8601 v1.7.0 // indirect
 	github.com/rfjakob/eme v1.2.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
@@ -207,14 +207,14 @@ require (
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
 	golang.org/x/exp v0.0.0-20260212183809-81e46e3db34a // indirect
 	golang.org/x/image v0.39.0 // indirect
-	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.275.0 // indirect
