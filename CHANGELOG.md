@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix titles of switch preferences being truncated when they don't fit ([PR #283])
+
 ### Version 3.46
 
 * Update golang to 1.26.3 ([PR #280])
@@ -659,3 +663,4 @@
 [PR #278]: https://github.com/chenxiaolong/RSAF/pull/278
 [PR #280]: https://github.com/chenxiaolong/RSAF/pull/280
 [PR #281]: https://github.com/chenxiaolong/RSAF/pull/281
+[PR #283]: https://github.com/chenxiaolong/RSAF/pull/283
