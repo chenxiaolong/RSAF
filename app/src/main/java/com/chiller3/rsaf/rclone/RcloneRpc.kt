@@ -298,15 +298,26 @@ object RcloneRpc {
     }
 
     class InteractiveConfiguration(private val remote: String) {
-        private var create = remote !in remoteNames
-        private var state: String? = null
+        companion object {
+            private val SKIP_QUESTIONS = mapOf(
+                // We require either using Authorizer or having the user manually run rclone
+                // authorize. If true is selected, the question prints to stdout and blocks until
+                // the authorization is complete.
+                "config_is_local" to "false",
+            )
+        }
+
+        private var states = mutableListOf<String?>()
+        // answers[i] is for states[i - 1].
+        private var answers = mutableListOf<String?>()
         private var error: String? = null
-        private var option: ProviderOption? = if (create) { providerQuestion } else { null }
+        private var option = if (remote !in remoteNames) { providerQuestion } else { null }
+        private var skipped = 0
 
         init {
             // If we're not creating a new remote, we need to start the config process to get the
             // first question
-            if (!create) {
+            if (option == null) {
                 submit(null)
             }
         }
@@ -322,7 +333,18 @@ object RcloneRpc {
         val question: Pair<String?, ProviderOption>?
             get() = option?.let { Pair(error, it) }
 
-        fun submit(answer: String?) {
+        /**
+         * Whether it's possible to go back to a previous question.
+         *
+         * It is not possible to go back to the remote type question because once submitted, the
+         * remote will have already been created.
+         */
+        val hasPrevious: Boolean
+            get() = states.size + skipped >= 2
+
+        private fun submitRaw(answer: String?) {
+            val isProviderQuestion = option === providerQuestion
+
             val input = JSONObject()
                 .put("name", remote)
                 // The parameters field is required to exist even in interactive mode.
@@ -332,10 +354,10 @@ object RcloneRpc {
                     .put("all", true)
                     .put("obscure", true)
                     .apply {
-                        state?.let {
+                        states.lastOrNull()?.let {
                             put("state", it)
                         }
-                        if (!create) {
+                        if (!isProviderQuestion) {
                             val result = answer?.let {
                                 // The "obscure" flag is currently ignored for the "result" value:
                                 // https://github.com/rclone/rclone/issues/7069
@@ -352,32 +374,86 @@ object RcloneRpc {
                     }
                 )
                 .apply {
-                    if (create) {
+                    if (isProviderQuestion) {
                         put("type", answer)
                     }
                 }
 
-            val method = if (create) {
+            val method = if (isProviderQuestion) {
                 "config/create"
             } else {
                 "config/update"
             }
 
             val output = invoke(method, input)
-            create = false
 
-            state = output.getString("State")
+            if (output.has("Error")) {
+                error = output.getString("Error")
+            }
+
+            // We intentionally can't go back to the provider question because the remote will have
+            // been created at this point. Clear out the answer before persisting so that the state
+            // is just like if we were freshly editing an existing remote.
+            val savedAnswer = if (isProviderQuestion) {
+                null
+            } else {
+                answer
+            }
+
+            val state = output.getString("State")
+            if (state != states.lastOrNull()) {
+                // Avoid duplicates when retrying.
+                states.add(state)
+                answers.add(savedAnswer)
+            } else {
+                answers[answers.size - 1] = savedAnswer
+            }
+
             option = if (output.isNull("Option")) {
                 null
             } else {
                 ProviderOption(output.getJSONObject("Option"))
             }
+        }
 
-            // We require either using Authorizer or having the user manually run rclone authorize.
-            // If true is selected, the question prints to stdout and blocks until the authorization
-            // is complete.
-            if (option?.name == "config_is_local") {
-                submit("false")
+        fun submit(answer: String?) {
+            submitRaw(answer)
+
+            while (true) {
+                val name = option?.name ?: break
+                val skipAnswer = SKIP_QUESTIONS[name] ?: break
+
+                submitRaw(skipAnswer)
+                skipped += 1
+            }
+        }
+
+        private fun goBackRaw(): String? {
+            // When displaying question C:
+            //   states:        [A, B, C]
+            //   answers: [null, A, B]
+            //   submit:               C
+            // to query question B, we need to resubmit with state A and answer A:
+            //   states:        [A]
+            //   answers: [null]
+            //   submit:         A
+            states.removeAt(states.lastIndex)
+            states.removeAt(states.lastIndex)
+            answers.removeAt(answers.lastIndex)
+            return answers.removeAt(answers.lastIndex)
+        }
+
+        fun goBack() {
+            if (!hasPrevious) {
+                throw IllegalStateException("No previous state")
+            }
+
+            submitRaw(goBackRaw())
+
+            while (option?.name in SKIP_QUESTIONS) {
+                val previousAnswer = goBackRaw()
+                skipped -= 1
+                submitRaw(previousAnswer)
             }
         }
     }

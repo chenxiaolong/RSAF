@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -85,7 +85,6 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
     private var currentOrDefault = ""
     private var userInput = ""
     private var lastOptionName: String? = null
-    private var neutralIsAuthorize = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val arguments = requireArguments()
@@ -118,6 +117,15 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             }
         }
 
+        binding.authorize.setOnClickListener {
+            val cmd = viewModel.question.value!!.second.authorizeCmd
+
+            AuthorizeDialogFragment.newInstance(cmd).show(
+                parentFragmentManager.beginTransaction(),
+                AuthorizeDialogFragment.TAG,
+            )
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.run.collect {
@@ -145,7 +153,7 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
             .setView(binding.root)
             .setPositiveButton(R.string.dialog_action_next, null)
             .setNegativeButton(android.R.string.cancel, null)
-            .setNeutralButton("placeholder", null)
+            .setNeutralButton(R.string.dialog_action_back, null)
             .create()
             .apply {
                 if (Preferences(requireContext()).dialogsAtBottom) {
@@ -169,17 +177,13 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
                     getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
                         dismiss()
                     }
+                    getButton(AlertDialog.BUTTON_NEGATIVE).setOnLongClickListener {
+                        userInput = currentOrDefault
+                        setStateFromInput()
+                        true
+                    }
                     getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                        if (neutralIsAuthorize) {
-                            val cmd = viewModel.question.value!!.second.authorizeCmd
-
-                            AuthorizeDialogFragment.newInstance(cmd)
-                                .show(parentFragmentManager.beginTransaction(),
-                                    AuthorizeDialogFragment.TAG)
-                        } else {
-                            userInput = currentOrDefault
-                            setStateFromInput()
-                        }
+                        viewModel.goBack()
                     }
                 }
             }
@@ -198,7 +202,7 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
                     updateMessage(error, option)
                     updateInput(option)
                     updateExamples(option)
-                    updateNeutralButton(option)
+                    updateAuthorize(option)
 
                     if (lastOptionName != option.name) {
                         userInput = currentOrDefault
@@ -208,6 +212,14 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
                     setStateFromInput()
 
                     lastOptionName = option.name
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.hasPrevious.collect { hasPrevious ->
+                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = hasPrevious
                 }
             }
         }
@@ -363,17 +375,8 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
         }
     }
 
-    private fun updateNeutralButton(option: RcloneRpc.ProviderOption) {
-        val dialog = dialog as AlertDialog
-        val button = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
-
-        neutralIsAuthorize = option.isAuthorize
-
-        button.setText(if (option.isAuthorize) {
-            R.string.dialog_action_authorize
-        } else {
-            R.string.dialog_action_reset
-        })
+    private fun updateAuthorize(option: RcloneRpc.ProviderOption) {
+        binding.authorize.isVisible = option.isAuthorize
     }
 
     /**
@@ -386,9 +389,6 @@ class InteractiveConfigurationDialogFragment : DialogFragment() {
 
         val dialog = dialog as AlertDialog
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = ok
-
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled =
-            neutralIsAuthorize || userInput != currentOrDefault
     }
 
     /**

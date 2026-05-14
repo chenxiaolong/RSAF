@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
     SPDX-License-Identifier: GPL-3.0-only
 -->
 <resources>
@@ -111,9 +111,9 @@
     <string name="biometric_ignore">Ignoring app lock because device has no screen lock configured</string>
 
     <!-- Dialogs -->
+    <string name="dialog_action_back">Back</string>
     <string name="dialog_action_next">Next</string>
     <string name="dialog_action_authorize">Authorize</string>
-    <string name="dialog_action_reset">Reset</string>
     <string name="dialog_action_proceed_anyway">Proceed anyway</string>
     <string name="dialog_remote_name_message">Enter a name for the remote.</string>
     <string name="dialog_remote_name_hint">Remote name</string>

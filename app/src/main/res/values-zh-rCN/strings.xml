@@ -113,7 +113,6 @@
     <!-- Dialogs -->
     <string name="dialog_action_next">下一步</string>
     <string name="dialog_action_authorize">授权</string>
-    <string name="dialog_action_reset">重置</string>
     <string name="dialog_action_proceed_anyway">继续进行</string>
     <string name="dialog_remote_name_message">为远程存储输入名称。</string>
     <string name="dialog_remote_name_hint">远程存储名称</string>

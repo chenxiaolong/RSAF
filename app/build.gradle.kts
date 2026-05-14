@@ -188,6 +188,11 @@ android {
             include(*abis)
         }
     }
+    lint {
+        // The translations are always going to lag behind new strings being
+        // added to values/strings.xml
+        disable += "MissingTranslation"
+    }
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
