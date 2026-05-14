@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.47
 
 * Fix titles of switch preferences being truncated when they don't fit ([PR #283])
 * Add a workaround to allow going back to previous questions when configuring remotes, despite rclone not supporting it ([Issue #284], [PR #285])
