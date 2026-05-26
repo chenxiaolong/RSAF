@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.74.2 ([PR #288])
+
 ### Version 3.47
 
 * Fix titles of switch preferences being truncated when they don't fit ([PR #283])
@@ -667,3 +671,4 @@
 [PR #281]: https://github.com/chenxiaolong/RSAF/pull/281
 [PR #283]: https://github.com/chenxiaolong/RSAF/pull/283
 [PR #285]: https://github.com/chenxiaolong/RSAF/pull/285
+[PR #288]: https://github.com/chenxiaolong/RSAF/pull/288
