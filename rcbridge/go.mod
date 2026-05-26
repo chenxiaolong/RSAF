@@ -3,11 +3,11 @@ module rcbridge
 go 1.25.0
 
 require (
-	github.com/rclone/rclone v1.74.1
-	golang.org/x/mobile v0.0.0-20260410095206-2cfb76559b7b
+	github.com/rclone/rclone v1.74.2
+	golang.org/x/mobile v0.0.0-20260520154334-0e4426e1883d
 )
 
-replace github.com/rclone/rclone v1.74.1 => github.com/chenxiaolong/rclone v1.74.1-rsaf.0
+replace github.com/rclone/rclone v1.74.2 => github.com/chenxiaolong/rclone v1.74.2-rsaf.0
 
 // https://github.com/chenxiaolong/RSAF/issues/268
 // https://github.com/t3rm1n4l/go-mega/pull/61
@@ -96,7 +96,7 @@ require (
 	github.com/geoffgarside/ber v1.2.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.5 // indirect
 	github.com/go-darwin/apfs v0.0.0-20211011131704-f84b94dbf348 // indirect
-	github.com/go-git/go-billy/v5 v5.8.0 // indirect
+	github.com/go-git/go-billy/v5 v5.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -207,15 +207,15 @@ require (
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
-	golang.org/x/exp v0.0.0-20260212183809-81e46e3db34a // indirect
-	golang.org/x/image v0.39.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
+	golang.org/x/image v0.41.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.275.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
