@@ -143,9 +143,15 @@ func generateTrustStorePool() *x509.CertPool {
 	// This has never changed since 2011 when support for multi-user was added.
 	androidUid := os.Getuid() / 100_000
 
+	osDir := systemDir + "/etc/security/cacerts"
+	apexDir := "/apex/com.android.conscrypt/cacerts"
+
+	if contents, _ := os.ReadDir(apexDir); len(contents) > 0 {
+		osDir = apexDir
+	}
+
 	addDirs := []string{
-		"/apex/com.android.conscrypt/cacerts",
-		systemDir + "/etc/security/cacerts",
+		osDir,
 		fmt.Sprintf("%s/misc/user/%d/cacerts-added", dataDir, androidUid),
 	}
 	removeDirs := []string{
