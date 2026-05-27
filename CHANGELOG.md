@@ -7,6 +7,11 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Ignore `/system/etc/security/cacerts` when out-of-band updates (Google Play System Updates) are present ([PR #289])
+  * On old Android versions, this fixes formerly trusted CA certificates still being trusted even after an out-of-band update removed them.
+
 ### Version 3.48
 
 * Update rclone to 1.74.2 ([PR #288])
@@ -672,3 +677,4 @@
 [PR #283]: https://github.com/chenxiaolong/RSAF/pull/283
 [PR #285]: https://github.com/chenxiaolong/RSAF/pull/285
 [PR #288]: https://github.com/chenxiaolong/RSAF/pull/288
+[PR #289]: https://github.com/chenxiaolong/RSAF/pull/289
