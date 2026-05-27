@@ -11,6 +11,8 @@
 
 * Ignore `/system/etc/security/cacerts` when out-of-band updates (Google Play System Updates) are present ([PR #289])
   * On old Android versions, this fixes formerly trusted CA certificates still being trusted even after an out-of-band update removed them.
+* Fix the `override.ca_cert` option for remotes being ignored ([Issue #287], [PR #290])
+  * The new approach for handling CA certs also eliminates the need for RSAF to use a fork of rclone.
 
 ### Version 3.48
 
@@ -500,6 +502,7 @@
 [Issue #268]: https://github.com/chenxiaolong/RSAF/issues/268
 [Issue #277]: https://github.com/chenxiaolong/RSAF/issues/277
 [Issue #284]: https://github.com/chenxiaolong/RSAF/issues/284
+[Issue #287]: https://github.com/chenxiaolong/RSAF/issues/287
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -678,3 +681,4 @@
 [PR #285]: https://github.com/chenxiaolong/RSAF/pull/285
 [PR #288]: https://github.com/chenxiaolong/RSAF/pull/288
 [PR #289]: https://github.com/chenxiaolong/RSAF/pull/289
+[PR #290]: https://github.com/chenxiaolong/RSAF/pull/290
