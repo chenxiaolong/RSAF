@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 3.49
 
 * Ignore `/system/etc/security/cacerts` when out-of-band updates (Google Play System Updates) are present ([PR #289])
   * On old Android versions, this fixes formerly trusted CA certificates still being trusted even after an out-of-band update removed them.
