@@ -500,6 +500,15 @@ val rcbridge = tasks.register("rcbridge") {
         val binDir = gomobileExecutable.parentFile
 
         injected.execOps.exec {
+            val ldflags = arrayOf(
+                // Needed for working around golang's deficient CA certificate handling on Android.
+                "-checklinkname=0",
+                // We need to repeat the ldflags from the goenv task. There is currently no way to
+                // extend the existing value provided via an environment variable.
+                // https://github.com/golang/go/issues/38522
+                "-buildid=",
+            )
+
             executable(gomobileExecutable)
             args(
                 "bind",
@@ -509,6 +518,7 @@ val rcbridge = tasks.register("rcbridge") {
                 "-androidapi=${android.defaultConfig.minSdk}",
                 "-javapkg=${android.namespace}.binding",
                 "-trimpath",
+                "-ldflags=${ldflags.joinToString(" ")}",
                 ".",
             )
             environment(

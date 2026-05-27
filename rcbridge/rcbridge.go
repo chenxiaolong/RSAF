@@ -20,7 +20,6 @@ import (
 	_ "rcbridge/envhack"
 
 	"context"
-	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -33,6 +32,7 @@ import (
 	goSync "sync"
 	"syscall"
 	"time"
+	_ "unsafe"
 
 	_ "golang.org/x/mobile/event/key"
 
@@ -42,7 +42,6 @@ import (
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/configstruct"
 	"github.com/rclone/rclone/fs/config/obscure"
-	"github.com/rclone/rclone/fs/fshttp"
 	"github.com/rclone/rclone/fs/fspath"
 	"github.com/rclone/rclone/fs/operations"
 	"github.com/rclone/rclone/fs/sync"
@@ -62,8 +61,6 @@ var (
 	vfsInstances     = make(map[string]*vfs.VFS)
 	vfsOptValidKeys  = make(map[string]bool)
 	vfsOptStringKeys = make(map[string]bool)
-	caCertsLock      goSync.Mutex
-	caCertsPool      *x509.CertPool
 )
 
 func init() {
@@ -230,14 +227,6 @@ func generateTrustStorePool() *x509.CertPool {
 	return pool
 }
 
-// Set the trusted CA certificates on every HTTP request.
-func perRequestHook(config *tls.Config) {
-	caCertsLock.Lock()
-	defer caCertsLock.Unlock()
-
-	config.RootCAs = caCertsPool
-}
-
 // Initialize global aspects of the library.
 func RbInit() {
 	librclone.Initialize()
@@ -251,15 +240,21 @@ func RbInit() {
 	// agent is just "rclone/".
 	ci.UserAgent = fmt.Sprintf("rclone/%s", fs.VersionTag)
 
-	fshttp.SetRoundTripHook(perRequestHook)
+	RbReloadCerts()
 }
+
+//go:linkname systemRootsMu crypto/x509.systemRootsMu
+var systemRootsMu goSync.RWMutex
+
+//go:linkname systemRoots crypto/x509.systemRoots
+var systemRoots *x509.CertPool
 
 // Reload certificates from the system and user trust stores.
 func RbReloadCerts() {
-	caCertsLock.Lock()
-	defer caCertsLock.Unlock()
+	systemRootsMu.RLock()
+	defer systemRootsMu.RUnlock()
 
-	caCertsPool = generateTrustStorePool()
+	systemRoots = generateTrustStorePool()
 }
 
 // Clean up library resources.

@@ -448,7 +448,6 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         Os.setenv("XDG_CACHE_HOME", context.cacheDir.path, true)
 
         Rcbridge.rbInit()
-        Rcbridge.rbReloadCerts()
         RcloneConfig.init(context)
         VfsCache.init(context)
         updateRcloneVerbosity()

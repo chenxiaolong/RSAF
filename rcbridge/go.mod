@@ -7,8 +7,6 @@ require (
 	golang.org/x/mobile v0.0.0-20260520154334-0e4426e1883d
 )
 
-replace github.com/rclone/rclone v1.74.2 => github.com/chenxiaolong/rclone v1.74.2-rsaf.0
-
 // https://github.com/chenxiaolong/RSAF/issues/268
 // https://github.com/t3rm1n4l/go-mega/pull/61
 replace github.com/t3rm1n4l/go-mega v0.0.0-20251031123324-a804aaa87491 => github.com/chenxiaolong/go-mega v0.0.0-20260412203312-607e36c7f6ca
