@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix the value of the 2nd previous question being obscured when going back from a password question ([PR #293])
+
 ### Version 3.49
 
 * Ignore `/system/etc/security/cacerts` when out-of-band updates (Google Play System Updates) are present ([PR #289])
@@ -682,3 +686,4 @@
 [PR #288]: https://github.com/chenxiaolong/RSAF/pull/288
 [PR #289]: https://github.com/chenxiaolong/RSAF/pull/289
 [PR #290]: https://github.com/chenxiaolong/RSAF/pull/290
+[PR #293]: https://github.com/chenxiaolong/RSAF/pull/293
