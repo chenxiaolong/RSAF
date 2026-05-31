@@ -307,17 +307,30 @@ object RcloneRpc {
             )
         }
 
-        private var states = mutableListOf<String?>()
-        // answers[i] is for states[i - 1].
-        private var answers = mutableListOf<String?>()
-        private var error: String? = null
-        private var option = if (remote !in remoteNames) { providerQuestion } else { null }
+        private data class Question(
+            // This is the answer submitted that resulted in obtaining this question.
+            val prevAnswer: String?,
+            val state: String?,
+            val error: String?,
+            val option: ProviderOption?,
+        )
+
+        private var questions = mutableListOf<Question>().apply {
+            if (remote !in remoteNames) {
+                add(Question(
+                    prevAnswer = null,
+                    state = null,
+                    error = null,
+                    option = providerQuestion,
+                ))
+            }
+        }
         private var skipped = 0
 
         init {
             // If we're not creating a new remote, we need to start the config process to get the
             // first question
-            if (option == null) {
+            if (questions.isEmpty()) {
                 submit(null)
             }
         }
@@ -331,7 +344,12 @@ object RcloneRpc {
          * should be answered. If there are no more questions, then null is returned.
          */
         val question: Pair<String?, ProviderOption>?
-            get() = option?.let { Pair(error, it) }
+            get() {
+                val question = questions.lastOrNull() ?: return null
+                val option = question.option ?: return null
+
+                return Pair(question.error, option)
+            }
 
         /**
          * Whether it's possible to go back to a previous question.
@@ -340,10 +358,11 @@ object RcloneRpc {
          * remote will have already been created.
          */
         val hasPrevious: Boolean
-            get() = states.size + skipped >= 2
+            get() = questions.size + skipped >= 2
 
         private fun submitRaw(answer: String?) {
-            val isProviderQuestion = option === providerQuestion
+            val question = questions.lastOrNull()
+            val isProviderQuestion = question?.option === providerQuestion
 
             val input = JSONObject()
                 .put("name", remote)
@@ -354,14 +373,14 @@ object RcloneRpc {
                     .put("all", true)
                     .put("obscure", true)
                     .apply {
-                        states.lastOrNull()?.let {
+                        question?.state?.let {
                             put("state", it)
                         }
                         if (!isProviderQuestion) {
                             val result = answer?.let {
                                 // The "obscure" flag is currently ignored for the "result" value:
                                 // https://github.com/rclone/rclone/issues/7069
-                                if (option?.isPassword == true) {
+                                if (question?.option?.isPassword == true) {
                                     obscure(it)
                                 } else {
                                     it
@@ -387,32 +406,37 @@ object RcloneRpc {
 
             val output = invoke(method, input)
 
-            if (output.has("Error")) {
-                error = output.getString("Error")
-            }
+            var savedAnswer = answer
 
             // We intentionally can't go back to the provider question because the remote will have
             // been created at this point. Clear out the answer before persisting so that the state
             // is just like if we were freshly editing an existing remote.
-            val savedAnswer = if (isProviderQuestion) {
-                null
-            } else {
-                answer
+            if (isProviderQuestion) {
+                questions.removeAt(questions.lastIndex)
+                savedAnswer = null
             }
 
-            val state = output.getString("State")
-            if (state != states.lastOrNull()) {
-                // Avoid duplicates when retrying.
-                states.add(state)
-                answers.add(savedAnswer)
-            } else {
-                answers[answers.size - 1] = savedAnswer
-            }
+            val error = output.optString("Error")
+            val newQuestion = Question(
+                prevAnswer = savedAnswer,
+                state = output.getString("State"),
+                error = if (error.isNullOrEmpty()) {
+                    null
+                } else {
+                    error
+                },
+                option = if (output.isNull("Option")) {
+                    null
+                } else {
+                    ProviderOption(output.getJSONObject("Option"))
+                },
+            )
 
-            option = if (output.isNull("Option")) {
-                null
+            // Avoid duplicates when retrying.
+            if (newQuestion.state != question?.state) {
+                questions.add(newQuestion)
             } else {
-                ProviderOption(output.getJSONObject("Option"))
+                questions[questions.size - 1] = newQuestion
             }
         }
 
@@ -420,7 +444,7 @@ object RcloneRpc {
             submitRaw(answer)
 
             while (true) {
-                val name = option?.name ?: break
+                val name = questions.lastOrNull()?.option?.name ?: break
                 val skipAnswer = SKIP_QUESTIONS[name] ?: break
 
                 submitRaw(skipAnswer)
@@ -429,18 +453,8 @@ object RcloneRpc {
         }
 
         private fun goBackRaw(): String? {
-            // When displaying question C:
-            //   states:        [A, B, C]
-            //   answers: [null, A, B]
-            //   submit:               C
-            // to query question B, we need to resubmit with state A and answer A:
-            //   states:        [A]
-            //   answers: [null]
-            //   submit:         A
-            states.removeAt(states.lastIndex)
-            states.removeAt(states.lastIndex)
-            answers.removeAt(answers.lastIndex)
-            return answers.removeAt(answers.lastIndex)
+            questions.removeAt(questions.lastIndex)
+            return questions.removeAt(questions.lastIndex).prevAnswer
         }
 
         fun goBack() {
@@ -450,7 +464,7 @@ object RcloneRpc {
 
             submitRaw(goBackRaw())
 
-            while (option?.name in SKIP_QUESTIONS) {
+            while (questions.lastOrNull()?.option?.name in SKIP_QUESTIONS) {
                 val previousAnswer = goBackRaw()
                 skipped -= 1
                 submitRaw(previousAnswer)
