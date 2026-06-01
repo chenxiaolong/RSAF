@@ -9,6 +9,7 @@
 
 ### Unreleased
 
+* Port UI to Jetpack Compose and adopt Material 3 Expressive styling ([PR #294])
 * Fix the value of the 2nd previous question being obscured when going back from a password question ([PR #293])
 
 ### Version 3.49
@@ -687,3 +688,4 @@
 [PR #289]: https://github.com/chenxiaolong/RSAF/pull/289
 [PR #290]: https://github.com/chenxiaolong/RSAF/pull/290
 [PR #293]: https://github.com/chenxiaolong/RSAF/pull/293
+[PR #294]: https://github.com/chenxiaolong/RSAF/pull/294
