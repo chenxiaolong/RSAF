@@ -7,6 +7,11 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Use elapsed realtime clock for the app lock feature ([PR #295])
+  * Fixes the app staying unlocked longer than expected if the device enters deep sleep.
+
 ### Version 4.0
 
 * Port UI to Jetpack Compose and adopt Material 3 Expressive styling ([PR #294])
@@ -689,3 +694,4 @@
 [PR #290]: https://github.com/chenxiaolong/RSAF/pull/290
 [PR #293]: https://github.com/chenxiaolong/RSAF/pull/293
 [PR #294]: https://github.com/chenxiaolong/RSAF/pull/294
+[PR #295]: https://github.com/chenxiaolong/RSAF/pull/295
