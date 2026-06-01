@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -9,7 +9,6 @@ import android.app.Application
 import android.app.backup.BackupManager
 import android.content.SharedPreferences
 import android.util.Log
-import com.google.android.material.color.DynamicColors
 import java.io.File
 
 class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -38,6 +37,7 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
         }
 
         prefs = Preferences(this)
+        prefs.migrate()
         prefs.registerListener(this)
 
         backupManager = BackupManager(this)
@@ -45,9 +45,6 @@ class MainApplication : Application(), SharedPreferences.OnSharedPreferenceChang
         AppLock.init(this)
 
         Notifications(this).updateChannels()
-
-        // Enable Material You colors
-        DynamicColors.applyToActivitiesIfAvailable(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

@@ -9,7 +9,6 @@
     <string name="pref_header_remote">Remote</string>
     <string name="pref_header_configuration">Configuration</string>
     <string name="pref_header_behavior">Behavior</string>
-    <string name="pref_header_ui">UI</string>
     <string name="pref_header_app_lock">App lock</string>
     <string name="pref_header_advanced">Advanced</string>
     <string name="pref_header_about">About</string>
@@ -32,8 +31,6 @@
     <string name="pref_pretend_local_desc">Present the rclone remotes as local storage to the Storage Access Framework. This forces compatibility with apps that only allow selecting local files.</string>
     <string name="pref_local_storage_access_name">Allow local storage access</string>
     <string name="pref_local_storage_access_desc">Allows wrapper remotes, like <tt>crypt</tt>, to access local storage under <tt>/sdcard</tt>.</string>
-    <string name="pref_dialogs_at_bottom_name">Show dialogs at bottom</string>
-    <string name="pref_dialogs_at_bottom_desc">Makes one-handed use easier and prevents dialog buttons from shifting.</string>
     <string name="pref_require_auth_name">Require authentication</string>
     <string name="pref_require_auth_desc">Require biometric unlock or screen lock PIN/password to view and change RSAF settings.</string>
     <string name="pref_inactivity_timeout_name">Inactivity timeout</string>
@@ -83,6 +80,8 @@
     <!-- Alerts -->
     <string name="action_details">Details</string>
     <string name="dialog_error_details_title">Error details</string>
+    <string name="alert_browser_not_found">No web browser is available.</string>
+    <string name="alert_documentsui_not_found">Android\'s builtin file manager (DocumentsUI) is unavailable.</string>
 
     <!-- Main alerts -->
     <string name="alert_list_remotes_failure">Failed to get list of remotes</string>

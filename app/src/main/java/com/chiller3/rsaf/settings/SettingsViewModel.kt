@@ -25,7 +25,7 @@ import java.io.File
 
 data class Remote(
     val name: String,
-    val provider: RcloneRpc.Provider?,
+    val provider: RcloneRpc.Provider,
 )
 
 enum class ImportExportMode {
@@ -77,9 +77,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             val r = withContext(Dispatchers.IO) {
                 val providers = RcloneRpc.providers
 
-                RcloneRpc.remoteConfigsRaw.map {
-                    Remote(it.key, providers[it.value["type"]])
-                }.sortedBy { it.name }
+                RcloneRpc
+                    .remoteConfigsRaw
+                    .asSequence()
+                    // Silently ignore remote types that are no longer supported.
+                    .mapNotNull { providers[it.value["type"]]?.let { p -> Remote(it.key, p) } }
+                    .sortedBy { it.name }
+                    .toList()
             }
 
             _remotes.update { r }
@@ -205,6 +209,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun acknowledgeFirstAlert() {
         _alerts.update { it.drop(1) }
+    }
+
+    fun addAlert(alert: SettingsAlert) {
+        _alerts.update { it + alert }
     }
 
     fun interactiveConfigurationCompleted(remote: String, cancelled: Boolean) {

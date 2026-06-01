@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -13,48 +13,14 @@ import kotlin.math.max
 
 class Preferences(private val context: Context) {
     companion object {
-        const val CATEGORY_PERMISSIONS = "permissions"
-        const val CATEGORY_CONFIGURATION = "configuration"
-        const val CATEGORY_DEBUG = "debug"
-        const val CATEGORY_REMOTES = "remotes"
-
-        // Main preferences
-        const val PREF_ADD_FILE_EXTENSION = "add_file_extension"
-        const val PREF_ALLOW_BACKUP = "allow_backup"
-        const val PREF_DIALOGS_AT_BOTTOM = "dialogs_at_bottom"
-        const val PREF_LOCAL_STORAGE_ACCESS = "local_storage_access"
-        const val PREF_PRETEND_LOCAL = "pretend_local"
-        const val PREF_REQUIRE_AUTH = "require_auth"
-        const val PREF_INACTIVITY_TIMEOUT = "inactivity_timeout"
-        const val PREF_LOCK_NOW = "lock_now"
-        const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
-
-        // Main UI actions only
-        const val PREF_INHIBIT_BATTERY_OPT = "inhibit_battery_opt"
-        const val PREF_MISSING_NOTIFICATIONS = "missing_notifications"
-        const val PREF_ADD_REMOTE = "add_remote"
-        const val PREF_EDIT_REMOTE_PREFIX = "edit_remote_"
-        const val PREF_IMPORT_CONFIGURATION = "import_configuration"
-        const val PREF_EXPORT_CONFIGURATION = "export_configuration"
-        const val PREF_VERSION = "version"
-        const val PREF_SAVE_LOGS = "save_logs"
-        const val PREF_ADD_INTERNAL_CACHE_REMOTE = "add_internal_cache_remote"
-
-        // Edit remote UI actions
-        const val PREF_OPEN_REMOTE = "open_remote"
-        const val PREF_CONFIGURE_REMOTE = "configure_remote"
-        const val PREF_RENAME_REMOTE = "rename_remote"
-        const val PREF_DUPLICATE_REMOTE = "duplicate_remote"
-        const val PREF_DELETE_REMOTE = "delete_remote"
-        const val PREF_ALLOW_EXTERNAL_ACCESS = "allow_external_access"
-        const val PREF_ALLOW_LOCKED_ACCESS = "allow_locked_access"
-        const val PREF_DYNAMIC_SHORTCUT = "dynamic_shortcut"
-        const val PREF_THUMBNAILS = "thumbnails"
-        const val PREF_REPORT_USAGE = "report_usage"
-        const val PREF_VFS_OPTIONS = "vfs_options"
-
-        // Not associated with a UI preference
+        // Keep in the same order as the helper functions below.
         const val PREF_DEBUG_MODE = "debug_mode"
+        private const val PREF_ADD_FILE_EXTENSION = "add_file_extension"
+        const val PREF_PRETEND_LOCAL = "pretend_local"
+        private const val PREF_REQUIRE_AUTH = "require_auth"
+        private const val PREF_INACTIVITY_TIMEOUT = "inactivity_timeout"
+        private const val PREF_ALLOW_BACKUP = "allow_backup"
+        const val PREF_VERBOSE_RCLONE_LOGS = "verbose_rclone_logs"
         private const val PREF_NEXT_NOTIFICATION_ID = "next_notification_id"
 
         // This needs to be large enough to account for activity transitions, where the lock state
@@ -87,11 +53,6 @@ class Preferences(private val context: Context) {
         get() = prefs.getBoolean(PREF_PRETEND_LOCAL, false)
         set(enabled) = prefs.edit { putBoolean(PREF_PRETEND_LOCAL, enabled) }
 
-    /** Whether to show dialogs at the bottom of the screen. */
-    var dialogsAtBottom: Boolean
-        get() = prefs.getBoolean(PREF_DIALOGS_AT_BOTTOM, false)
-        set(enabled) = prefs.edit { putBoolean(PREF_DIALOGS_AT_BOTTOM, enabled) }
-
     /** Whether biometric or device credential auth is required. */
     var requireAuth: Boolean
         get() = prefs.getBoolean(PREF_REQUIRE_AUTH, false)
@@ -121,4 +82,10 @@ class Preferences(private val context: Context) {
             prefs.edit { putInt(PREF_NEXT_NOTIFICATION_ID, nextId + 1) }
             nextId
         }
+
+    fun migrate() {
+        prefs.edit {
+            remove("dialogs_at_bottom")
+        }
+    }
 }

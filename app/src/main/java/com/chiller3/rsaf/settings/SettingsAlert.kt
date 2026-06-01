@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -29,4 +29,6 @@ sealed interface SettingsAlert {
     data class LogcatSucceeded(val uri: Uri) : SettingsAlert
 
     data class LogcatFailed(val uri: Uri, val error: String) : SettingsAlert
+
+    data object BrowserNotFound : SettingsAlert
 }

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -29,4 +29,6 @@ sealed interface EditRemoteAlert {
         val opt: String,
         val error: String,
     ) : EditRemoteAlert
+
+    data object DocumentsUINotFound : EditRemoteAlert
 }

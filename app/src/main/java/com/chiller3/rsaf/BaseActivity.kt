@@ -11,166 +11,105 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager.Authenticators
+import androidx.biometric.AuthenticationRequest
+import androidx.biometric.AuthenticationRequest.Companion.biometricRequest
+import androidx.biometric.AuthenticationResult
+import androidx.biometric.AuthenticationResultLauncher
 import androidx.biometric.BiometricPrompt
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
-import com.chiller3.rsaf.databinding.SettingsActivityBinding
+import androidx.biometric.compose.rememberAuthenticationLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
 
-abstract class PreferenceBaseActivity : AppCompatActivity() {
+abstract class BaseActivity : ComponentActivity() {
     companion object {
         private fun supportsModernDeviceCredential() =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     }
 
-    protected abstract val actionBarTitle: CharSequence?
-
-    protected abstract val showUpButton: Boolean
-
-    protected abstract fun createFragment(): PreferenceBaseFragment
-
     private val tag = javaClass.simpleName
 
     private lateinit var prefs: Preferences
-    private lateinit var bioPrompt: BiometricPrompt
     private lateinit var activityManager: ActivityManager
     private var isCoveredBySafeActivity = false
-
-    private val requestLegacyDeviceCredential =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                onAuthenticationSucceeded()
-            } else {
-                // We can't know the reason.
-                onAuthenticationError(
-                    BiometricPrompt.ERROR_USER_CANCELED,
-                    getString(R.string.biometric_error_cancelled),
-                )
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val binding = SettingsActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val transaction = supportFragmentManager.beginTransaction()
-
-        // https://issuetracker.google.com/issues/181805603
-        val bioFragment = supportFragmentManager
-            .findFragmentByTag("androidx.biometric.BiometricFragment")
-        if (bioFragment != null) {
-            transaction.remove(bioFragment)
-        }
-
-        val fragment: PreferenceBaseFragment
-
-        if (savedInstanceState == null) {
-            fragment = createFragment()
-            transaction.replace(R.id.settings, fragment)
-        } else {
-            fragment = supportFragmentManager.findFragmentById(R.id.settings)
-                    as PreferenceBaseFragment
-        }
-
-        transaction.commit()
-
-        supportFragmentManager.setFragmentResultListener(fragment.requestTag, this) { _, result ->
-            setResult(RESULT_OK, Intent().apply { putExtras(result) })
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, windowInsets ->
-            val insets = windowInsets.getInsets(
-                WindowInsetsCompat.Type.systemBars()
-                        or WindowInsetsCompat.Type.displayCutout()
-            )
-
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.left
-                topMargin = insets.top
-                rightMargin = insets.right
-            }
-
-            // Consuming the insets here prevents PreferenceBaseFragment's RecyclerView's insets
-            // callback from being called on older versions of Android, despite it not being a child
-            // of this view.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                WindowInsetsCompat.CONSUMED
-            } else {
-                windowInsets
-            }
-        }
-
-        setSupportActionBar(binding.toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(showUpButton)
-
-        actionBarTitle?.let {
-            title = it
-        }
-
         prefs = Preferences(this)
-
-        bioPrompt = BiometricPrompt(
-            this,
-            mainExecutor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) =
-                    this@PreferenceBaseActivity.onAuthenticationError(errorCode, errString)
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) =
-                    this@PreferenceBaseActivity.onAuthenticationSucceeded()
-
-                override fun onAuthenticationFailed() {
-                    // Ignore. This is called when a single biometric authentication attempt fails,
-                    // but the user is still allowed to retry.
-                }
-            },
-        )
-
         activityManager = getSystemService(ActivityManager::class.java)
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                true
+        setContent {
+            var startedOnce by rememberSaveable { mutableStateOf(false) }
+
+            val modernLauncher = rememberAuthenticationLauncher { authResult ->
+                startedOnce = false
+
+                when (authResult) {
+                    is AuthenticationResult.Success -> onAuthenticationSucceeded()
+                    is AuthenticationResult.Error -> {
+                        // Ignore cancellation due to eg. orientation change.
+                        if (authResult.errorCode != BiometricPrompt.ERROR_CANCELED) {
+                            onAuthenticationError(authResult.errorCode, authResult.errString)
+                        }
+                    }
+                }
             }
-            else -> super.onOptionsItemSelected(item)
+
+            val legacyLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) {
+                startedOnce = false
+
+                if (it.resultCode == RESULT_OK) {
+                    onAuthenticationSucceeded()
+                } else {
+                    // We can't know the reason.
+                    onAuthenticationError(
+                        BiometricPrompt.ERROR_USER_CANCELED,
+                        getString(R.string.biometric_error_cancelled),
+                    )
+                }
+            }
+
+            LifecycleResumeEffect(Unit) {
+                Log.d(tag, "onResume()")
+                AppLock.onAppResume()
+
+                if (AppLock.isLocked && !startedOnce) {
+                    startedOnce = true
+                    startAuth(modernLauncher, legacyLauncher)
+                }
+
+                refreshTaskState()
+                refreshGlobalVisibility()
+
+                onPauseOrDispose {
+                    Log.d(tag, "onPause()")
+                    AppLock.onAppPause()
+                }
+            }
+
+            ActivityContent()
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d(tag, "onResume()")
-
-        AppLock.onAppResume()
-
-        if (AppLock.isLocked) {
-            startAuth()
-        }
-
-        refreshTaskState()
-        refreshGlobalVisibility()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(tag, "onPause()")
-
-        AppLock.onAppPause()
-    }
+    @Composable
+    abstract fun ActivityContent()
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -213,26 +152,33 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         super.onWindowAttributesChanged(params)
     }
 
-    private fun startAuth() {
+    private fun startAuth(
+        modernLauncher: AuthenticationResultLauncher,
+        legacyLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    ) {
         if (supportsModernDeviceCredential()) {
-            startBiometricAuth()
+            startBiometricAuth(modernLauncher)
         } else {
-            startLegacyDeviceCredentialAuth()
+            startLegacyDeviceCredentialAuth(legacyLauncher)
         }
     }
 
-    private fun startBiometricAuth() {
+    private fun startBiometricAuth(launcher: AuthenticationResultLauncher) {
         Log.d(tag, "Starting biometric authentication")
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setAllowedAuthenticators(Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL)
-            .setTitle(getString(R.string.biometric_title))
-            .build()
-
-        bioPrompt.authenticate(promptInfo)
+        launcher.launch(
+            biometricRequest(
+                title = getString(R.string.biometric_title),
+                AuthenticationRequest.Biometric.Fallback.DeviceCredential,
+            ) {
+                setMinStrength(AuthenticationRequest.Biometric.Strength.Class3())
+            }
+        )
     }
 
-    private fun startLegacyDeviceCredentialAuth() {
+    private fun startLegacyDeviceCredentialAuth(
+        launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    ) {
         Log.d(tag, "Starting legacy device credential authentication")
 
         val keyguardManager = getSystemService(KeyguardManager::class.java)
@@ -243,7 +189,7 @@ abstract class PreferenceBaseActivity : AppCompatActivity() {
         )
 
         if (intent != null) {
-            requestLegacyDeviceCredential.launch(intent)
+            launcher.launch(intent)
         } else {
             onAuthenticationError(
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,

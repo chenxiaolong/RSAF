@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package com.chiller3.rsaf.dialog
+package com.chiller3.rsaf.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class InteractiveConfigurationViewModel : ViewModel() {
+    private var loadedOnce = false
+
     private lateinit var ic: RcloneRpc.InteractiveConfiguration
 
     private val _question = MutableStateFlow<Pair<String?, RcloneRpc.ProviderOption>?>(null)
@@ -28,6 +30,11 @@ class InteractiveConfigurationViewModel : ViewModel() {
     val run = _run.asStateFlow()
 
     fun init(remote: String) {
+        if (loadedOnce) {
+            return
+        }
+        loadedOnce = true
+
         viewModelScope.launch {
             ic = withContext(Dispatchers.IO) {
                 RcloneRpc.InteractiveConfiguration(remote)

@@ -49,7 +49,6 @@ import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
 import com.chiller3.rsaf.rclone.RcloneProvider.Companion.MIME_TYPE_BINARY
-import com.chiller3.rsaf.settings.SettingsFragment.Companion.documentsUiIntent
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -114,6 +113,11 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
             } else {
                 projection
             }
+
+        fun documentsUiIntent(remote: String) = Intent(Intent.ACTION_VIEW).apply {
+            val uri = DocumentsContract.buildRootUri(BuildConfig.DOCUMENTS_AUTHORITY, remote)
+            setDataAndType(uri, DocumentsContract.Root.MIME_TYPE_ITEM)
+        }
 
         private fun updateShortcuts(context: Context, remoteConfigs: Map<String, RcloneRpc.RemoteConfig>) {
             val icon = IconCompat.createWithResource(context, R.mipmap.ic_launcher)

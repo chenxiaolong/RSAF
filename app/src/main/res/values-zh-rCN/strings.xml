@@ -10,7 +10,6 @@
     <string name="pref_header_remote">远程存储</string>
     <string name="pref_header_configuration">配置</string>
     <string name="pref_header_behavior">行为</string>
-    <string name="pref_header_ui">界面</string>
     <string name="pref_header_app_lock">应用锁定</string>
     <string name="pref_header_advanced">高级</string>
     <string name="pref_header_about">关于</string>
@@ -33,8 +32,6 @@
     <string name="pref_pretend_local_desc">将 rclone 远程存储作为本地存储呈现给存储访问框架。这将强制与只允许选择本地文件的应用兼容。</string>
     <string name="pref_local_storage_access_name">允许本地存储访问</string>
     <string name="pref_local_storage_access_desc">允许包装远程存储（如 <tt>crypt</tt>）访问 <tt>/sdcard</tt> 下的本地存储。</string>
-    <string name="pref_dialogs_at_bottom_name">在底部显示对话框</string>
-    <string name="pref_dialogs_at_bottom_desc">使单手操作更容易，并防止对话框按钮移动。</string>
     <string name="pref_require_auth_name">需要身份验证</string>
     <string name="pref_require_auth_desc">需要生物识别解锁或屏幕锁定 PIN/密码才能查看和更改 RSAF 设置。</string>
     <string name="pref_inactivity_timeout_name">非活动超时</string>
