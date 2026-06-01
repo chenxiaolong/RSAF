@@ -1,11 +1,13 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
 package com.chiller3.rsaf
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.os.SystemClock
 import android.util.Log
 
 object AppLock {
@@ -17,8 +19,11 @@ object AppLock {
         }
 
         data class Inactive(val pauseTime: Long) : State {
+            constructor() : this(SystemClock.elapsedRealtimeNanos())
+
             override val isLocked: Boolean
-                get() = System.nanoTime() - pauseTime >= prefs.inactivityTimeout * 1_000_000_000L
+                get() = SystemClock.elapsedRealtimeNanos() - pauseTime >=
+                        prefs.inactivityTimeout * 1_000_000_000L
         }
 
         data object Locked : State {
@@ -29,6 +34,7 @@ object AppLock {
     private val TAG = AppLock::class.java.simpleName
 
     private lateinit var appContext: Context
+    @SuppressLint("StaticFieldLeak")
     private lateinit var prefs: Preferences
     private var state: State = State.Locked
         set(s) {
@@ -65,7 +71,7 @@ object AppLock {
     fun onAppPause() {
         if (prefs.requireAuth && state == State.Active) {
             Log.d(TAG, "App is inactive")
-            state = State.Inactive(System.nanoTime())
+            state = State.Inactive()
         }
     }
 
