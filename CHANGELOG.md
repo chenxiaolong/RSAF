@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.0
 
 * Port UI to Jetpack Compose and adopt Material 3 Expressive styling ([PR #294])
 * Fix the value of the 2nd previous question being obscured when going back from a password question ([PR #293])
