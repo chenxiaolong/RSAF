@@ -74,7 +74,7 @@ fun RemoteNameDialog(
                 OutlinedTextField(
                     state = input,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    placeholder = { Text(text = stringResource(R.string.dialog_remote_name_hint)) },
+                    label = { Text(text = stringResource(R.string.dialog_remote_name_hint)) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
                         autoCorrectEnabled = false,

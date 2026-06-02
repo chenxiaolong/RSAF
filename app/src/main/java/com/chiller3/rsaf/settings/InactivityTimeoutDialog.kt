@@ -78,7 +78,6 @@ fun InactivityTimeoutDialog(
     )
 }
 
-@Composable
 private fun tryParseInput(input: String): Int? {
     try {
         val seconds = input.toInt()

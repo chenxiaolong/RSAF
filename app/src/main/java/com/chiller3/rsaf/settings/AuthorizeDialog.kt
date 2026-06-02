@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -70,10 +71,12 @@ fun AuthorizeDialog(
             ),
         )
 
+        val latestOnReceive by rememberUpdatedState(onReceive)
+
         LaunchedEffect(Unit) {
             viewModel.code.collect {
                 if (it != null) {
-                    onReceive(it)
+                    latestOnReceive(it)
                 }
             }
         }

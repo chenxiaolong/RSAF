@@ -106,13 +106,13 @@ fun SettingsScreen(
     ) {
         reloadPerms++
     }
-    val requestPermissionRequired = rememberLauncherForActivityResult(
+    val requestPermissionsRequired = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { granted ->
         if (granted.all { it.value }) {
             reloadPerms++
         } else {
-            context.startActivity(Permissions.getAppInfoIntent(context))
+            requestPermissionActivity.launch(Permissions.getAppInfoIntent(context))
         }
     }
     val requestSafImportConfiguration = rememberLauncherForActivityResult(
@@ -225,7 +225,7 @@ fun SettingsScreen(
                 requestPermissionActivity.launch(Permissions.getInhibitBatteryOptIntent(context))
             },
             onNotificationsGrant = {
-                requestPermissionRequired.launch(Permissions.NOTIFICATION)
+                requestPermissionsRequired.launch(Permissions.NOTIFICATION)
             },
             onRemoteAdd = { name ->
                 requestInteractiveConfiguration.launch(
@@ -260,7 +260,7 @@ fun SettingsScreen(
 
                     requestPermissionActivity.launch(intent)
                 } else if (enabled) {
-                    requestPermissionRequired.launch(Permissions.LEGACY_STORAGE)
+                    requestPermissionsRequired.launch(Permissions.LEGACY_STORAGE)
                 } else {
                     requestPermissionActivity.launch(Permissions.getAppInfoIntent(context))
                 }

@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldLabelScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,14 +51,14 @@ fun PasswordDialog(
                 TogglablePasswordField(
                     state = input,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    placeholder = { Text(text = modeHint(mode)) },
+                    label = { Text(text = modeHint(mode)) },
                 )
 
                 if (mode == ImportExportMode.EXPORT) {
                     TogglablePasswordField(
                         state = inputConfirm,
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        placeholder = {
+                        label = {
                             Text(text = stringResource(R.string.dialog_export_password_confirm_hint))
                         },
                         isError = inputConfirm.text != input.text,
@@ -94,14 +95,14 @@ private fun TogglablePasswordField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    placeholder: @Composable (() -> Unit)? = null,
+    label: @Composable (TextFieldLabelScope.() -> Unit)? = null,
 ) {
     var showPassword by rememberSaveable { mutableStateOf(false) }
 
     OutlinedSecureTextField(
         state = state,
         modifier = modifier,
-        placeholder = placeholder,
+        label = label,
         isError = isError,
         trailingIcon = {
             IconButton(onClick = { showPassword = !showPassword }) {

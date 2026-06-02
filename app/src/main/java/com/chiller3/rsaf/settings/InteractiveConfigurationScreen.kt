@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,6 +72,7 @@ import com.chiller3.rsaf.ui.PreferenceColumn
 import com.chiller3.rsaf.ui.PreferenceDefaults
 import com.chiller3.rsaf.ui.RadioPreference
 import com.chiller3.rsaf.ui.betterSegmentedShapes
+import com.chiller3.rsaf.ui.copy
 import com.chiller3.rsaf.ui.theme.AppTheme
 import com.chiller3.rsaf.ui.theme.Icons
 import org.json.JSONArray
@@ -101,7 +103,7 @@ fun InteractiveConfigurationScreen(
         title = { Text(text = title) },
         onBack = onCancel,
         backIsExit = true,
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime)
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime),
     ) { params ->
         question?.let { (error, option) ->
             InteractiveConfigurationContent(
@@ -124,12 +126,14 @@ fun InteractiveConfigurationScreen(
         onBack = { viewModel.goBack() },
     )
 
+    val latestOnComplete by rememberUpdatedState(onComplete)
+
     LaunchedEffect(Unit) {
         viewModel.run.collect {
             if (!it) {
                 // No more questions. We can just exit because changes are immediately
                 // committed upon submission.
-                onComplete()
+                latestOnComplete()
             }
         }
     }
@@ -228,9 +232,7 @@ private fun InteractiveConfigurationContent(
     var showAuthorizeDialog by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding + PreferenceDefaults.ListPadding),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val maxWidthModifier = Modifier
@@ -239,8 +241,7 @@ private fun InteractiveConfigurationContent(
 
         PreferenceColumn(
             modifier = Modifier.fillMaxSize().weight(weight = 1f),
-            contentPadding = PaddingValues(bottom = PreferenceDefaults.HorizontalPadding),
-            fillScreen = false,
+            contentPadding = contentPadding.copy(bottom = 0.dp),
         ) {
             item("message") {
                 val message = buildAnnotatedString {
@@ -316,18 +317,20 @@ private fun InteractiveConfigurationContent(
             }
         }
 
-        HorizontalDivider(modifier = maxWidthModifier)
+        Box(modifier = Modifier.padding(contentPadding + PreferenceDefaults.ListPadding)) {
+            HorizontalDivider(modifier = maxWidthModifier)
 
-        NavigationButtons(
-            hasPrevious = hasPrevious,
-            answer = answer,
-            onPrevQuestion = {
-                epoch++
-                onPrevQuestion()
-            },
-            onNextQuestion = onNextQuestion,
-            modifier = maxWidthModifier,
-        )
+            NavigationButtons(
+                hasPrevious = hasPrevious,
+                answer = answer,
+                onPrevQuestion = {
+                    epoch++
+                    onPrevQuestion()
+                },
+                onNextQuestion = onNextQuestion,
+                modifier = maxWidthModifier,
+            )
+        }
     }
 
     showAuthorizeDialog?.let { cmd ->
@@ -365,7 +368,7 @@ private fun AnswerTextField(
         OutlinedSecureTextField(
             state = state,
             modifier = modifier,
-            placeholder = { Text(text = option.name) },
+            label = { Text(text = option.name) },
             isError = answer == null,
             supportingText = { Text(text = supportingText) },
             trailingIcon = {
@@ -394,7 +397,7 @@ private fun AnswerTextField(
         OutlinedTextField(
             state = state,
             modifier = modifier,
-            placeholder = { Text(text = option.name) },
+            label = { Text(text = option.name) },
             isError = answer == null,
             supportingText = { Text(text = supportingText) },
             keyboardOptions = KeyboardOptions(

@@ -9,6 +9,7 @@ package com.chiller3.rsaf.settings
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
@@ -33,7 +34,9 @@ fun ErrorDetailsDialog(
         },
         text = {
             message?.let {
-                Text(text = it)
+                SelectionContainer {
+                    Text(text = it)
+                }
             }
         },
         onDismissRequest = onDismiss,

@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -175,16 +176,19 @@ fun EditRemoteScreen(
         )
     }
 
+    val latestOnEditNext by rememberUpdatedState(onEditNext)
+    val latestOnBack by rememberUpdatedState(onBack)
+
     LaunchedEffect(remote) {
         viewModel.activityActions.collect {
             if (it.refreshRoots) {
                 RcloneProvider.notifyRootsChanged(context)
             }
             it.editNewRemote?.let { newRemote ->
-                onEditNext(newRemote)
+                latestOnEditNext(newRemote)
             }
             if (it.finish) {
-                onBack()
+                latestOnBack()
             }
             viewModel.activityActionCompleted()
         }
