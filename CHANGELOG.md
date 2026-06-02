@@ -12,6 +12,7 @@
 * Use elapsed realtime clock for the app lock feature ([PR #295])
   * Fixes the app staying unlocked longer than expected if the device enters deep sleep.
 * Update golang to 1.26.4 ([PR #296])
+* Minor fixes for new Compose UI ([PR #297])
 
 ### Version 4.0
 
@@ -697,3 +698,4 @@
 [PR #294]: https://github.com/chenxiaolong/RSAF/pull/294
 [PR #295]: https://github.com/chenxiaolong/RSAF/pull/295
 [PR #296]: https://github.com/chenxiaolong/RSAF/pull/296
+[PR #297]: https://github.com/chenxiaolong/RSAF/pull/297
