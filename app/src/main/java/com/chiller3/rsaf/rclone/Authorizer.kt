@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -49,14 +49,18 @@ object Authorizer {
             .drop(2)
 
     private fun logAsIfGo(msg: String) {
-        Log.i(GO_TAG, msg)
+        // This is intentionally logging at the error level because HarmonyOS devices seem to only
+        // preserve error logs.
+        Log.e(GO_TAG, msg)
     }
 
     private fun authorizeBlockingLocked(cmd: String, listener: AuthorizeListener) {
         val args = parseCmd(cmd)
 
         Log.d(TAG, "Starting logcat")
-        val logcat = ProcessBuilder("logcat", "-v", "raw", "*:S", "$GO_TAG:V")
+        // We intentionally only capture error logs so that the HarmonyOS behavior is used
+        // everywhere for easier testing.
+        val logcat = ProcessBuilder("logcat", "-v", "raw", "*:S", "$GO_TAG:E")
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectErrorStream(true)
             .start()
@@ -79,7 +83,7 @@ object Authorizer {
 
             try {
                 processLogs(logcat.inputStream, markerNow, listener)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 cancelServer()
             } finally {
                 server.join()

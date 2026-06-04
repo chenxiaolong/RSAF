@@ -61,6 +61,7 @@ var (
 	vfsInstances     = make(map[string]*vfs.VFS)
 	vfsOptValidKeys  = make(map[string]bool)
 	vfsOptStringKeys = make(map[string]bool)
+	stdoutHijackLock goSync.Mutex
 )
 
 func init() {
@@ -1307,12 +1308,38 @@ func (rbfile *RbFile) GetSize(errOut *RbError) int64 {
 // None of the underlying functions are available outside of the oauthutil
 // package and the higher level functions print to stdout and can only be killed
 // by sending a bad request to it. But since that's what we have to work with,
-// we'll deal with it on the Android side by parsing logcat.
+// we'll deal with it.
+//
+// There are two pieces of information we need: the local server URL and the
+// oauth refresh token once authorized. The former can only be obtained via
+// logcat since oauthutil.configSetup() uses fs.Logf(). The latter gets printed
+// to stdout, which normally shows up in logcat due to gomobile, but some OS's
+// like HarmonyOS only show messages with error priority. We work around this by
+// temporarily sending stdout to stderr.
 func RbAuthorize(argsNullSep string, errOut *RbError) bool {
+	stdoutHijackLock.Lock()
+	defer stdoutHijackLock.Unlock()
+
 	var args = strings.Split(argsNullSep, "\x00")
 
-	err := config.Authorize(context.Background(), args, true, "")
+	origStdout, err := syscall.Dup(int(os.Stdout.Fd()))
 	if err != nil {
+		assignError(errOut, err, syscall.EIO)
+		return false
+	}
+	defer syscall.Close(origStdout)
+
+	if err = syscall.Dup3(int(os.Stderr.Fd()), int(os.Stdout.Fd()), 0); err != nil {
+		assignError(errOut, err, syscall.EIO)
+		return false
+	}
+
+	if err = config.Authorize(context.Background(), args, true, ""); err != nil {
+		assignError(errOut, err, syscall.EIO)
+		return false
+	}
+
+	if err = syscall.Dup3(int(origStdout), int(os.Stdout.Fd()), 0); err != nil {
 		assignError(errOut, err, syscall.EIO)
 		return false
 	}
