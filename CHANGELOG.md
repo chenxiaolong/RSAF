@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.1
 
 * Use elapsed realtime clock for the app lock feature ([PR #295])
   * Fixes the app staying unlocked longer than expected if the device enters deep sleep.
