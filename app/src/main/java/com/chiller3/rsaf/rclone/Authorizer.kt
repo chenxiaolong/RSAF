@@ -156,6 +156,7 @@ object Authorizer {
                     if (line.contains(MARKER_CODE_START)) {
                         inCode = true
                     } else if (line.contains(MARKER_CODE_STOP)) {
+                        @Suppress("AssignedValueIsNeverRead")
                         inCode = false
                         listener.onAuthorizeCode(code.toString())
                         break

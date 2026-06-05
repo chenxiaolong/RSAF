@@ -222,7 +222,6 @@ private fun InteractiveConfigurationContent(
             input.edit {
                 replace(0, length, currentOrDefault)
             }
-            @Suppress("AssignedValueIsNeverRead")
             loadedOnce = true
         }
     }
@@ -338,11 +337,9 @@ private fun InteractiveConfigurationContent(
             cmd = cmd,
             onReceive = {
                 input.edit { replace(0, length, it) }
-                @Suppress("AssignedValueIsNeverRead")
                 showAuthorizeDialog = null
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showAuthorizeDialog = null
             },
         )

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2024-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2024-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -102,6 +102,7 @@ class KeepAliveService : Service() {
 
         synchronized(monitorThread) {
             monitorState = MonitorState.STOPPED
+            @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
             (monitorThread as Object).notify()
         }
 
@@ -208,6 +209,7 @@ class KeepAliveService : Service() {
                     }
                 }
 
+                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                 (monitorThread as Object).wait(1000)
             }
         }

@@ -25,6 +25,7 @@ import com.chiller3.rsaf.R
 fun ErrorDetailsDialog(
     message: String?,
     onDismiss: () -> Unit,
+    showCopy: Boolean = true,
 ) {
     val context = LocalContext.current
 
@@ -46,7 +47,7 @@ fun ErrorDetailsDialog(
             }
         },
         dismissButton = {
-            message?.let {
+            if (message != null && showCopy) {
                 TextButton(
                     onClick = {
                         val clipboardManager = context.getSystemService(ClipboardManager::class.java)

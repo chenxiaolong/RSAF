@@ -5,6 +5,7 @@
 
 package com.chiller3.rsaf.rclone
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -148,6 +149,8 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
                 Log.w(TAG, "Truncating dynamic shortcuts from $rank to $maxShortcuts")
             }
 
+            // We can't report usage because the shortcut opens DocumentsUI directly.
+            @SuppressLint("ReportShortcutUsage")
             if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) {
                 Log.w(TAG, "Failed to update dynamic shortcuts")
             }

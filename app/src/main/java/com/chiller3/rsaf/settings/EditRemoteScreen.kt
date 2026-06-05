@@ -385,11 +385,9 @@ private fun EditRemoteContent(
                     else -> throw IllegalStateException("Invalid reason: $reason")
                 }
 
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsWarningDialog = null
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsWarningDialog = null
             }
         )
@@ -406,11 +404,9 @@ private fun EditRemoteContent(
                     else -> throw IllegalStateException("Invalid action: $action")
                 }
 
-                @Suppress("AssignedValueIsNeverRead")
                 showRemoteNameDialog = null
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showRemoteNameDialog = null
             },
         )
@@ -422,11 +418,9 @@ private fun EditRemoteContent(
             initialOptions = state.config?.vfsOptions!!,
             onSelect = { options, reload ->
                 onVfsOptionsChange(options, reload)
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsOptionsDialog = false
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsOptionsDialog = false
             },
         )

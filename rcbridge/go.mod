@@ -3,8 +3,8 @@ module rcbridge
 go 1.25.0
 
 require (
-	github.com/rclone/rclone v1.74.2
-	golang.org/x/mobile v0.0.0-20260520154334-0e4426e1883d
+	github.com/rclone/rclone v1.74.3
+	golang.org/x/mobile v0.0.0-20260602190626-68735029466e
 )
 
 // https://github.com/chenxiaolong/RSAF/issues/268

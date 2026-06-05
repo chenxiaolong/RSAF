@@ -646,11 +646,9 @@ private fun SettingsContent(
                     else -> throw IllegalStateException("Invalid reason: $reason")
                 }
 
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsWarningDialog = null
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showVfsWarningDialog = null
             }
         )
@@ -662,11 +660,9 @@ private fun SettingsContent(
             existingRemotes = remotes.map { it.name },
             onSelect = { name ->
                 onRemoteAdd(name)
-                @Suppress("AssignedValueIsNeverRead")
                 showRemoteNameDialog = null
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showRemoteNameDialog = null
             },
         )
@@ -677,11 +673,9 @@ private fun SettingsContent(
             initialTimeout = inactivityTimeout,
             onSelect = { timeout ->
                 onInactivityTimeoutChange(timeout)
-                @Suppress("AssignedValueIsNeverRead")
                 showInactivityTimeoutDialog = false
             },
             onDismiss = {
-                @Suppress("AssignedValueIsNeverRead")
                 showInactivityTimeoutDialog = false
             },
         )
