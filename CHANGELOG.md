@@ -12,6 +12,7 @@
 * Use elapsed realtime clock for the app lock feature ([PR #295])
   * Fixes the app staying unlocked longer than expected if the device enters deep sleep.
 * Work around broken OAuth authorization screen on OS's like HarmonyOS that hide non-error logs ([Issue #299], [PR #300])
+* Update rclone to 1.74.3 ([PR #301])
 * Update golang to 1.26.4 ([PR #296])
 * Minor fixes for new Compose UI ([PR #297])
 
@@ -702,3 +703,4 @@
 [PR #296]: https://github.com/chenxiaolong/RSAF/pull/296
 [PR #297]: https://github.com/chenxiaolong/RSAF/pull/297
 [PR #300]: https://github.com/chenxiaolong/RSAF/pull/300
+[PR #301]: https://github.com/chenxiaolong/RSAF/pull/301
