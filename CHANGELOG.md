@@ -10,6 +10,7 @@
 ### Version 4.2
 
 * Fix Android's user CA trust store not being trusted after an app restart ([Issue #302], [PR #305])
+  * This was a regression introduced in version 3.49.
 
 ### Version 4.1
 
