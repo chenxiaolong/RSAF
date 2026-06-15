@@ -221,9 +221,9 @@ func generateTrustStorePool() *x509.CertPool {
 		for _, cert := range certs {
 			pool.AddCert(cert)
 		}
-	}
 
-	fs.Logf(nil, "Loaded %d certificates", len(caFiles))
+		fs.Logf(nil, "Loaded %d certificate(s) from: %v", len(certs), path)
+	}
 
 	return pool
 }
@@ -244,6 +244,9 @@ func RbInit() {
 	RbReloadCerts()
 }
 
+//go:linkname once crypto/x509.once
+var once goSync.Once
+
 //go:linkname systemRootsMu crypto/x509.systemRootsMu
 var systemRootsMu goSync.RWMutex
 
@@ -252,6 +255,10 @@ var systemRoots *x509.CertPool
 
 // Reload certificates from the system and user trust stores.
 func RbReloadCerts() {
+	once.Do(func() {
+		fs.Logf(nil, "Skipped golang's initial CA trust store load")
+	})
+
 	systemRootsMu.RLock()
 	defer systemRootsMu.RUnlock()
 
