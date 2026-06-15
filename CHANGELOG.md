@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix Android's user CA trust store not being trusted after an app restart ([Issue #302], [PR #305])
+
 ### Version 4.1
 
 * Use elapsed realtime clock for the app lock feature ([PR #295])
@@ -518,6 +522,7 @@
 [Issue #284]: https://github.com/chenxiaolong/RSAF/issues/284
 [Issue #287]: https://github.com/chenxiaolong/RSAF/issues/287
 [Issue #299]: https://github.com/chenxiaolong/RSAF/issues/299
+[Issue #302]: https://github.com/chenxiaolong/RSAF/issues/302
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -704,3 +709,4 @@
 [PR #297]: https://github.com/chenxiaolong/RSAF/pull/297
 [PR #300]: https://github.com/chenxiaolong/RSAF/pull/300
 [PR #301]: https://github.com/chenxiaolong/RSAF/pull/301
+[PR #305]: https://github.com/chenxiaolong/RSAF/pull/305
