@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.2
 
 * Fix Android's user CA trust store not being trusted after an app restart ([Issue #302], [PR #305])
 
