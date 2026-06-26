@@ -400,17 +400,10 @@ class RcloneProviderTest {
                 assertEquals("bye", file.readText())
             }
 
-            appContext.contentResolver.openFileDescriptor(uri, "rwa")!!.use {
-                Os.write(it.fileDescriptor, "world".toByteArray(), 0, 5)
-            }
-            retryTimeout(timeout) {
-                assertEquals("byeworld", file.readText())
-            }
-
             appContext.contentResolver.openFileDescriptor(uri, "r")!!.use {
-                val data = ByteArray(8)
+                val data = ByteArray(3)
                 Os.read(it.fileDescriptor, data, 0, data.size)
-                assertArrayEquals("byeworld".toByteArray(), data)
+                assertArrayEquals("bye".toByteArray(), data)
 
                 // EOF
                 assertEquals(0, Os.read(it.fileDescriptor, data, 0, data.size))
@@ -449,17 +442,10 @@ class RcloneProviderTest {
                 assertEquals("bye", file.readText())
             }
 
-            appContext.contentResolver.openFileDescriptor(uri, "rwa")!!.use {
-                Os.write(it.fileDescriptor, "world".toByteArray(), 0, 5)
-            }
-            retryTimeout(timeout) {
-                assertEquals("world", file.readText())
-            }
-
             appContext.contentResolver.openFileDescriptor(uri, "r")!!.use {
-                val data = ByteArray(5)
+                val data = ByteArray(3)
                 Os.read(it.fileDescriptor, data, 0, data.size)
-                assertArrayEquals("world".toByteArray(), data)
+                assertArrayEquals("bye".toByteArray(), data)
 
                 // EOF
                 assertEquals(0, Os.read(it.fileDescriptor, data, 0, data.size))

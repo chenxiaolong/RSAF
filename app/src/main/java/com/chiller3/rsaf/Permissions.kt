@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2022-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -28,6 +28,13 @@ object Permissions {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
     )
+
+    val LOCAL_NETWORK: Array<String> =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+            arrayOf(Manifest.permission.ACCESS_LOCAL_NETWORK)
+        } else {
+            emptyArray()
+        }
 
     /** Check if all permissions have been granted. */
     fun have(context: Context, permissions: Array<String>): Boolean = permissions.all {

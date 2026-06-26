@@ -125,14 +125,14 @@ val abis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 android {
     namespace = "com.chiller3.rsaf"
 
-    compileSdk = 36
-    buildToolsVersion = "36.0.0"
+    compileSdk = 37
+    buildToolsVersion = "37.0.0"
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "com.chiller3.rsaf"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = gitVersionCode
         versionName = gitVersionName
 

@@ -17,8 +17,10 @@
     <!-- Main preferences -->
     <string name="pref_inhibit_battery_opt_name">Disable battery optimization</string>
     <string name="pref_inhibit_battery_opt_desc">Needed to upload files in the background.</string>
-    <string name="pref_missing_notifications_name">Missing notification permission</string>
-    <string name="pref_missing_notifications_desc">Needed to show when files are being uploaded in the background.</string>
+    <string name="pref_allow_notifications_name">Allow notifications</string>
+    <string name="pref_allow_notifications_desc">Needed to show when files are being uploaded in the background.</string>
+    <string name="pref_allow_local_network_name">Allow local network access</string>
+    <string name="pref_allow_local_network_desc">Needed to connect to hosts on the local network.</string>
     <string name="pref_add_remote_name">Add a remote</string>
     <string name="pref_add_remote_desc">Add a new rclone remote configuration.</string>
     <string name="pref_import_configuration_name">Import configuration</string>

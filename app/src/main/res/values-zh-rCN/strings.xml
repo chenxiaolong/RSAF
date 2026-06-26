@@ -18,8 +18,7 @@
     <!-- Main preferences -->
     <string name="pref_inhibit_battery_opt_name">禁用电池优化</string>
     <string name="pref_inhibit_battery_opt_desc">需要在后台上传文件。</string>
-    <string name="pref_missing_notifications_name">缺少通知权限</string>
-    <string name="pref_missing_notifications_desc">需要在后台上传文件时显示通知。</string>
+    <string name="pref_allow_notifications_desc">需要在后台上传文件时显示通知。</string>
     <string name="pref_add_remote_name">添加远程存储</string>
     <string name="pref_add_remote_desc">添加新的 rclone 远程存储配置。</string>
     <string name="pref_import_configuration_name">导入配置</string>

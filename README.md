@@ -67,6 +67,8 @@ When creating, renaming, copying, or moving a file/directory, RSAF will add a co
 
 The main permission RSAF requires is the `INTERNET` permission. It is used only to allow rclone to access the configured remotes. RSAF does not and will never have ads or telemetry.
 
+On Android 17+, the `ACCESS_LOCAL_NETWORK` permission is needed to access hosts on the local network. It is not required for accessing other hosts on the internet.
+
 The `RECEIVE_BOOT_COMPLETED` permission is used to automatically resume pending uploads if they were interrupted due to a crash or reboot.
 
 Allowing notifications and disabling battery optimizations are optional, but strongly recommended. These are needed to allow RSAF to reliably run in the background after a client app closes a file, which is when file uploads actually begin.

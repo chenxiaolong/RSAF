@@ -77,6 +77,9 @@ fun SettingsScreen(
     val notificationsGranted = remember(reloadPerms) {
         Permissions.have(context, Permissions.NOTIFICATION)
     }
+    val localNetworkGranted = remember(reloadPerms) {
+        Permissions.have(context, Permissions.LOCAL_NETWORK)
+    }
     val localStorageAccess = remember(reloadPerms) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
@@ -211,6 +214,7 @@ fun SettingsScreen(
             importExportState = importExportState,
             inhibitBatteryOpt = inhibitBatteryOpt,
             notificationsGranted = notificationsGranted,
+            localNetworkGranted = localNetworkGranted,
             remotes = remotes,
             addFileExtension = addFileExtension,
             pretendLocal = pretendLocal,
@@ -226,6 +230,9 @@ fun SettingsScreen(
             },
             onNotificationsGrant = {
                 requestPermissionsRequired.launch(Permissions.NOTIFICATION)
+            },
+            onLocalNetworkGrant = {
+                requestPermissionsRequired.launch(Permissions.LOCAL_NETWORK)
             },
             onRemoteAdd = { name ->
                 requestInteractiveConfiguration.launch(
@@ -335,6 +342,7 @@ private fun SettingsContent(
     importExportState: ImportExportState?,
     inhibitBatteryOpt: Boolean,
     notificationsGranted: Boolean,
+    localNetworkGranted: Boolean,
     remotes: List<Remote>,
     addFileExtension: Boolean,
     pretendLocal: Boolean,
@@ -347,6 +355,7 @@ private fun SettingsContent(
     verboseRcloneLogs: Boolean,
     onInhibitBatteryOptGrant: () -> Unit,
     onNotificationsGrant: () -> Unit,
+    onLocalNetworkGrant: () -> Unit,
     onRemoteAdd: (String) -> Unit,
     onRemoteEdit: (String) -> Unit,
     onConfigurationImport: () -> Unit,
@@ -366,12 +375,46 @@ private fun SettingsContent(
     isVfsCacheDirty: () -> Boolean,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
+    data class MissingPermission(
+        val key: String,
+        val title: String,
+        val summary: String,
+        val onGrant: () -> Unit,
+    )
+
+    val missingPermissions = mutableListOf<MissingPermission>().apply {
+        if (!inhibitBatteryOpt) {
+            add(MissingPermission(
+                key = "inhibit_battery_opt",
+                title = stringResource(R.string.pref_inhibit_battery_opt_name),
+                summary = stringResource(R.string.pref_inhibit_battery_opt_desc),
+                onGrant = onInhibitBatteryOptGrant,
+            ))
+        }
+        if (!notificationsGranted) {
+            add(MissingPermission(
+                key = "allow_notifications",
+                title = stringResource(R.string.pref_allow_notifications_name),
+                summary = stringResource(R.string.pref_allow_notifications_desc),
+                onGrant = onNotificationsGrant,
+            ))
+        }
+        if (!localNetworkGranted) {
+            add(MissingPermission(
+                key = "allow_local_network",
+                title = stringResource(R.string.pref_allow_local_network_name),
+                summary = stringResource(R.string.pref_allow_local_network_desc),
+                onGrant = onLocalNetworkGrant,
+            ))
+        }
+    }
+
     var showVfsWarningDialog by rememberSaveable { mutableStateOf<VfsCacheDeletionReason?>(null) }
     var showRemoteNameDialog by rememberSaveable { mutableStateOf<RemoteNameDialogAction?>(null) }
     var showInactivityTimeoutDialog by rememberSaveable { mutableStateOf(false) }
 
     PreferenceColumn(contentPadding = contentPadding) {
-        if (!inhibitBatteryOpt || !notificationsGranted) {
+        if (missingPermissions.isNotEmpty()) {
             item(key = "permissions") {
                 PreferenceCategory(
                     title = { Text(text = stringResource(R.string.pref_header_permissions)) },
@@ -379,36 +422,14 @@ private fun SettingsContent(
                 )
             }
 
-            if (!inhibitBatteryOpt) {
-                item(key = "inhibit_battery_opt") {
-                    Preference(
-                        onClick = onInhibitBatteryOptGrant,
-                        shapes = if (!notificationsGranted) {
-                            BetterSegmentedShapes.top()
-                        } else {
-                            BetterSegmentedShapes.single()
-                        },
-                        title = { Text(text = stringResource(R.string.pref_inhibit_battery_opt_name)) },
-                        summary = { Text(text = stringResource(R.string.pref_inhibit_battery_opt_desc)) },
-                        modifier = Modifier.animateItem(),
-                    )
-                }
-            }
-
-            if (!notificationsGranted) {
-                item(key = "missing_notifications") {
-                    Preference(
-                        onClick = onNotificationsGrant,
-                        shapes = if (!inhibitBatteryOpt) {
-                            BetterSegmentedShapes.bottom()
-                        } else {
-                            BetterSegmentedShapes.single()
-                        },
-                        title = { Text(text = stringResource(R.string.pref_missing_notifications_name)) },
-                        summary = { Text(text = stringResource(R.string.pref_missing_notifications_desc)) },
-                        modifier = Modifier.animateItem(),
-                    )
-                }
+            itemsIndexed(missingPermissions, key = { _, m -> m.key }) { index, missing ->
+                Preference(
+                    onClick = missing.onGrant,
+                    shapes = betterSegmentedShapes(index, missingPermissions.size),
+                    title = { Text(text = missing.title) },
+                    summary = { Text(text = missing.summary) },
+                    modifier = Modifier.animateItem(),
+                )
             }
         }
 
@@ -719,6 +740,7 @@ private fun PreviewSettingsScreen() {
                 importExportState = null,
                 inhibitBatteryOpt = false,
                 notificationsGranted = false,
+                localNetworkGranted = false,
                 remotes = emptyList(),
                 addFileExtension = true,
                 pretendLocal = false,
@@ -731,6 +753,7 @@ private fun PreviewSettingsScreen() {
                 verboseRcloneLogs = false,
                 onInhibitBatteryOptGrant = {},
                 onNotificationsGrant = {},
+                onLocalNetworkGrant = {},
                 onRemoteAdd = {},
                 onRemoteEdit = {},
                 onConfigurationImport = {},

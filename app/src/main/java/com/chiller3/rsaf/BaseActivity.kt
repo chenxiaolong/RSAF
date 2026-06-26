@@ -67,6 +67,8 @@ abstract class BaseActivity : ComponentActivity() {
                             onAuthenticationError(authResult.errorCode, authResult.errString)
                         }
                     }
+                    is AuthenticationResult.CustomFallbackSelected ->
+                        throw IllegalStateException("Custom fallback not used")
                 }
             }
 
@@ -235,10 +237,10 @@ abstract class BaseActivity : ComponentActivity() {
 
         val task = activityManager.appTasks.find {
             taskId == if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                it.taskInfo.taskId
+                it.taskInfo?.taskId
             } else {
                 @Suppress("DEPRECATION")
-                it.taskInfo.id
+                it.taskInfo?.id
             }
         }
 
