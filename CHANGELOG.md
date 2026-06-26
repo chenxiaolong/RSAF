@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.3
 
 * Update target API version to API 37 (Android 17) ([PR #308])
   * **Action required**: Android 17 now blocks local network connections by default. If you have any rclone remotes that connect to hosts on the local network, open the app to grant the new local network permission.
