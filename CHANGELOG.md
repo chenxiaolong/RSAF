@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Make back navigation icon filled to match Material 3 Expressive styling in Android's system settings ([PR #307])
+
 ### Version 4.2
 
 * Fix Android's user CA trust store not being trusted after an app restart ([Issue #302], [PR #305])
@@ -711,3 +715,4 @@
 [PR #300]: https://github.com/chenxiaolong/RSAF/pull/300
 [PR #301]: https://github.com/chenxiaolong/RSAF/pull/301
 [PR #305]: https://github.com/chenxiaolong/RSAF/pull/305
+[PR #307]: https://github.com/chenxiaolong/RSAF/pull/307
