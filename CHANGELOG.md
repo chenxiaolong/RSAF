@@ -9,6 +9,8 @@
 
 ### Unreleased
 
+* Update target API version to API 37 (Android 17) ([PR #308])
+  * **Action required**: Android 17 now blocks local network connections by default. If you have any rclone remotes that connect to hosts on the local network, open the app to grant the new local network permission.
 * Make back navigation icon filled to match Material 3 Expressive styling in Android's system settings ([PR #307])
 
 ### Version 4.2
@@ -716,3 +718,4 @@
 [PR #301]: https://github.com/chenxiaolong/RSAF/pull/301
 [PR #305]: https://github.com/chenxiaolong/RSAF/pull/305
 [PR #307]: https://github.com/chenxiaolong/RSAF/pull/307
+[PR #308]: https://github.com/chenxiaolong/RSAF/pull/308
