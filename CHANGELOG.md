@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Add Traditional Chinese translations ([PR #309])
+
 ### Version 4.3
 
 * Update target API version to API 37 (Android 17) ([PR #308])
@@ -719,3 +723,4 @@
 [PR #305]: https://github.com/chenxiaolong/RSAF/pull/305
 [PR #307]: https://github.com/chenxiaolong/RSAF/pull/307
 [PR #308]: https://github.com/chenxiaolong/RSAF/pull/308
+[PR #309]: https://github.com/chenxiaolong/RSAF/pull/309
