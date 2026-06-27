@@ -127,7 +127,7 @@
     <string name="alert_logcat_failure">Impossibile salvare i log in %1$s</string>
     <string name="alert_edit_remote_success">Unità remota %1$s modificata con successo</string>
     <string name="alert_delete_remote_failure">Impossibile rimuovere l\'unità remota %1$s</string>
-    <string name="alert_rename_remote_failure">Impossibile rinominare l\'unità remota %1$s</string>
+    <string name="alert_rename_remote_failure">Impossibile rinominare l\'unità remota %1$s a %2$s</string>
     <string name="alert_duplicate_remote_failure">Impossibile duplicare l\'unità remota %1$s a %2$s</string>
     <string name="notification_keep_alive_cleanup_wait_desc">"In attesa della pulizia della cache VFS "</string>
     <string name="notification_background_upload_failed_title">Impossibile caricare i file sull\'unità remota</string>
