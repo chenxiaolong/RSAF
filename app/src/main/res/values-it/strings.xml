@@ -73,7 +73,7 @@
     <string name="alert_export_cancelled">Esportazione della configurazione annullata</string>
     <string name="alert_set_config_failure">Impossibile impostare opzione %1$s per l\'unità remota %2$s</string>
     <string name="biometric_title">Sblocca RSAF</string>
-    <string name="biometric_error">"Errore "</string>
+    <string name="biometric_error">Errore di autenticazione biometrica: %s1$</string>
     <string name="biometric_error_cancelled">Sblocco annullato</string>
     <string name="biometric_ignore">Blocco app ignorato perché il dispositivo non ha un blocco schermo impostato</string>
     <string name="dialog_action_back">Indietro</string>
