@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2026 Federico Carboni (translation)
     SPDX-License-Identifier: GPL-3.0-only
 -->
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="pref_header_permissions">Permessi</string>
     <string name="pref_header_remote">Unità virtuale</string>
     <string name="pref_header_configuration">Configurazione</string>
@@ -142,5 +142,20 @@
         -->
         <item quantity="many">Blocca %d secondi dopo aver lasciato l\'app.</item>
         <item quantity="other">Blocca %d secondi dopo aver lasciato l\'app.</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d file aperto</item>
+        <item quantity="many">%d file aperti</item>
+        <item quantity="other">%d file aperti</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d file in caricamento</item>
+        <item quantity="many">%d file in caricamento</item>
+        <item quantity="other">%d file in caricamento</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d file in attesa del caricamento</item>
+        <item quantity="many">%d file in attesa del caricamento</item>
+        <item quantity="other">%d file in attesa del caricamento</item>
     </plurals>
 </resources>
