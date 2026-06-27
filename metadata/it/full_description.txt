@@ -1,0 +1,3 @@
+RSAF è un fornitore di documenti basato sul meraviglioso rclone. Consente di accedere a file remoti grazie ai backend di rclone su qualunque app che supporti lo Storage Access Framework (SAF) di Android.
+
+RSAF non è un gestore di file, ma può essere usato da tutti i gestori di file che supportano SAF, incluso quello predefinito di Android.

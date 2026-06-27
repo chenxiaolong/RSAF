@@ -1,0 +1,161 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2026 Federico Carboni (translation)
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<resources>
+    <string name="pref_header_permissions">Permessi</string>
+    <string name="pref_header_remote">Unità virtuale</string>
+    <string name="pref_header_configuration">Configurazione</string>
+    <string name="pref_header_behavior">Comportamento</string>
+    <string name="pref_header_app_lock">Blocco app</string>
+    <string name="pref_header_advanced">Avanzate</string>
+    <string name="pref_header_about">Informazioni</string>
+    <string name="pref_header_debug">Debug</string>
+    <string name="pref_inhibit_battery_opt_name">Disabilita ottimizzazione batteria</string>
+    <string name="pref_inhibit_battery_opt_desc">Necessario per caricare i file in background.</string>
+    <string name="pref_allow_notifications_name">Consenti notifiche</string>
+    <string name="pref_allow_notifications_desc">Necessario per mostrare quando i file vengono caricati.</string>
+    <string name="pref_allow_local_network_name">Consenti accesso alla rete locale</string>
+    <string name="pref_allow_local_network_desc">Necessario per connettersi a host sulla rete locale.</string>
+    <string name="pref_add_remote_desc">Aggiungi una nuova unità virtuale alla configurazione.</string>
+    <string name="pref_import_configuration_name">Importa configurazione</string>
+    <string name="pref_import_configuration_desc">Importa un file di configurazione rclone esistente.</string>
+    <string name="pref_export_configuration_name">Esporta configurazione</string>
+    <string name="pref_export_configuration_desc">Esporta configurazione rclone corrente.</string>
+    <string name="pref_add_file_extension_name">Aggiungi estensione ai file</string>
+    <string name="pref_add_file_extension_desc">Quando viene creato un file aggiunge l\'estensione corrispondente al tipo di file.</string>
+    <string name="pref_pretend_local_name">Presenta come archiviazione locale</string>
+    <string name="pref_pretend_local_desc">Presenta le unità virtuali di rclone come archiviazione locale.</string>
+    <string name="pref_local_storage_access_name">Consenti l\'accesso all\'archiviazione locale</string>
+    <string name="pref_local_storage_access_desc">Consenti a unità virtuali intermedie, come <tt>crypt</tt>, di accedere all\'archiviazione locale in <tt>/sdcard</tt>.</string>
+    <string name="pref_require_auth_name">Richiedi autenticazione</string>
+    <string name="pref_require_auth_desc">Richiedi sblocco biometrico o blocco schermo per vedere e modificare le impostazioni di RSAF.</string>
+    <string name="pref_lock_now_name">Blocca ora</string>
+    <string name="pref_lock_now_desc">Blocca ora l\'app invece di aspettare il timeout per inattività.</string>
+    <string name="pref_allow_backup_name">Consenti backup di Android</string>
+    <string name="pref_allow_backup_desc">Consenti ad Android di eseguire il backup della configurazione se dichiara un trasferimento crittografato end-to-end o diretto ad un altro dispositivo. RSAF non può verificare se queste condizioni siano effettivamente vere.</string>
+    <string name="pref_version_name">Versione</string>
+    <string name="pref_verbose_rclone_logs_name">Attiva log dettagliati di rclone</string>
+    <string name="pref_verbose_rclone_logs_desc">Avvertimento: i log dettagliati potrebbero includere informazioni sensibili, come codici di autenticazione</string>
+    <string name="pref_save_logs_name">Salva log dell\'app</string>
+    <string name="pref_save_logs_desc">Salva il registro logcat, potrebbe contenere i nomi delle unità virtuali utilizzate</string>
+    <string name="pref_add_internal_cache_remote_name">Aggiungi unità virtuale della cache interna di rclone</string>
+    <string name="pref_add_internal_cache_remote_desc">Aggiungi un\'unità virtuale <tt>alias</tt> che punta alla cartella della cache interna di rclone. Potrebbe essere utile per risolvere problemi di VFS.</string>
+    <string name="pref_edit_remote_open_name">Apri unità virtuale</string>
+    <string name="pref_edit_remote_open_desc">Apri questa unità virtuale nel gestore di file predefinito</string>
+    <string name="pref_edit_remote_configure_name">Riconfigura unità virtuale</string>
+    <string name="pref_edit_remote_configure_desc">"Avvia la configurazione guidata di rclone "</string>
+    <string name="pref_edit_remote_rename_name">Rinomina unità virtuale</string>
+    <string name="pref_edit_remote_rename_desc">Se altre unità virtuali dipendono da questa, dovranno essere aggiornate manualmente al nome nuovo.</string>
+    <string name="pref_edit_remote_duplicate_name">Duplica unità virtuale</string>
+    <string name="pref_edit_remote_duplicate_desc">Crea una copia di questa unità virtuale con configurazione identica.</string>
+    <string name="pref_edit_remote_delete_name">Rimuovi unità virtuale</string>
+    <string name="pref_edit_remote_allow_external_access_desc">Consenti alle app di accedere a questa unità virtuale tramite il gestore di file. L\'accesso esterno non è necessario se questa è solo un filtro per un altra unità virtuale.</string>
+    <string name="pref_edit_remote_allow_locked_access_name">Consenti l\'accesso durante il blocco</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">Mostra nelle scorciatoie</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">Includi questa unità virtuale nella lista di scorciatoie tenendo premuta l\'icona di RSAF.</string>
+    <string name="pref_edit_remote_thumbnails_name">Abilita anteprime</string>
+    <string name="pref_edit_remote_thumbnails_desc">Mostra anteprime per immagini, video e musica. Potrebbe aumentare il traffico mentre si esplorano i file.</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">Questo tipo di unità virtuale non può riportare spazio libero e spazio totale.</string>
+    <string name="pref_edit_remote_vfs_options_name">Personalizza opzioni VFS</string>
+    <string name="pref_edit_remote_vfs_options_desc">Imposta opzioni VFS personalizzate supportate da <tt>rclone mount</tt>.</string>
+    <string name="action_details">Dettagli</string>
+    <string name="dialog_error_details_title">Dettagli dell\'errore</string>
+    <string name="alert_browser_not_found">Nessun browser web disponibile.</string>
+    <string name="alert_documentsui_not_found">Il gestore di file predefinito di Android (DocumentsUI) non è disponibile.</string>
+    <string name="alert_add_remote_partial">Nuova unità virtuale %1$s aggiunta parzialmente, operazione interrotta</string>
+    <string name="alert_import_success">Configurazione importata con successo</string>
+    <string name="alert_import_failure">Impossibile importare la configurazione</string>
+    <string name="alert_import_cancelled">Importazione della configurazione annullata</string>
+    <string name="alert_export_success">Configurazione esportata con successo</string>
+    <string name="alert_export_failure">Impossibile esportare la configurazione</string>
+    <string name="alert_export_cancelled">Esportazione della configurazione annullata</string>
+    <string name="alert_set_config_failure">Impossibile impostare opzione %1$s per l\'unità remota %2$s</string>
+    <string name="biometric_title">Sblocca RSAF</string>
+    <string name="biometric_error">Errore di autenticazione biometrica: %1$s</string>
+    <string name="biometric_error_cancelled">Sblocco annullato</string>
+    <string name="biometric_ignore">Blocco app ignorato perché il dispositivo non ha un blocco schermo impostato</string>
+    <string name="dialog_action_back">Indietro</string>
+    <string name="dialog_action_next">Prossimo</string>
+    <string name="dialog_action_authorize">Autorizza</string>
+    <string name="dialog_action_proceed_anyway">Procedi comunque</string>
+    <string name="dialog_remote_name_message">Inserisci un nome per l\'unità virtuale.</string>
+    <string name="vfs_options_title">Opzioni VFS: %1$s</string>
+    <string name="vfs_options_message">Inserisci opzioni VFS per rclone come <tt>chiave=valore</tt> con una opzione per riga. La chiave è l\'argomento da riga di comando senza il prefisso <tt>--</tt> e utilizza i trattini bassi per separare le parole. Consulta <annotation type="rclone_vfs_docs">la documentazione di rclone</annotation> per la lista di opzioni disponibili.</string>
+    <string name="vfs_options_reload_warning">Avvertimento: il VFS deve essere ricaricato perché i cambiamenti abbiano effetto, le operazioni in sospeso sui file saranno interrotte per questa unità virtuale.</string>
+    <string name="vfs_options_save_and_reload">Salva e ricarica</string>
+    <string name="vfs_options_save_only">Salva soltanto</string>
+    <string name="notification_channel_keep_alive_name">Servizi in background</string>
+    <string name="notification_channel_keep_alive_desc">Mantiene attivo il processo mentre i file sono aperti o vengono caricati</string>
+    <string name="pref_header_remotes">Unità virtuali</string>
+    <string name="pref_add_remote_name">Aggiungi unità virtuale</string>
+    <string name="pref_inactivity_timeout_name">Timeout per inattività</string>
+    <string name="dialog_export_password_hint">Password</string>
+    <string name="dialog_export_password_confirm_hint">Conferma password</string>
+    <string name="dialog_inactivity_timeout_title">Timeout per inattività</string>
+    <string name="pref_edit_remote_delete_desc">Rimuovi questa unità remota dalla configurazione.</string>
+    <string name="ic_title_edit_remote">Modifica unità virtuale: %1$s</string>
+    <string name="ic_text_box_helper_required">Il valore non può essere vuoto.</string>
+    <string name="ic_text_box_helper_not_required">Il valore può essere vuoto.</string>
+    <string name="ic_header_examples">Opzioni di esempio:</string>
+    <string name="dialog_vfs_cache_deletion_message">Alcuni caricamenti sono in sospeso e potrebbero essere interrotti. Saranno cancellati permanentemente dalla cache VFS.</string>
+    <string name="ic_title_add_remote">Aggiungi unità virtuale: %1$s</string>
+    <string name="dialog_inactivity_timeout_message">Inserisci la durata in secondi</string>
+    <string name="dialog_remote_name_hint">Nome unità virtuale</string>
+    <string name="dialog_add_remote_title">Aggiungi unità remota</string>
+    <string name="dialog_rename_remote_title">Rinomina %1$s</string>
+    <string name="dialog_duplicate_remote_title">Duplica %1$s</string>
+    <string name="dialog_delete_remote_title">Rimuovi %1$s</string>
+    <string name="dialog_authorize_title">In attesa dell\'autorizzazione</string>
+    <string name="dialog_authorize_message_loading">In attesa dell\'avvio del servizio web di rclone.</string>
+    <string name="dialog_authorize_message_url">Apri il seguente link per autorizzare rclone ad accedere al provider. Quando sarà autorizzato, il token sarà automaitcamente inserito nella schermata precedente.</string>
+    <string name="dialog_import_password_title">Importa configurazione</string>
+    <string name="dialog_import_password_message">Il file selezionato è crittografato. Inserisci la password per importarlo.</string>
+    <string name="dialog_import_password_hint">Password</string>
+    <string name="dialog_export_password_title">Esporta configurazione</string>
+    <string name="dialog_export_password_message">Inserisci una password per crittografare il file di configurazione esportato o lascia il campo vuoto per tenerlo in chiaro.</string>
+    <string name="pref_edit_remote_allow_external_access_name">Consenti accesso alle app</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">Quando RSAF è bloccato i file sono disponibili alle app che hanno ricevuto il permesso.</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">Quando RSAF è bloccato i file sono nascosti alle app e le operazioni sui file sono impedite. Le operazioni in sospeso su file già aperti non sono influenzate.</string>
+    <string name="pref_edit_remote_report_usage_name">Riporta utilizzo dell\'archiviazione</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">(Controllo se riportare l\'utilizzo dell\'archiviazione è supportato…)</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">Riporta spazio libero e spazio totale alle app. Alcuni tipi di unità virtuali possono creare rallentamenti significativi quando vengono elencate le unità di archiviazione.</string>
+    <string name="alert_list_remotes_failure">Impossibile elencare le unità virtuali</string>
+    <string name="alert_add_remote_success">Nuova unità virtuale %1$s aggiunta con successo</string>
+    <string name="alert_logcat_success">Log salvati con successo in %1$s</string>
+    <string name="alert_logcat_failure">Impossibile salvare i log in %1$s</string>
+    <string name="alert_edit_remote_success">Unità remota %1$s modificata con successo</string>
+    <string name="alert_delete_remote_failure">Impossibile rimuovere l\'unità remota %1$s</string>
+    <string name="alert_rename_remote_failure">Impossibile rinominare l\'unità remota %1$s a %2$s</string>
+    <string name="alert_duplicate_remote_failure">Impossibile duplicare l\'unità remota %1$s a %2$s</string>
+    <string name="notification_keep_alive_cleanup_wait_desc">"In attesa della pulizia della cache VFS "</string>
+    <string name="notification_background_upload_failed_title">Impossibile caricare i file sull\'unità remota</string>
+    <string name="notification_channel_failure_desc">Avvisi di errore sui caricamenti in background</string>
+    <string name="notification_keep_alive_title">Operazioni sui file in corso</string>
+    <string name="notification_channel_failure_name">Avvisi di errore</string>
+    <plurals name="pref_inactivity_timeout_desc">
+        <item quantity="one">Blocca %d secondo dopo aver lasciato l\'app.</item>
+        <!--
+            Italian doesn't actually distinguish other and many but since a warning is printed out
+            when many is not define I kept it to be safe.
+        -->
+        <item quantity="many">Blocca %d secondi dopo aver lasciato l\'app.</item>
+        <item quantity="other">Blocca %d secondi dopo aver lasciato l\'app.</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d file aperto</item>
+        <item quantity="many">%d file aperti</item>
+        <item quantity="other">%d file aperti</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d file in caricamento</item>
+        <item quantity="many">%d file in caricamento</item>
+        <item quantity="other">%d file in caricamento</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d file in attesa del caricamento</item>
+        <item quantity="many">%d file in attesa del caricamento</item>
+        <item quantity="other">%d file in attesa del caricamento</item>
+    </plurals>
+</resources>
