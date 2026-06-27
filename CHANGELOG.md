@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Add Traditional Chinese translations ([PR #309])
+* Add Italian translations ([PR #310])
 
 ### Version 4.3
 
@@ -724,3 +725,4 @@
 [PR #307]: https://github.com/chenxiaolong/RSAF/pull/307
 [PR #308]: https://github.com/chenxiaolong/RSAF/pull/308
 [PR #309]: https://github.com/chenxiaolong/RSAF/pull/309
+[PR #310]: https://github.com/chenxiaolong/RSAF/pull/310
