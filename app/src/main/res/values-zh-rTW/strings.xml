@@ -1,0 +1,164 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2025 Andrew Gunnerson
+    SPDX-FileCopyrightText: 2026 AcideFluorhydrique (translation)
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<resources>
+    <!-- Preference headers -->
+    <string name="pref_header_permissions">權限</string>
+    <string name="pref_header_remotes">遠端儲存</string>
+    <string name="pref_header_remote">遠端儲存</string>
+    <string name="pref_header_configuration">設定</string>
+    <string name="pref_header_behavior">行為</string>
+    <string name="pref_header_app_lock">應用程式鎖定</string>
+    <string name="pref_header_advanced">進階</string>
+    <string name="pref_header_about">關於</string>
+    <string name="pref_header_debug">偵錯</string>
+
+    <!-- Main preferences -->
+    <string name="pref_inhibit_battery_opt_name">停用電池最佳化</string>
+    <string name="pref_inhibit_battery_opt_desc">需要在背景上傳檔案。</string>
+    <string name="pref_allow_notifications_desc">需要在背景上傳檔案時顯示通知。</string>
+    <string name="pref_add_remote_name">新增遠端儲存</string>
+    <string name="pref_add_remote_desc">新增一個新的 rclone 遠端儲存設定。</string>
+    <string name="pref_import_configuration_name">匯入設定</string>
+    <string name="pref_import_configuration_desc">匯入現有的 rclone 設定檔。</string>
+    <string name="pref_export_configuration_name">匯出設定</string>
+    <string name="pref_export_configuration_desc">將目前的 rclone 設定匯出至檔案。</string>
+    <string name="pref_add_file_extension_name">新增檔案副檔名</string>
+    <string name="pref_add_file_extension_desc">建立新檔案時，自動加上對應檔案類型的副檔名。</string>
+    <string name="pref_pretend_local_name">偽裝成本機儲存</string>
+    <string name="pref_pretend_local_desc">將 rclone 遠端儲存以本機儲存的形式呈現給儲存空間存取架構。這會強制與僅允許選取本機檔案的應用程式相容。</string>
+    <string name="pref_local_storage_access_name">允許本機儲存存取</string>
+    <string name="pref_local_storage_access_desc">允許包裝遠端儲存（例如 <tt>crypt</tt>）存取 <tt>/sdcard</tt> 下的本機儲存空間。</string>
+    <string name="pref_require_auth_name">需要驗證</string>
+    <string name="pref_require_auth_desc">需要生物辨識解鎖或螢幕鎖定 PIN/密碼才能檢視及變更 RSAF 設定。</string>
+    <string name="pref_inactivity_timeout_name">閒置逾時</string>
+    <plurals name="pref_inactivity_timeout_desc">
+        <item quantity="other">離開應用程式 %d 秒後鎖定。</item>
+    </plurals>
+    <string name="pref_lock_now_name">立即鎖定</string>
+    <string name="pref_lock_now_desc">立即鎖定應用程式，而不是等待閒置逾時。</string>
+    <string name="pref_allow_backup_name">允許 Android 備份</string>
+    <string name="pref_allow_backup_desc">如果 Android 聲稱傳輸是端對端加密的，或正在直接傳輸到另一台裝置，則允許備份應用程式資料。RSAF 無法確認這些條件是否真的成立。</string>
+    <string name="pref_version_name">版本</string>
+    <string name="pref_verbose_rclone_logs_name">詳細的 rclone 紀錄</string>
+    <string name="pref_verbose_rclone_logs_desc">警告：詳細紀錄可能包含敏感資訊，例如驗證憑證。</string>
+    <string name="pref_save_logs_name">儲存紀錄</string>
+    <string name="pref_save_logs_desc">將 logcat 紀錄儲存至檔案。請注意，紀錄可能包含已存取的遠端檔案名稱。</string>
+    <string name="pref_add_internal_cache_remote_name">新增 rclone 內部快取遠端儲存</string>
+    <string name="pref_add_internal_cache_remote_desc">新增一個指向 rclone 內部快取目錄的 <tt>alias</tt> 遠端儲存。這對於排查 VFS 問題可能很有用。</string>
+
+    <!-- Remote preferences -->
+    <string name="pref_edit_remote_open_name">開啟遠端儲存</string>
+    <string name="pref_edit_remote_open_desc">在系統檔案管理器中開啟此遠端儲存。</string>
+    <string name="pref_edit_remote_configure_name">設定遠端儲存</string>
+    <string name="pref_edit_remote_configure_desc">重新執行 rclone 設定精靈。</string>
+    <string name="pref_edit_remote_rename_name">重新命名遠端儲存</string>
+    <string name="pref_edit_remote_rename_desc">變更此遠端儲存的名稱。如果其他遠端儲存依賴此儲存，則需要手動更新為新名稱。</string>
+    <string name="pref_edit_remote_duplicate_name">複製遠端儲存</string>
+    <string name="pref_edit_remote_duplicate_desc">建立具有相同設定的此遠端儲存的副本。</string>
+    <string name="pref_edit_remote_delete_name">刪除遠端儲存</string>
+    <string name="pref_edit_remote_delete_desc">從設定中移除此遠端儲存。</string>
+    <string name="pref_edit_remote_allow_external_access_name">允許外部應用程式存取</string>
+    <string name="pref_edit_remote_allow_external_access_desc">允許外部應用程式透過系統檔案管理器存取此遠端儲存。如果此遠端儲存只是另一個遠端儲存的後端，則不需要存取權限。</string>
+    <string name="pref_edit_remote_allow_locked_access_name">允許鎖定時存取</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">當 RSAF 被鎖定時，檔案仍可供已取得存取權限的外部應用程式使用。</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">當 RSAF 被鎖定時，檔案會對外部應用程式隱藏，新的檔案操作會被封鎖。對已開啟檔案的持續操作不受影響。</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">顯示於啟動器捷徑中</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">長按 RSAF 啟動器圖示時，將此遠端儲存包含在捷徑清單中。</string>
+    <string name="pref_edit_remote_thumbnails_name">啟用縮圖</string>
+    <string name="pref_edit_remote_thumbnails_desc">允許顯示影像、影片和音樂（專輯封面）的縮圖。瀏覽檔案時可能會產生額外的網路流量。</string>
+    <string name="pref_edit_remote_report_usage_name">回報檔案系統使用量</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">（正在檢查是否支援回報檔案系統使用量…）</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">向用戶端應用程式回報可用空間及總空間。對於某些遠端儲存類型，當用戶端應用程式取得遠端儲存清單時，這可能會明顯拖慢速度。</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">此遠端儲存類型不支援回報其可用空間及總空間。</string>
+    <string name="pref_edit_remote_vfs_options_name">自訂 VFS 選項</string>
+    <string name="pref_edit_remote_vfs_options_desc">設定 <tt>rclone mount</tt> 支援的自訂 rclone VFS 選項。</string>
+
+    <!-- Alerts -->
+    <string name="action_details">詳情</string>
+    <string name="dialog_error_details_title">錯誤詳情</string>
+
+    <!-- Main alerts -->
+    <string name="alert_list_remotes_failure">取得遠端儲存清單失敗</string>
+    <string name="alert_add_remote_success">已成功新增遠端儲存 %1$s</string>
+    <string name="alert_add_remote_partial">由於中斷，已部分新增遠端儲存 %1$s</string>
+    <string name="alert_import_success">已成功匯入設定</string>
+    <string name="alert_import_failure">匯入設定失敗</string>
+    <string name="alert_import_cancelled">設定匯入已取消</string>
+    <string name="alert_export_success">已成功匯出設定</string>
+    <string name="alert_export_failure">匯出設定失敗</string>
+    <string name="alert_export_cancelled">設定匯出已取消</string>
+    <string name="alert_logcat_success">已成功將紀錄儲存至 %1$s</string>
+    <string name="alert_logcat_failure">將紀錄儲存至 %1$s 失敗</string>
+
+    <!-- Edit remote alerts -->
+    <string name="alert_edit_remote_success">已成功編輯遠端儲存 %1$s</string>
+    <string name="alert_delete_remote_failure">刪除遠端儲存 %1$s 失敗</string>
+    <string name="alert_rename_remote_failure">將遠端儲存 %1$s 重新命名為 %2$s 失敗</string>
+    <string name="alert_duplicate_remote_failure">將遠端儲存 %1$s 複製為 %2$s 失敗</string>
+    <string name="alert_set_config_failure">為遠端儲存 %2$s 設定 %1$s 設定選項失敗</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">解鎖設定</string>
+    <string name="biometric_error">生物辨識驗證錯誤：%1$s</string>
+    <string name="biometric_error_cancelled">解鎖操作已取消</string>
+    <string name="biometric_ignore">忽略應用程式鎖定，因為裝置未設定螢幕鎖定</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_action_next">下一步</string>
+    <string name="dialog_action_authorize">授權</string>
+    <string name="dialog_action_proceed_anyway">仍要繼續</string>
+    <string name="dialog_remote_name_message">請輸入遠端儲存的名稱。</string>
+    <string name="dialog_remote_name_hint">遠端儲存名稱</string>
+    <string name="dialog_add_remote_title">新增遠端儲存</string>
+    <string name="dialog_rename_remote_title">重新命名 %1$s</string>
+    <string name="dialog_duplicate_remote_title">複製 %1$s</string>
+    <string name="dialog_delete_remote_title">刪除 %1$s</string>
+    <string name="dialog_authorize_title">等待授權</string>
+    <string name="dialog_authorize_message_loading">正在等待 rclone webserver 啟動。</string>
+    <string name="dialog_authorize_message_url">開啟以下連結以授權 rclone 存取後端。授權後，憑證將自動填入上一個畫面。</string>
+    <string name="dialog_import_password_title">設定匯入</string>
+    <string name="dialog_import_password_message">所選設定檔已加密。請輸入解密密碼以匯入它。</string>
+    <string name="dialog_import_password_hint">解密密碼</string>
+    <string name="dialog_export_password_title">設定匯出</string>
+    <string name="dialog_export_password_message">輸入密碼以加密匯出的設定檔，或留空以純文字形式儲存。</string>
+    <string name="dialog_export_password_hint">加密密碼</string>
+    <string name="dialog_export_password_confirm_hint">確認密碼</string>
+    <string name="dialog_inactivity_timeout_title">閒置逾時</string>
+    <string name="dialog_inactivity_timeout_message">請輸入以秒為單位的持續時間。</string>
+    <string name="dialog_vfs_cache_deletion_message">進行中的上傳可能會被中斷。這些將從 VFS 快取中永久刪除。</string>
+
+    <!-- Interactive configuration -->
+    <string name="ic_title_add_remote">新增遠端儲存：%1$s</string>
+    <string name="ic_title_edit_remote">編輯遠端儲存：%1$s</string>
+    <string name="ic_text_box_helper_required">值不可為空白。</string>
+    <string name="ic_text_box_helper_not_required">值可以是空白的。</string>
+    <string name="ic_header_examples">範例選項：</string>
+
+    <!-- VFS options dialog -->
+    <string name="vfs_options_title">VFS 選項：%1$s</string>
+    <string name="vfs_options_message">請以 <tt>key=value</tt> 格式輸入自訂 rclone VFS 選項，每行一個選項。鍵名是不含 <tt>--</tt> 前綴、且所有連字號皆替換為底線的命令列參數。如需可用選項清單，請參閱 <annotation type="rclone_vfs_docs">rclone 文件</annotation>。</string>
+    <string name="vfs_options_reload_warning"><b>注意</b>：必須重新載入 VFS 才能套用變更，這將中斷此遠端儲存目前進行中的檔案操作。</string>
+    <string name="vfs_options_save_and_reload">儲存並重新載入</string>
+    <string name="vfs_options_save_only">僅儲存</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_keep_alive_name">背景服務</string>
+    <string name="notification_channel_keep_alive_desc">在檔案開啟或正在上傳時保持程序執行</string>
+    <string name="notification_channel_failure_name">失敗警示</string>
+    <string name="notification_channel_failure_desc">背景上傳期間的錯誤警示</string>
+    <string name="notification_keep_alive_title">檔案操作進行中</string>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="other">已開啟 %d 個檔案</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="other">正在上傳 %d 個檔案</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="other">%d 個檔案等待上傳</item>
+    </plurals>
+    <string name="notification_keep_alive_cleanup_wait_desc">正在等待 VFS 快取清理</string>
+    <string name="notification_background_upload_failed_title">上傳檔案至遠端儲存失敗</string>
+</resources>
