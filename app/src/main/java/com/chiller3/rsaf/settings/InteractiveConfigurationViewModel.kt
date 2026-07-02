@@ -20,6 +20,9 @@ class InteractiveConfigurationViewModel : ViewModel() {
 
     private lateinit var ic: RcloneRpc.InteractiveConfiguration
 
+    private val _loading = MutableStateFlow(false)
+    val loading = _loading.asStateFlow()
+
     private val _question = MutableStateFlow<Pair<String?, RcloneRpc.ProviderOption>?>(null)
     val question = _question.asStateFlow()
 
@@ -29,27 +32,34 @@ class InteractiveConfigurationViewModel : ViewModel() {
     private val _run = MutableStateFlow(true)
     val run = _run.asStateFlow()
 
+    private fun runInBackground(block: () -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    _loading.update { true }
+                    block()
+                } finally {
+                    _loading.update { false }
+                }
+            }
+        }
+    }
+
     fun init(remote: String) {
         if (loadedOnce) {
             return
         }
         loadedOnce = true
 
-        viewModelScope.launch {
-            ic = withContext(Dispatchers.IO) {
-                RcloneRpc.InteractiveConfiguration(remote)
-            }
-
+        runInBackground {
+            ic = RcloneRpc.InteractiveConfiguration(remote)
             loadQuestion()
         }
     }
 
     fun submit(result: String?) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                ic.submit(result)
-            }
-
+        runInBackground {
+            ic.submit(result)
             loadQuestion()
         }
     }
@@ -66,8 +76,9 @@ class InteractiveConfigurationViewModel : ViewModel() {
     }
 
     fun goBack() {
-        ic.goBack()
-
-        loadQuestion()
+        runInBackground {
+            ic.goBack()
+            loadQuestion()
+        }
     }
 }

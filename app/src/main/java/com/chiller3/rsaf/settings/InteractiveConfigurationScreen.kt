@@ -13,12 +13,15 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.plus
@@ -32,10 +35,12 @@ import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
@@ -90,6 +95,7 @@ fun InteractiveConfigurationScreen(
 ) {
     viewModel.init(remote)
 
+    val loading by viewModel.loading.collectAsStateWithLifecycle()
     val question by viewModel.question.collectAsStateWithLifecycle()
     val hasPrevious by viewModel.hasPrevious.collectAsStateWithLifecycle()
 
@@ -107,6 +113,7 @@ fun InteractiveConfigurationScreen(
     ) { params ->
         question?.let { (error, option) ->
             InteractiveConfigurationContent(
+                loading = loading,
                 error = error,
                 option = option,
                 hasPrevious = hasPrevious,
@@ -195,6 +202,7 @@ private fun tryReveal(text: String, isPassword: Boolean): String {
 @SuppressLint("PrivateResource")
 @Composable
 private fun InteractiveConfigurationContent(
+    loading: Boolean,
     error: String?,
     option: RcloneRpc.ProviderOption,
     hasPrevious: Boolean,
@@ -259,6 +267,7 @@ private fun InteractiveConfigurationContent(
             if (!option.exclusive) {
                 item("input") {
                     AnswerTextField(
+                        loading = loading,
                         option = option,
                         state = input,
                         answer = answer,
@@ -272,6 +281,7 @@ private fun InteractiveConfigurationContent(
                     Button(
                         onClick = { showAuthorizeDialog = option.authorizeCmd },
                         modifier = Modifier.padding(top = 8.dp),
+                        enabled = !loading,
                     ) {
                         Text(text = stringResource(R.string.dialog_action_authorize))
                     }
@@ -305,6 +315,7 @@ private fun InteractiveConfigurationContent(
                         selected = isSelected,
                         onClick = onClick,
                         shapes = betterSegmentedShapes(index, option.examples.size),
+                        enabled = !loading,
                         title = { Text(text = example.value) },
                         summary = if (example.help != example.value) {
                             { Text(text = example.help) }
@@ -317,9 +328,27 @@ private fun InteractiveConfigurationContent(
         }
 
         Box(modifier = Modifier.padding(contentPadding + PreferenceDefaults.ListPadding)) {
-            HorizontalDivider(modifier = maxWidthModifier)
+            // https://youtrack.jetbrains.com/issue/KT-48215
+            androidx.compose.animation.AnimatedVisibility(
+                visible = loading,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                LinearWavyProgressIndicator(
+                    modifier = maxWidthModifier.height(DividerDefaults.Thickness),
+                )
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !loading,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                HorizontalDivider(modifier = maxWidthModifier)
+            }
 
             NavigationButtons(
+                loading = loading,
                 hasPrevious = hasPrevious,
                 answer = answer,
                 onPrevQuestion = {
@@ -348,6 +377,7 @@ private fun InteractiveConfigurationContent(
 
 @Composable
 private fun AnswerTextField(
+    loading: Boolean,
     option: RcloneRpc.ProviderOption,
     state: TextFieldState,
     answer: String?,
@@ -365,6 +395,7 @@ private fun AnswerTextField(
         OutlinedSecureTextField(
             state = state,
             modifier = modifier,
+            enabled = !loading,
             label = { Text(text = option.name) },
             isError = answer == null,
             supportingText = { Text(text = supportingText) },
@@ -394,6 +425,7 @@ private fun AnswerTextField(
         OutlinedTextField(
             state = state,
             modifier = modifier,
+            enabled = !loading,
             label = { Text(text = option.name) },
             isError = answer == null,
             supportingText = { Text(text = supportingText) },
@@ -408,6 +440,7 @@ private fun AnswerTextField(
 
 @Composable
 private fun NavigationButtons(
+    loading: Boolean,
     hasPrevious: Boolean,
     answer: String?,
     onPrevQuestion: () -> Unit,
@@ -420,7 +453,7 @@ private fun NavigationButtons(
             modifier = Modifier
                 .padding(all = 8.dp)
                 .align(alignment = Alignment.CenterStart),
-            enabled = hasPrevious,
+            enabled = !loading && hasPrevious,
         ) {
             Text(text = stringResource(R.string.dialog_action_back))
         }
@@ -430,7 +463,7 @@ private fun NavigationButtons(
             modifier = Modifier
                 .padding(all = 8.dp)
                 .align(alignment = Alignment.CenterEnd),
-            enabled = answer != null,
+            enabled = !loading && answer != null,
         ) {
             Text(text = stringResource(R.string.dialog_action_next))
         }
@@ -487,6 +520,7 @@ private fun PreviewQuestionArbitrary() {
             backIsExit = true,
         ) { params ->
             InteractiveConfigurationContent(
+                loading = true,
                 error = null,
                 option = option,
                 hasPrevious = true,
@@ -548,6 +582,7 @@ private fun PreviewQuestionExclusive() {
             backIsExit = true,
         ) { params ->
             InteractiveConfigurationContent(
+                loading = false,
                 error = null,
                 option = option,
                 hasPrevious = false,
@@ -596,6 +631,7 @@ private fun PreviewQuestionPassword() {
             backIsExit = true,
         ) { params ->
             InteractiveConfigurationContent(
+                loading = false,
                 error = "This is an error message from rclone.",
                 option = option,
                 hasPrevious = true,
