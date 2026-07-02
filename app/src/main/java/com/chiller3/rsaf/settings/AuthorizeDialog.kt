@@ -15,11 +15,14 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -27,11 +30,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chiller3.rsaf.R
+import com.chiller3.rsaf.rclone.AuthorizeService
+import com.chiller3.rsaf.rclone.Authorizer
+import com.chiller3.rsaf.rclone.rememberAuthorizeWatcher
 
 @Composable
 fun AuthorizeDialog(
@@ -39,48 +41,53 @@ fun AuthorizeDialog(
     onReceive: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val scopedOwner = rememberViewModelStoreOwner()
+    val context = LocalContext.current
 
-    CompositionLocalProvider(LocalViewModelStoreOwner provides scopedOwner) {
-        val viewModel: AuthorizeViewModel = viewModel()
-        viewModel.authorize(cmd)
+    var authorizeUrl by remember { mutableStateOf<String?>(null) }
+    val latestOnReceive by rememberUpdatedState(onReceive)
 
-        val url by viewModel.url.collectAsStateWithLifecycle()
-
-        AlertDialog(
-            title = { Text(text = stringResource(R.string.dialog_authorize_title)) },
-            text = {
-                Column(modifier = Modifier.verticalScroll(state = rememberScrollState())) {
-                    Text(text = urlMessage(url))
-
-                    LinearWavyProgressIndicator(
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    )
-                }
-            },
-            onDismissRequest = onDismiss,
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(android.R.string.cancel))
-                }
-            },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-            ),
-        )
-
-        val latestOnReceive by rememberUpdatedState(onReceive)
-
-        LaunchedEffect(Unit) {
-            viewModel.code.collect {
-                if (it != null) {
-                    latestOnReceive(it)
-                }
-            }
+    rememberAuthorizeWatcher(listener = object : Authorizer.AuthorizeListener {
+        override fun onAuthorizeUrl(url: String) {
+            authorizeUrl = url
         }
+
+        override fun onAuthorizeCode(code: String) {
+            latestOnReceive(code)
+        }
+    })
+
+    LaunchedEffect(Unit) {
+        context.startForegroundService(AuthorizeService.createStartIntent(context, cmd))
     }
+
+    val cancelAndDismiss = {
+        context.startService(AuthorizeService.createCancelIntent(context))
+        onDismiss()
+    }
+
+    AlertDialog(
+        title = { Text(text = stringResource(R.string.dialog_authorize_title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(state = rememberScrollState())) {
+                Text(text = urlMessage(authorizeUrl))
+
+                LinearWavyProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+            }
+        },
+        onDismissRequest = cancelAndDismiss,
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = cancelAndDismiss) {
+                Text(text = stringResource(android.R.string.cancel))
+            }
+        },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    )
 }
 
 @Composable

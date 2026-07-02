@@ -67,6 +67,11 @@
             android:exported="false" />
 
         <service
+            android:name=".rclone.AuthorizeService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false" />
+
+        <service
             android:name=".rclone.KeepAliveService"
             android:foregroundServiceType="specialUse"
             android:exported="false" />

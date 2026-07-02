@@ -23,6 +23,7 @@ class Notifications(private val context: Context) {
         )
 
         const val ID_KEEP_ALIVE = -1
+        const val ID_AUTHORIZE = -2
     }
 
     private val prefs = Preferences(context)
@@ -98,6 +99,21 @@ class Notifications(private val context: Context) {
             build()
         }
     }
+
+    fun createAuthorizeNotification() =
+        Notification.Builder(context, CHANNEL_ID_KEEP_ALIVE).run {
+            setContentTitle(context.getString(R.string.dialog_authorize_title))
+            setSmallIcon(R.drawable.ic_notifications)
+            setOngoing(true)
+            setOnlyAlertOnce(true)
+
+            // Inhibit 10-second delay when showing persistent notification
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+            }
+
+            build()
+        }
 
     fun notifyBackgroundUploadFailed(documentId: String, errorMsg: String) {
         val notificationId = prefs.nextNotificationId
