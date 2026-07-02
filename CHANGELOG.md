@@ -12,6 +12,7 @@
 * Add Traditional Chinese translations ([PR #309])
 * Add Italian translations ([PR #310])
 * Show loading state when configuring a remote if submitting an answer to a question takes a while ([PR #312])
+* Fix crash when configuring a remote if rclone returns multiple choices with identical values ([Issue #311], [PR #313])
 
 ### Version 4.3
 
@@ -536,6 +537,7 @@
 [Issue #287]: https://github.com/chenxiaolong/RSAF/issues/287
 [Issue #299]: https://github.com/chenxiaolong/RSAF/issues/299
 [Issue #302]: https://github.com/chenxiaolong/RSAF/issues/302
+[Issue #311]: https://github.com/chenxiaolong/RSAF/issues/311
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -728,3 +730,4 @@
 [PR #309]: https://github.com/chenxiaolong/RSAF/pull/309
 [PR #310]: https://github.com/chenxiaolong/RSAF/pull/310
 [PR #312]: https://github.com/chenxiaolong/RSAF/pull/312
+[PR #313]: https://github.com/chenxiaolong/RSAF/pull/313
