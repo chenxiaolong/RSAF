@@ -304,10 +304,9 @@ private fun InteractiveConfigurationContent(
                     }
                 }
 
-                itemsIndexed(
-                    option.examples,
-                    key = { _, e -> "example_${e.value}" },
-                ) { index, example ->
+                // We intentionally rely on the default behavior of using the item index as the key.
+                // rclone does not guarantee any of the fields within an example to be unique.
+                itemsIndexed(option.examples) { index, example ->
                     val isSelected = answer == example.value
                     val onClick = { input.edit { replace(0, length, example.value) } }
 
