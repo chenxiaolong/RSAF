@@ -11,6 +11,7 @@
 
 * Add Traditional Chinese translations ([PR #309])
 * Add Italian translations ([PR #310])
+* Show loading state when configuring a remote if submitting an answer to a question takes a while ([PR #312])
 
 ### Version 4.3
 
@@ -726,3 +727,4 @@
 [PR #308]: https://github.com/chenxiaolong/RSAF/pull/308
 [PR #309]: https://github.com/chenxiaolong/RSAF/pull/309
 [PR #310]: https://github.com/chenxiaolong/RSAF/pull/310
+[PR #312]: https://github.com/chenxiaolong/RSAF/pull/312
