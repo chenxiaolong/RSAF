@@ -7,13 +7,13 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.4
 
-* Add Traditional Chinese translations ([PR #309])
-* Add Italian translations ([PR #310])
 * Show loading state when configuring a remote if submitting an answer to a question takes a while ([PR #312])
 * Fix crash when configuring a remote if rclone returns multiple choices with identical values ([Issue #311], [PR #313])
 * Keep app alive while waiting for oauth authorization ([Issue #311], [PR #314])
+* Add Traditional Chinese translations ([PR #309])
+* Add Italian translations ([PR #310])
 
 ### Version 4.3
 
