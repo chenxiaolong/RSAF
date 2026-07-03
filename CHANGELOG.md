@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update dynamic background color to match AOSP Settings ([PR #315])
+
 ### Version 4.4
 
 * Show loading state when configuring a remote if submitting an answer to a question takes a while ([PR #312])
@@ -733,3 +737,4 @@
 [PR #312]: https://github.com/chenxiaolong/RSAF/pull/312
 [PR #313]: https://github.com/chenxiaolong/RSAF/pull/313
 [PR #314]: https://github.com/chenxiaolong/RSAF/pull/314
+[PR #315]: https://github.com/chenxiaolong/RSAF/pull/315
