@@ -10,7 +10,7 @@
             the same app.
             This must be set statically. Keep this in sync with PreferenceDefaults.containerColor.
         -->
-        <item name="android:colorBackground">?attr/colorSurfaceContainerHigh</item>
+        <item name="android:colorBackground">?attr/colorSurfaceContainer</item>
 
         <!--
             This prevents an ugly bar from showing up in the recents screen when another app is
