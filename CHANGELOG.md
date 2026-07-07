@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Update dynamic background color to match AOSP Settings ([PR #315])
+* Update golang to 1.26.5 ([PR #316])
 
 ### Version 4.4
 
@@ -738,3 +739,4 @@
 [PR #313]: https://github.com/chenxiaolong/RSAF/pull/313
 [PR #314]: https://github.com/chenxiaolong/RSAF/pull/314
 [PR #315]: https://github.com/chenxiaolong/RSAF/pull/315
+[PR #316]: https://github.com/chenxiaolong/RSAF/pull/316
