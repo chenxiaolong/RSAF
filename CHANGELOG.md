@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.5
 
 * Update dynamic background color to match AOSP Settings ([PR #315])
 * Update golang to 1.26.5 ([PR #316])
