@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.74.4 ([PR #317])
+
 ### Version 4.5
 
 * Update dynamic background color to match AOSP Settings ([PR #315])
@@ -740,3 +744,4 @@
 [PR #314]: https://github.com/chenxiaolong/RSAF/pull/314
 [PR #315]: https://github.com/chenxiaolong/RSAF/pull/315
 [PR #316]: https://github.com/chenxiaolong/RSAF/pull/316
+[PR #317]: https://github.com/chenxiaolong/RSAF/pull/317
