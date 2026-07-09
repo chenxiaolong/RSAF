@@ -2,8 +2,8 @@
 android-gradle-plugin = "9.2.1"
 androidx-activity = "1.13.0"
 androidx-biometric = "1.4.0-alpha07"
-androidx-compose-bom = "2026.06.00"
-androidx-compose-material3 = "1.5.0-alpha22"
+androidx-compose-bom = "2026.06.01"
+androidx-compose-material3 = "1.5.0-alpha23"
 androidx-core = "1.19.0"
 androidx-exifinterface = "1.4.2"
 androidx-lifecycle-viewmodel-compose = "2.11.0"
@@ -14,7 +14,7 @@ junit = "1.3.0"
 kotlin = "2.4.0"
 material = "1.14.0"
 spotbugs = "4.10.2"
-tink-android = "1.22.0"
+tink-android = "1.23.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
