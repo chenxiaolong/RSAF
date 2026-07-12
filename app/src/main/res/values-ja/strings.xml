@@ -1,0 +1,158 @@
+<resources>
+    <string name="pref_header_permissions">権限</string>
+    <string name="pref_header_remotes">リモート一覧</string>
+    <string name="pref_header_remote">リモート</string>
+    <string name="pref_header_configuration">設定</string>
+    <string name="pref_header_behavior">動作</string>
+    <string name="pref_header_app_lock">アプリのロック</string>
+    <string name="pref_header_advanced">詳細設定</string>
+    <string name="pref_header_about">アプリについて</string>
+    <string name="pref_header_debug">デバッグ</string>
+
+    <string name="pref_inhibit_battery_opt_name">バッテリー最適化を無効化</string>
+    <string name="pref_inhibit_battery_opt_desc">バックグラウンドでファイルをアップロードするために必要です。</string>
+    <string name="pref_allow_notifications_name">通知を許可</string>
+    <string name="pref_allow_notifications_desc">バックグラウンドでのファイルアップロード状況を表示するために必要です。</string>
+    <string name="pref_allow_local_network_name">ローカルネットワークへのアクセスを許可</string>
+    <string name="pref_allow_local_network_desc">ローカルネットワーク上のホストに接続するために必要です。</string>
+    <string name="pref_add_remote_name">リモートを追加</string>
+    <string name="pref_add_remote_desc">新しいrcloneリモート設定を追加します。</string>
+    <string name="pref_import_configuration_name">設定をインポート</string>
+    <string name="pref_import_configuration_desc">既存のrclone設定ファイルをインポートします。</string>
+    <string name="pref_export_configuration_name">設定をエクスポート</string>
+    <string name="pref_export_configuration_desc">現在のrclone設定をファイルにエクスポートします。</string>
+    <string name="pref_add_file_extension_name">ファイル拡張子を自動追加</string>
+    <string name="pref_add_file_extension_desc">新しいファイルを作成する際、ファイルタイプに応じた拡張子を自動的に追加します。</string>
+    <string name="pref_pretend_local_name">ローカルストレージとして偽装</string>
+    <string name="pref_pretend_local_desc">Storage Access Frameworkに対して、rcloneリモートをローカルストレージとして提示します。これにより、ローカルファイルしか選択できないアプリとの互換性を強制します。</string>
+    <string name="pref_local_storage_access_name">ローカルストレージへのアクセスを許可</string>
+    <string name="pref_local_storage_access_desc"><tt>crypt</tt> などのラッパーリモートが、<tt>/sdcard</tt> 以下のローカルストレージにアクセスすることを許可します。</string>
+    <string name="pref_require_auth_name">認証を要求</string>
+    <string name="pref_require_auth_desc">RSAFの設定表示や変更を行う際に、生体認証または画面ロックのPIN/パスワードを要求します。</string>
+    <string name="pref_inactivity_timeout_name">無操作タイムアウト</string>
+    <plurals name="pref_inactivity_timeout_desc">
+        <item quantity="one">アプリを離れてから %d 秒後にロックします。</item>
+        <item quantity="other">アプリを離れてから %d 秒後にロックします。</item>
+    </plurals>
+    <string name="pref_lock_now_name">今すぐロック</string>
+    <string name="pref_lock_now_desc">無操作タイムアウトを待たずに、今すぐアプリをロックします。</string>
+    <string name="pref_allow_backup_name">Androidバックアップを許可</string>
+    <string name="pref_allow_backup_desc">Androidシステム側で、バックアップ経路がエンドツーエンドで暗号化されている、または別のデバイスへ直接転送されていると判定された場合に、アプリデータのバックアップを許可します。ただしRSAF側で、これらの条件が実際に満たされているかを検証することはできません。</string>
+    <string name="pref_version_name">バージョン</string>
+    <string name="pref_verbose_rclone_logs_name">rcloneの詳細ログを出力</string>
+    <string name="pref_verbose_rclone_logs_desc">警告: 詳細ログには認証トークンなどの機密情報が含まれる場合があります。</string>
+    <string name="pref_save_logs_name">ログを保存</string>
+    <string name="pref_save_logs_desc">logcatログをファイルに保存します。ログには、アクセスしたリモートファイルの名前が含まれる場合があります。</string>
+    <string name="pref_add_internal_cache_remote_name">rclone内部キャッシュリモートを追加</string>
+    <string name="pref_add_internal_cache_remote_desc">rcloneの内部キャッシュディレクトリを指す新しい <tt>alias</tt> リモートを追加します。VFSのトラブルシューティングに役立ちます。</string>
+
+    <string name="pref_edit_remote_open_name">リモートを開く</string>
+    <string name="pref_edit_remote_open_desc">このリモートをシステムファイルマネージャーで開きます。</string>
+    <string name="pref_edit_remote_configure_name">リモートを設定</string>
+    <string name="pref_edit_remote_configure_desc">rcloneの設定ウィザードを再実行します。</string>
+    <string name="pref_edit_remote_rename_name">リモート名を変更</string>
+    <string name="pref_edit_remote_rename_desc">このリモートの名前を変更します。他のリモートがこのリモートに依存している場合は、新しい名前を手動で反映させる必要があります。</string>
+    <string name="pref_edit_remote_duplicate_name">リモートを複製</string>
+    <string name="pref_edit_remote_duplicate_desc">同一の設定でこのリモートのコピーを作成します。</string>
+    <string name="pref_edit_remote_delete_name">リモートを削除</string>
+    <string name="pref_edit_remote_delete_desc">このリモートを設定から削除します。</string>
+    <string name="pref_edit_remote_allow_external_access_name">外部アプリからのアクセスを許可</string>
+    <string name="pref_edit_remote_allow_external_access_desc">外部アプリがシステムファイルマネージャー経由でこのリモートにアクセスすることを許可します。このリモートが別のリモートのバックエンドとしてのみ使用されている場合は、許可する必要はありません。</string>
+    <string name="pref_edit_remote_allow_locked_access_name">ロック中のアクセスを許可</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">RSAFがロックされている間も、アクセス権限が与えられている外部アプリからは引き続きファイルを利用できます。</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">RSAFがロックされている間、外部アプリからファイルは非表示になり、新しいファイル操作はブロックされます。すでに開かれているファイルに対する進行中の操作には影響しません。</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">ランチャーのショートカットに表示</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">RSAFのランチャーアイコンを長押ししたときに表示されるショートカット一覧に、このリモートを含めます。</string>
+    <string name="pref_edit_remote_thumbnails_name">サムネイルを有効化</string>
+    <string name="pref_edit_remote_thumbnails_desc">画像、動画、および音楽（アルバムアート）のサムネイル表示を許可します。ファイルを閲覧する際に追加のネットワーク通信が発生する場合があります。</string>
+    <string name="pref_edit_remote_report_usage_name">ファイルシステムの使用状況を報告</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">(ファイルシステムの使用状況報告がサポートされているか確認中…)</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">空き容量と総容量をクライアントアプリに報告します。一部のリモートタイプでは、クライアントアプリがリモート一覧を取得する際の動作が大幅に低下する場合があります。</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">このリモートタイプは、空き容量および総容量の報告をサポートしていません。</string>
+    <string name="pref_edit_remote_vfs_options_name">カスタムVFSオプション</string>
+    <string name="pref_edit_remote_vfs_options_desc"><tt>rclone mount</tt> でサポートされているカスタムrclone VFSオプションを設定します。</string>
+
+    <string name="action_details">詳細</string>
+    <string name="dialog_error_details_title">エラーの詳細</string>
+    <string name="alert_browser_not_found">ウェブブラウザが利用できません。</string>
+    <string name="alert_documentsui_not_found">Android標準のファイルマネージャー（DocumentsUI）が利用できません。</string>
+
+    <string name="alert_list_remotes_failure">リモート一覧の取得に失敗しました</string>
+    <string name="alert_add_remote_success">新しいリモート %1$s を正常に追加しました</string>
+    <string name="alert_add_remote_partial">中断されたため、新しいリモート %1$s を部分的に追加しました</string>
+    <string name="alert_import_success">設定を正常にインポートしました</string>
+    <string name="alert_import_failure">設定のインポートに失敗しました</string>
+    <string name="alert_import_cancelled">設定のインポートがキャンセルされました</string>
+    <string name="alert_export_success">設定を正常にエクスポートしました</string>
+    <string name="alert_export_failure">設定のエクスポートに失敗しました</string>
+    <string name="alert_export_cancelled">設定のエクスポートがキャンセルされました</string>
+    <string name="alert_logcat_success">ログを %1$s に正常に保存しました</string>
+    <string name="alert_logcat_failure">ログの %1$s への保存に失敗しました</string>
+
+    <string name="alert_edit_remote_success">リモート %1$s を正常に編集しました</string>
+    <string name="alert_delete_remote_failure">リモート %1$s の削除に失敗しました</string>
+    <string name="alert_rename_remote_failure">リモート名を %1$s から %2$s へ変更することに失敗しました</string>
+    <string name="alert_duplicate_remote_failure">リモート %1$s から %2$s への複製に失敗しました</string>
+    <string name="alert_set_config_failure">リモート %2$s の設定オプション %1$s の設定に失敗しました</string>
+
+    <string name="biometric_title">設定のロック解除</string>
+    <string name="biometric_error">生体認証エラー: %1$s</string>
+    <string name="biometric_error_cancelled">ロック解除操作がキャンセルされました</string>
+    <string name="biometric_ignore">デバイスの画面ロックが設定されていないため、アプリのロックを無視します</string>
+
+    <string name="dialog_action_back">戻る</string>
+    <string name="dialog_action_next">次へ</string>
+    <string name="dialog_action_authorize">認証する</string>
+    <string name="dialog_action_proceed_anyway">警告を無視して続行</string>
+    <string name="dialog_remote_name_message">リモートの名前を入力してください。</string>
+    <string name="dialog_remote_name_hint">リモート名</string>
+    <string name="dialog_add_remote_title">リモートを追加</string>
+    <string name="dialog_rename_remote_title">%1$s の名前を変更</string>
+    <string name="dialog_duplicate_remote_title">%1$s を複製</string>
+    <string name="dialog_delete_remote_title">%1$s を削除</string>
+    <string name="dialog_authorize_title">認証を待機中</string>
+    <string name="dialog_authorize_message_loading">rcloneウェブサーバーの起動を待機しています。</string>
+    <string name="dialog_authorize_message_url">以下のリンクを開き、rcloneによるバックエンドへのアクセスを認証してください。認証が完了すると、トークンが前の画面に自動的に挿入されます。</string>
+    <string name="dialog_import_password_title">設定のインポート</string>
+    <string name="dialog_import_password_message">選択された設定ファイルは暗号化されています。インポートするには復号パスワードを入力してください。</string>
+    <string name="dialog_import_password_hint">復号パスワード</string>
+    <string name="dialog_export_password_title">設定のエクスポート</string>
+    <string name="dialog_export_password_message">エクスポートする設定ファイルを暗号化するためのパスワードを入力してください。空欄のままにすると平文で保存されます。</string>
+    <string name="dialog_export_password_hint">暗号化パスワード</string>
+    <string name="dialog_export_password_confirm_hint">パスワードの確認</string>
+    <string name="dialog_inactivity_timeout_title">無操作タイムアウト</string>
+    <string name="dialog_inactivity_timeout_message">時間を秒単位で入力してください。</string>
+    <string name="dialog_vfs_cache_deletion_message">進行中のアップロードが中断される可能性があります。これらはVFSキャッシュから永久に削除されます。</string>
+
+    <string name="ic_title_add_remote">リモートを追加: %1$s</string>
+    <string name="ic_title_edit_remote">リモートを編集: %1$s</string>
+    <string name="ic_text_box_helper_required">値を入力する必要があります。</string>
+    <string name="ic_text_box_helper_not_required">値は空欄でも構いません。</string>
+    <string name="ic_header_examples">オプションの例:</string>
+
+    <string name="vfs_options_title">VFSオプション: %1$s</string>
+    <string name="vfs_options_message">カスタムrclone VFSオプションを、1行に1つずつ <tt>キー=値</tt> の形式で入力してください。キーには、コマンドライン引数から先頭の <tt>--</tt> を除き、その他のハイフンをアンダースコアに置き換えたものを指定します。利用可能なオプションの一覧については、<annotation type="rclone_vfs_docs">rcloneのドキュメント</annotation>を参照してください。</string>
+    <string name="vfs_options_reload_warning"><b>注意</b>: 変更を適用するにはVFSを再読み込みする必要があります。これにより、このリモートで進行中のファイル操作が中断されます。</string>
+    <string name="vfs_options_save_and_reload">保存して再読み込み</string>
+    <string name="vfs_options_save_only">保存のみ</string>
+
+    <string name="notification_channel_keep_alive_name">バックグラウンドサービス</string>
+    <string name="notification_channel_keep_alive_desc">ファイルが開かれている間、またはアップロード中のプロセスを維持します</string>
+    <string name="notification_channel_failure_name">失敗アラート</string>
+    <string name="notification_channel_failure_desc">バックグラウンドアップロード中のエラーを通知します</string>
+    <string name="notification_keep_alive_title">ファイル操作が進行中</string>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d 個のファイルが開いています</item>
+        <item quantity="other">%d 個のファイルが開いています</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d 個のファイルをアップロード中</item>
+        <item quantity="other">%d 個のファイルをアップロード中</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d 個のファイルがアップロード待機中</item>
+        <item quantity="other">%d 個のファイルがアップロード待機中</item>
+    </plurals>
+    <string name="notification_keep_alive_cleanup_wait_desc">VFSキャッシュのクリーンアップを待機中</string>
+    <string name="notification_background_upload_failed_title">リモートへのファイルアップロードに失敗しました</string>
+</resources>
