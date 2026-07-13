@@ -1,0 +1,1 @@
+AndroidのStorage Access Frameworkを利用して、rcloneへアクセスできるようにする連携アプリ
