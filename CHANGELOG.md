@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.7
 
 * Add Japanese translations ([PR #318])
 
