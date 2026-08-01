@@ -7,6 +7,12 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+**NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
+
+* Update rclone to 1.75.0 ([PR #319])
+
 ### Version 4.7
 
 * Add Japanese translations ([PR #318])
@@ -552,6 +558,7 @@
 [Issue #299]: https://github.com/chenxiaolong/RSAF/issues/299
 [Issue #302]: https://github.com/chenxiaolong/RSAF/issues/302
 [Issue #311]: https://github.com/chenxiaolong/RSAF/issues/311
+[Issue #320]: https://github.com/chenxiaolong/RSAF/issues/320
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -750,3 +757,4 @@
 [PR #316]: https://github.com/chenxiaolong/RSAF/pull/316
 [PR #317]: https://github.com/chenxiaolong/RSAF/pull/317
 [PR #318]: https://github.com/chenxiaolong/RSAF/pull/318
+[PR #319]: https://github.com/chenxiaolong/RSAF/pull/319
