@@ -14,6 +14,7 @@
 * Update rclone to 1.75.0 ([PR #319])
 * Fix removal of custom VFS options not being saved ([PR #321])
   * This was a regression introduced in version 3.38.
+* Close authorization dialog if the `rclone authorize` server exits unexpectedly ([PR #322])
 
 ### Version 4.7
 
@@ -761,3 +762,4 @@
 [PR #318]: https://github.com/chenxiaolong/RSAF/pull/318
 [PR #319]: https://github.com/chenxiaolong/RSAF/pull/319
 [PR #321]: https://github.com/chenxiaolong/RSAF/pull/321
+[PR #322]: https://github.com/chenxiaolong/RSAF/pull/322
