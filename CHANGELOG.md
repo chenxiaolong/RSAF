@@ -12,6 +12,8 @@
 **NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
 
 * Update rclone to 1.75.0 ([PR #319])
+* Fix removal of custom VFS options not being saved ([PR #321])
+  * This was a regression introduced in version 3.38.
 
 ### Version 4.7
 
@@ -758,3 +760,4 @@
 [PR #317]: https://github.com/chenxiaolong/RSAF/pull/317
 [PR #318]: https://github.com/chenxiaolong/RSAF/pull/318
 [PR #319]: https://github.com/chenxiaolong/RSAF/pull/319
+[PR #321]: https://github.com/chenxiaolong/RSAF/pull/321
