@@ -79,6 +79,7 @@ object Authorizer {
                 }
 
                 Log.d(TAG, "Stopped authorize server")
+                cancelLogReader()
             }.apply { start() }
 
             try {

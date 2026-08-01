@@ -97,6 +97,11 @@ class AuthorizeService : Service(), Authorizer.AuthorizeListener {
                     authorizeThread = Thread {
                         try {
                             Authorizer.authorizeBlocking(cmd, this)
+
+                            // Give the client some sort of response so that it knows we exited.
+                            if (authorizeCode == null) {
+                                onAuthorizeCode("")
+                            }
                         } catch (e: Exception) {
                             Log.e(TAG, "Failed to run authorizer", e)
                         } finally {
@@ -124,8 +129,7 @@ class AuthorizeService : Service(), Authorizer.AuthorizeListener {
 
     private fun cancel() {
         if (!cancelled) {
-            // This cannot be done on the main thread because it makes a localhost HTTP request.
-            Thread(Authorizer::cancel).start()
+            Authorizer.cancel()
             cancelled = true
         }
     }
