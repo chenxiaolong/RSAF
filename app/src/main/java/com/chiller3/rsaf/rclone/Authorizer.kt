@@ -147,8 +147,7 @@ object Authorizer {
                     if (!inCode) {
                         val pos = line.indexOf(MARKER_URL)
                         if (pos >= 0) {
-                            val url = line.substring(pos + MARKER_URL.length)
-                            listener.onAuthorizeUrl(url)
+                            RcloneRpc.authorizeUrl()?.let(listener::onAuthorizeUrl)
                             continue
                         }
                     }
@@ -175,20 +174,10 @@ object Authorizer {
     }
 
     private fun cancelServer() {
-        // This is horrendous, but the only way to kill the server is by sending a bad request.
         try {
-            val conn = URL(Rcbridge.rbAuthorizeUrl()).openConnection() as HttpURLConnection
-            val response = if (conn.responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
-                conn.errorStream.use { it.readBytes() }.toString(Charsets.UTF_8)
-            } else {
-                conn.inputStream.use { it.readBytes() }.toString(Charsets.UTF_8)
-            }
-
-            Log.w(TAG, "Sent bad request to kill authorize server; " +
-                    "response: ${response.length} bytes")
+            RcloneRpc.authorizeCancel()
         } catch (e: Exception) {
-            // Intentionally omitting the stack trace because this path is "normal"
-            Log.w(TAG, "Error when cancelling authorize server: $e")
+            Log.w(TAG, "Error when cancelling authorize server", e)
         }
     }
 

@@ -40,9 +40,9 @@ Also, check `sync.MoveDir()` to see if still leaves behind an empty source direc
 
 ### `RbAuthorize`
 
-Check if there is a more library-friendly API for doing what `rclone authorize` does. Currently, the authorization flow is done in a blocking way. It starts a webserver to handle the oauth flow and waits for the authorization to complete before returning. If the user wants to cancel the authorization process, the only way to do so is by sending an invalid request to the webserver or by killing the (Linux) process entirely.
+Check if there is a more library-friendly API for doing what `rclone authorize` does. Currently, the authorization flow is done in a blocking way. It starts a webserver to handle the oauth flow and waits for the authorization to complete before returning.
 
-In addition, the URL and token are sent to stdout (or the logs). RSAF currently has to resort to parsing the logcat output to retrieve that information.
+In addition, the token is sent to stdout (or the logs). RSAF currently has to resort to parsing the logcat output to retrieve that information.
 
 ## [`Authorizer.kt`](./app/src/main/java/com/chiller3/rsaf/rclone/Authorizer.kt)
 
@@ -55,10 +55,6 @@ Also, check that `GO_TAG` still matches the logcat tag that gomobile uses.
 ### Command parsing
 
 Check the `oauthutil.ConfigOAuth()` implementation to see if the way that the interactive question shows the `rclone authorize` command is still the same. Currently, it uses `%q` to format values, which happen to never have characters that need to be escaped. If that changes, then the parser in `parseCmd` needs to be updated accordingly.
-
-### Server cancellation
-
-Currently, the only way to stop the `rclone authorize` server is by sending it a bad request. Check that this mechanism still works. This can be done on the command line by running `rclone authorize <backend>` and then making a GET request to http://localhost:53682/.
 
 ## [`RcloneConfig.kt`](./app/src/main/java/com/chiller3/rsaf/rclone/RcloneConfig.kt)
 

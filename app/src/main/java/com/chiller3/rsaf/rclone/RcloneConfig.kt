@@ -219,13 +219,6 @@ object RcloneConfig {
         }
     }
 
-    fun deleteSectionKey(remote: String, key: String) {
-        synchronized(globalStateLock) {
-            Rcbridge.rbConfigDeleteSectionKey(remote, key)
-            saveLocked()
-        }
-    }
-
     class BadPasswordException(message: String?, cause: Throwable? = null)
         : Exception(message, cause)
 

@@ -41,11 +41,14 @@ object RcloneRpc {
      *
      * @throws IOException if the RPC call does not return a 200 status
      */
-    private fun invoke(method: String, input: JSONObject): JSONObject {
+    private fun invoke(method: String, input: JSONObject, notifyBackup: Boolean = true): JSONObject {
         val result = Rcbridge.rbRpcCall(method, input.toString())
 
-        when (method) {
-            "config/create", "config/delete", "config/update" -> RcloneConfig.notifyConfigChanged()
+        if (notifyBackup) {
+            when (method) {
+                "config/create", "config/delete", "config/unset", "config/update" ->
+                    RcloneConfig.notifyConfigChanged()
+            }
         }
 
         if (result.status != 200L) {
@@ -474,12 +477,20 @@ object RcloneRpc {
 
     /** Directly and non-interactively set config key/value pairs for a remote. */
     private fun setRemoteOptions(remote: String, options: Map<String, String?>) {
-        // The RPC API can add and update keys, but cannot delete them. This is done before
-        // config/update because the RPC call will trigger the notification to the backup manager.
-        for ((k, v) in options.entries) {
-            if (v == null) {
-                RcloneConfig.deleteSectionKey(remote, k)
+        val deleteKeys = JSONArray().apply {
+            for ((k, v) in options.entries) {
+                if (v == null) {
+                    put(k)
+                }
             }
+        }
+        if (deleteKeys.length() > 0) {
+            invoke("config/unset", JSONObject()
+                .put("name", remote)
+                .put("keys", deleteKeys),
+                // The update below will do it.
+                notifyBackup = false,
+            )
         }
 
         invoke("config/update", JSONObject()
@@ -628,5 +639,19 @@ object RcloneRpc {
         }
 
         return VfsQueueStats(inProgress, pending)
+    }
+
+    fun authorizeUrl(): String? {
+        val output = invoke("config/oauthstatus", JSONObject())
+
+        return if (output.getString("status") == "running") {
+            output.getString("authUrl")
+        } else {
+            null
+        }
+    }
+
+    fun authorizeCancel() {
+        invoke("config/oauthstop", JSONObject())
     }
 }

@@ -462,10 +462,6 @@ func RbConfigCopySection(oldName string, newName string) {
 	}
 }
 
-func RbConfigDeleteSectionKey(name string, key string) bool {
-	return config.Data().DeleteKey(name, key)
-}
-
 func RbConfigSetPath(path string, errOut *RbError) bool {
 	err := config.SetConfigPath(path)
 	if err != nil {
