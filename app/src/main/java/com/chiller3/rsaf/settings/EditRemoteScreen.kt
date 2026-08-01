@@ -415,7 +415,7 @@ private fun EditRemoteContent(
     if (showVfsOptionsDialog) {
         VfsOptionsDialog(
             remote = remote,
-            initialOptions = state.config?.vfsOptions!!,
+            initialOptions = state.config!!.vfsOptionsOrDefault,
             onSelect = { options, reload ->
                 onVfsOptionsChange(options, reload)
                 showVfsOptionsDialog = false

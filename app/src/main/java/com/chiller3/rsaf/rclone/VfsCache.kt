@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2024-2025 Andrew Gunnerson
+ * SPDX-FileCopyrightText: 2024-2026 Andrew Gunnerson
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -159,7 +159,7 @@ object VfsCache {
             }
 
             val vfsOptions = try {
-                getVfsOptions(config.vfsOptions)
+                getVfsOptions(config.vfsOptionsOrDefault)
             } catch (e: Exception) {
                 Log.w(TAG, "Invalid VFS option overrides for remote: $remote", e)
                 continue

@@ -526,7 +526,7 @@ object RcloneRpc {
         val dynamicShortcut: Boolean? = null,
         val thumbnails: Boolean? = null,
         val reportUsage: Boolean? = null,
-        val vfsOptions: Map<String, String> = emptyMap(),
+        val vfsOptions: Map<String, String>? = null,
     ) {
         constructor(config: Map<String, String>) : this(
             hardBlocked = config[CUSTOM_OPT_HARD_BLOCKED]?.toBooleanStrictOrNull(),
@@ -537,7 +537,8 @@ object RcloneRpc {
             vfsOptions = config
                 .asSequence()
                 .filter { it.key.startsWith(CUSTOM_OPT_VFS_OPTIONS_PREFIX) }
-                .associate { it.key.substring(CUSTOM_OPT_VFS_OPTIONS_PREFIX.length) to it.value },
+                .associate { it.key.substring(CUSTOM_OPT_VFS_OPTIONS_PREFIX.length) to it.value }
+                .takeIf { it.isNotEmpty() },
         )
 
         fun toMap(): Map<String, String> = buildMap {
@@ -546,7 +547,17 @@ object RcloneRpc {
             dynamicShortcut?.let { put(CUSTOM_OPT_DYNAMIC_SHORTCUT, it.toString()) }
             thumbnails?.let { put(CUSTOM_OPT_THUMBNAILS, it.toString()) }
             reportUsage?.let { put(CUSTOM_OPT_REPORT_USAGE, it.toString()) }
-            vfsOptions.mapKeysTo(this) { CUSTOM_OPT_VFS_OPTIONS_PREFIX + it.key }
+            vfsOptions?.let { it.mapKeysTo(this) { e -> CUSTOM_OPT_VFS_OPTIONS_PREFIX + e.key } }
+        }
+
+        fun changesKey(key: String): Boolean = when {
+            key == CUSTOM_OPT_HARD_BLOCKED -> hardBlocked != null
+            key == CUSTOM_OPT_SOFT_BLOCKED -> softBlocked != null
+            key == CUSTOM_OPT_DYNAMIC_SHORTCUT -> dynamicShortcut != null
+            key == CUSTOM_OPT_THUMBNAILS -> thumbnails != null
+            key == CUSTOM_OPT_REPORT_USAGE -> reportUsage != null
+            key.startsWith(CUSTOM_OPT_VFS_OPTIONS_PREFIX) -> vfsOptions != null
+            else -> false
         }
 
         val hardBlockedOrDefault: Boolean
@@ -559,15 +570,17 @@ object RcloneRpc {
             get() = thumbnails ?: DEFAULT_THUMBNAILS
         val reportUsageOrDefault: Boolean
             get() = reportUsage ?: DEFAULT_REPORT_USAGE
+        val vfsOptionsOrDefault: Map<String, String>
+            get() = vfsOptions ?: emptyMap()
     }
 
     fun setRemoteConfig(remote: String, config: RemoteConfig) {
         val updates = mutableMapOf<String, String?>()
 
-        // Ensure we don't leave behind legacy options.
+        // Explicitly unset any legacy keys and keys that are going to be changed by this operation.
         remoteConfigsRaw[remote]
             ?.asSequence()
-            ?.filter { (key, _) -> !isKnownKey(key) }
+            ?.filter { (key, _) -> !isKnownKey(key) || config.changesKey(key) }
             ?.associateTo(updates) { (key, _) -> key to null }
 
         updates.putAll(config.toMap())

@@ -347,7 +347,7 @@ class RcloneProviderTest {
 
     private fun setVfsCaching(enabled: Boolean?) {
         val config = RcloneRpc.remoteConfigs[remote]!!
-        val vfsOptions = config.vfsOptions.toMutableMap()
+        val vfsOptions = config.vfsOptionsOrDefault.toMutableMap()
 
         when (enabled) {
             true -> vfsOptions["vfs_cache_mode"] = "writes"
