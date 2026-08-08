@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Fix git submodules not being rebuilt in certain scenarios ([PR #323])
+
 ### Version 4.8
 
 **NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
@@ -763,3 +767,4 @@
 [PR #319]: https://github.com/chenxiaolong/RSAF/pull/319
 [PR #321]: https://github.com/chenxiaolong/RSAF/pull/321
 [PR #322]: https://github.com/chenxiaolong/RSAF/pull/322
+[PR #323]: https://github.com/chenxiaolong/RSAF/pull/323
