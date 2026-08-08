@@ -288,8 +288,11 @@ val golang = tasks.register("golang") {
     val goBinDir = File(goDir, "bin")
     val goGitDir = File(File(File(File(rootDir, ".git"), "modules"), "external"), "go")
 
-    inputs.files(
-        File(goGitDir, "HEAD"),
+    // jgit can't read a submodule's .git file.
+    val goGit = Git.open(goGitDir)!!
+
+    inputs.properties(
+        "submodule.commit" to goGit.log().call().iterator().next().id.name,
     )
     outputs.files(
         File(goBinDir, "go"),
