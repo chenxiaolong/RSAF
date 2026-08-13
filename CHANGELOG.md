@@ -10,6 +10,7 @@
 ### Unreleased
 
 * Fix git submodules not being rebuilt in certain scenarios ([PR #323])
+* Update golang to 1.26.6 ([PR #325])
 
 ### Version 4.8
 
@@ -768,3 +769,4 @@
 [PR #321]: https://github.com/chenxiaolong/RSAF/pull/321
 [PR #322]: https://github.com/chenxiaolong/RSAF/pull/322
 [PR #323]: https://github.com/chenxiaolong/RSAF/pull/323
+[PR #325]: https://github.com/chenxiaolong/RSAF/pull/325
