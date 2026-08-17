@@ -241,6 +241,10 @@ func RbInit() {
 	// agent is just "rclone/".
 	ci.UserAgent = fmt.Sprintf("rclone/%s", fs.VersionTag)
 
+	// Disable HTTP/2 to avoid low throughput due to golang's HTTP client.
+	// https://github.com/rclone/rclone/issues/8379
+	ci.DisableHTTP2 = true
+
 	RbReloadCerts()
 }
 
