@@ -9,6 +9,8 @@
 
 ### Unreleased
 
+* Disable HTTP/2 globally ([Issue #326], [PR #327])
+  * Works around golang HTTP client limitations that previously resulted in low throughput ([upstream bug report](https://github.com/rclone/rclone/issues/8379)).
 * Fix git submodules not being rebuilt in certain scenarios ([PR #323])
 * Update golang to 1.26.6 ([PR #325])
 
@@ -567,6 +569,7 @@
 [Issue #302]: https://github.com/chenxiaolong/RSAF/issues/302
 [Issue #311]: https://github.com/chenxiaolong/RSAF/issues/311
 [Issue #320]: https://github.com/chenxiaolong/RSAF/issues/320
+[Issue #326]: https://github.com/chenxiaolong/RSAF/issues/326
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -770,3 +773,4 @@
 [PR #322]: https://github.com/chenxiaolong/RSAF/pull/322
 [PR #323]: https://github.com/chenxiaolong/RSAF/pull/323
 [PR #325]: https://github.com/chenxiaolong/RSAF/pull/325
+[PR #327]: https://github.com/chenxiaolong/RSAF/pull/327
