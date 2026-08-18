@@ -13,6 +13,7 @@
   * Works around golang HTTP client limitations that previously resulted in low throughput ([upstream bug report](https://github.com/rclone/rclone/issues/8379)).
 * Fix git submodules not being rebuilt in certain scenarios ([PR #323])
 * Update golang to 1.26.6 ([PR #325])
+* Update dependencies ([PR #328])
 
 ### Version 4.8
 
@@ -774,3 +775,4 @@
 [PR #323]: https://github.com/chenxiaolong/RSAF/pull/323
 [PR #325]: https://github.com/chenxiaolong/RSAF/pull/325
 [PR #327]: https://github.com/chenxiaolong/RSAF/pull/327
+[PR #328]: https://github.com/chenxiaolong/RSAF/pull/328
