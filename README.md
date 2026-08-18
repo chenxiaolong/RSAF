@@ -89,6 +89,8 @@ Then, check that the SHA-256 digest of the APK signing certificate is:
 b2506499bea1c5a6e658f07be6773fe486999dc124204c6522af7407503ac9f9
 ```
 
+Alternatively, if `apksigner` is not installed, the APK files can be verified against the external `.apk.sig` SSH signatures using [the steps here](https://github.com/chenxiaolong/chenxiaolong/blob/master/VERIFY_SSH_SIGNATURES.md).
+
 ## Building from source
 
 Before building, the following tools must be installed:

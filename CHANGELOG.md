@@ -7,7 +7,9 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.9
+
+**NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
 
 * Disable HTTP/2 globally ([Issue #326], [PR #327])
   * Works around golang HTTP client limitations that previously resulted in low throughput ([upstream bug report](https://github.com/rclone/rclone/issues/8379)).
