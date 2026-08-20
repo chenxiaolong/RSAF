@@ -158,6 +158,9 @@ android {
 
         resValue("string", "app_name", "@string/app_name_release")
     }
+    androidResources {
+        generateLocaleConfig = true
+    }
     signingConfigs {
         create("release") {
             val keystore = System.getenv("RELEASE_KEYSTORE")
