@@ -89,8 +89,8 @@ func replaceAbsPaths(basePath string, data map[string]any) error {
 		return fmt.Errorf("failed to compute relative path: %v: %w", data["GoMod"], err)
 	}
 
-	data["Dir"] = relDir
-	data["GoMod"] = relGoMod
+	data["Dir"] = filepath.ToSlash(relDir)
+	data["GoMod"] = filepath.ToSlash(relGoMod)
 
 	return nil
 }

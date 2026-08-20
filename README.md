@@ -127,6 +127,8 @@ and then build the release APK:
 ./gradlew assembleRelease
 ```
 
+**NOTE**: For reproducible builds on Windows, the `core.autocrlf=false` and `core.eol=lf` global git config options must be set before cloning the repo. No workarounds are needed on other platforms.
+
 ### Android Studio
 
 When loading the project in Android Studio, it might be necessary to build rcbridge once first:

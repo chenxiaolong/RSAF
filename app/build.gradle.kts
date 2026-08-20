@@ -13,7 +13,6 @@ import org.eclipse.jgit.api.ArchiveCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.archive.TarFormat
 import org.eclipse.jgit.lib.ObjectId
-import org.gradle.kotlin.dsl.environment
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
@@ -118,9 +117,20 @@ val projectUrl = "https://github.com/chenxiaolong/RSAF"
 val extraDir = layout.buildDirectory.map { it.dir("extra") }
 val archiveDir = extraDir.map { it.dir("archive") }
 val rcbridgeDir = extraDir.map { it.dir("rcbridge") }
+val rcbridgeRawAar = rcbridgeDir.map { it.file("rcbridge-raw.aar") }
 val rcbridgeAar = rcbridgeDir.map { it.file("rcbridge.aar") }
+val rcbridgeUnpackedDir = rcbridgeDir.map { it.dir("unpacked") }
+val rcbridgeCommentlessDir = rcbridgeDir.map { it.dir("commentless") }
+val rcbridgeSrcDir = File(rootDir, "rcbridge")
+
+val goDir = File(rootDir, "external/go")
+val goSrcDir = File(goDir, "src")
+val goBinDir = File(goDir, "bin")
 
 val abis = arrayOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+
+val isWindows = DefaultNativePlatform.getCurrentOperatingSystem().isWindows
+val exeExt = if (isWindows) ".exe" else ""
 
 android {
     namespace = "com.chiller3.rsaf"
@@ -280,13 +290,8 @@ interface InjectedExecOps {
     @get:Inject val execOps: ExecOperations
 }
 
-val rcbridgeSrcDir = File(rootDir, "rcbridge")
-
 val golang = tasks.register("golang") {
-    val goDir = File(File(rootDir, "external"), "go")
-    val goSrcDir = File(goDir, "src")
-    val goBinDir = File(goDir, "bin")
-    val goGitDir = File(File(File(File(rootDir, ".git"), "modules"), "external"), "go")
+    val goGitDir = File(rootDir, ".git/modules/external/go")
 
     // jgit can't read a submodule's .git file.
     val goGit = Git.open(goGitDir)!!
@@ -295,15 +300,15 @@ val golang = tasks.register("golang") {
         "submodule.commit" to goGit.log().call().iterator().next().id.name,
     )
     outputs.files(
-        File(goBinDir, "go"),
-        File(goBinDir, "gofmt"),
+        File(goBinDir, "go$exeExt"),
+        File(goBinDir, "gofmt$exeExt"),
     )
 
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
         injected.execOps.exec {
-            if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) {
+            if (isWindows) {
                 executable("cmd.exe")
                 args("/C", "make.bat")
             } else {
@@ -311,6 +316,40 @@ val golang = tasks.register("golang") {
             }
             workingDir(goSrcDir)
         }
+    }
+}
+
+val golangClean = tasks.register("golangClean") {
+    outputs.upToDateWhen { false }
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+    val goExecutable = File(goBinDir, "go$exeExt")
+
+    doFirst {
+        if (!goExecutable.exists()) {
+            throw StopExecutionException()
+        }
+    }
+
+    // Just run the cleanup commands directly. clean.bash and clean.bat do not behave the same way.
+    doLast {
+        for (args in arrayOf(
+            arrayOf("clean", "-i", "std"),
+            arrayOf("tool", "dist", "clean"),
+            arrayOf("clean", "-i", "cmd"),
+        )) {
+            injected.execOps.exec {
+                executable(goExecutable)
+                args(*args)
+                workingDir(goSrcDir)
+            }
+        }
+    }
+}
+
+tasks {
+    getByName<Delete>("clean") {
+        dependsOn.add(golangClean)
     }
 }
 
@@ -369,14 +408,14 @@ val gomobile = tasks.register("gomobile") {
         goenv.map { it.outputs.files },
     )
     outputs.files(
-        binDir.map { it.file("gobind") },
-        binDir.map { it.file("gomobile") },
+        binDir.map { it.file("gobind$exeExt") },
+        binDir.map { it.file("gomobile$exeExt") },
     )
 
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
-        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
+        val goExecutable = golang.get().outputs.files.find { it.name == "go$exeExt" }!!
         val outputStream = ByteArrayOutputStream()
 
         injected.execOps.exec {
@@ -422,13 +461,13 @@ val gowrapper = tasks.register("gowrapper") {
         goenv.map { it.outputs.files },
     )
     outputs.files(
-        binDir.map { it.file("go") },
+        binDir.map { it.file("go$exeExt") },
     )
 
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
-        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
+        val goExecutable = golang.get().outputs.files.find { it.name == "go$exeExt" }!!
 
         injected.execOps.exec {
             executable(goExecutable)
@@ -442,7 +481,7 @@ val gowrapper = tasks.register("gowrapper") {
     }
 }
 
-val rcbridge = tasks.register("rcbridge") {
+val rcbridgeRaw = tasks.register("rcbridgeRaw") {
     project.objects.newInstance<UsesSdkComponentsBuildService>().let { usesSdkComponents ->
         usesSdkComponents.initializeSdkComponentsBuildService(this)
         val sdkComponentsBuildService = usesSdkComponents.sdkComponentsBuildService.get()
@@ -476,7 +515,7 @@ val rcbridge = tasks.register("rcbridge") {
         File(rcbridgeSrcDir, "go.mod"),
         File(rcbridgeSrcDir, "go.sum"),
         File(rcbridgeSrcDir, "rcbridge.go"),
-        File(File(rcbridgeSrcDir, "envhack"), "envhack.go"),
+        File(rcbridgeSrcDir, "envhack/envhack.go"),
         golang.map { it.outputs.files },
         goenv.map { it.outputs.files },
         gomobile.map { it.outputs.files },
@@ -491,8 +530,8 @@ val rcbridge = tasks.register("rcbridge") {
                 androidComponents.sdkComponents.sdkDirectory.map { it.asFile.absolutePath },
     )
     outputs.files(
-        rcbridgeDir.map { it.file("rcbridge.aar") },
-        rcbridgeDir.map { it.file("rcbridge-sources.jar") },
+        rcbridgeRawAar,
+        rcbridgeDir.map { it.file("rcbridge-raw-sources.jar") },
     )
 
     doFirst {
@@ -502,9 +541,8 @@ val rcbridge = tasks.register("rcbridge") {
     val injected = project.objects.newInstance<InjectedExecOps>()
 
     doLast {
-        val goExecutable = golang.get().outputs.files.find { it.name == "go" }!!
-        val goBinDir = goExecutable.parentFile
-        val gomobileExecutable = gomobile.get().outputs.files.find { it.name == "gomobile" }!!
+        val goExecutable = golang.get().outputs.files.find { it.name == "go$exeExt" }!!
+        val gomobileExecutable = gomobile.get().outputs.files.find { it.name == "gomobile$exeExt" }!!
         val binDir = gomobileExecutable.parentFile
 
         injected.execOps.exec {
@@ -521,7 +559,7 @@ val rcbridge = tasks.register("rcbridge") {
             args(
                 "bind",
                 "-v",
-                "-o", rcbridgeAar.get().asFile.absolutePath,
+                "-o", rcbridgeRawAar.get().asFile.absolutePath,
                 "-target=android",
                 "-androidapi=${android.defaultConfig.minSdk}",
                 "-javapkg=${android.namespace}.binding",
@@ -532,11 +570,14 @@ val rcbridge = tasks.register("rcbridge") {
             environment(
                 // gomobile only supports finding gobind in $PATH. binDir is listed before goBinDir
                 // so that gowrapper is used.
-                "PATH" to "$binDir${File.pathSeparator}$goBinDir${File.pathSeparator}${environment["PATH"]}",
+                "PATH" to "$binDir${File.pathSeparator}$goBinDir${File.pathSeparator}${System.getenv("PATH")}",
                 "ANDROID_HOME" to androidComponents.sdkComponents.sdkDirectory.get()
                     .asFile.absolutePath,
                 "ANDROID_NDK_HOME" to androidComponents.sdkComponents.ndkDirectory.get()
                     .asFile.absolutePath,
+                // Windows.
+                "TMP" to tempDir.get().asFile.absolutePath,
+                // Non-Windows.
                 "TMPDIR" to tempDir.get().asFile.absolutePath,
                 // The wrapper will use this as a template to construct a relative path for
                 // reproducible builds. This will need to change if gomobile ever changes their
@@ -573,6 +614,85 @@ val rcbridge = tasks.register("rcbridge") {
     }
 }
 
+val rcbridgeRawUnpack = tasks.register<Copy>("rcbridgeRawUnpack") {
+    outputs.dir(rcbridgeUnpackedDir)
+
+    from(zipTree(rcbridgeRaw.map { it.outputs.files.find { f -> f.name.endsWith(".aar") } }))
+    into(rcbridgeUnpackedDir)
+}
+
+val rcbridgeStripComment = tasks.register("rcbridgeStripComment") {
+    val objcopyExecutables: Provider<Map<String, File>>
+
+    project.objects.newInstance<UsesSdkComponentsBuildService>().let { usesSdkComponents ->
+        usesSdkComponents.initializeSdkComponentsBuildService(this)
+        val sdkComponentsBuildService = usesSdkComponents.sdkComponentsBuildService.get()
+
+        val sdkComponents = androidComponents.sdkComponents as SdkComponentsImpl
+        val ndkHandler = sdkComponentsBuildService.versionedNdkHandler(
+            sdkComponents.ndkVersion.get(),
+            sdkComponents.ndkPath.takeIf { it.isPresent }?.get(),
+        )
+
+        objcopyExecutables = ndkHandler.objcopyExecutableMapProvider
+    }
+
+    inputs.dir(rcbridgeRawUnpack.map { it.outputs.files.first() })
+    outputs.dir(rcbridgeCommentlessDir)
+
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
+    // The same version of the NDK running on different host platforms produces executables with
+    // different version strings in the .comment section of the ELF file. We can just remove that
+    // entire section to make the file reproducible.
+    doFirst {
+        val unpackedDir = rcbridgeUnpackedDir.get().asFile
+        val commentlessDir = rcbridgeCommentlessDir.get().asFile
+
+        delete(commentlessDir)
+        commentlessDir.mkdir()
+
+        for (file in unpackedDir.walkTopDown()) {
+            val relPath = file.toRelativeString(unpackedDir)
+            val targetFile = File(commentlessDir, relPath)
+
+            if (file.isDirectory) {
+                file.mkdir()
+            } else if (file.name == "libgojni.so") {
+                val abi = file.parentFile.name
+                val targetFile = File(commentlessDir, relPath)
+
+                targetFile.parentFile.mkdirs()
+
+                injected.execOps.exec {
+                    executable(objcopyExecutables.get()[abi])
+                    args("--remove-section", ".comment", file, targetFile)
+                }
+            } else {
+                file.copyTo(targetFile)
+            }
+        }
+    }
+}
+
+val rcbridge = tasks.register<Zip>("rcbridge") {
+    archiveFileName.set(rcbridgeAar.map { it.asFile.name })
+    destinationDirectory.set(rcbridgeDir)
+
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+
+    from(rcbridgeStripComment)
+}
+
+tasks {
+    getByName<Delete>("clean") {
+        val syncthingDir = File(rootDir, "external/syncthing")
+        delete.add(File(syncthingDir, "cmd/infra/strelaypoolsrv/auto/gui.files.go"))
+        delete.add(File(syncthingDir, "lib/api/auto/gui.files.go"))
+    }
+}
+
 /*
  * NOTE: This requires the https://crates.io/crates/resvg CLI utility. RSAF's SVG icon uses
  * transform-origin, which very few SVG parsers support.
@@ -581,8 +701,8 @@ val rcbridge = tasks.register("rcbridge") {
  * https://gitlab.com/inkscape/inbox/-/issues/4640
  */
 tasks.register("iconPng") {
-    val inputSvg = File(File(File(rootDir, "app"), "images"), "icon.svg")
-    val outputPng = File(File(File(File(rootDir, "metadata"), "en-US"), "images"), "icon.png")
+    val inputSvg = File(rootDir, "app/images/icon.svg")
+    val outputPng = File(rootDir, "metadata/en-US/images/icon.png")
 
     inputs.files(inputSvg)
     outputs.files(outputPng)
@@ -734,7 +854,7 @@ tasks.register("versionPreRelease") {
         ?.let { getVersionCode(VersionTriple("v$it", 0, ObjectId.zeroId())) }
 
     doLast {
-        File(File(rootDir, "metadata"), "version.txt").writeText(gitVersionCode!!.toString())
+        File(rootDir, "metadata/version.txt").writeText(gitVersionCode!!.toString())
     }
 }
 
