@@ -12,6 +12,7 @@
 **NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
 
 * Update golang to 1.27.0 ([PR #329])
+* Add support for building the app on Windows ([PR #330])
 
 ### Version 4.9
 
@@ -785,3 +786,4 @@
 [PR #327]: https://github.com/chenxiaolong/RSAF/pull/327
 [PR #328]: https://github.com/chenxiaolong/RSAF/pull/328
 [PR #329]: https://github.com/chenxiaolong/RSAF/pull/329
+[PR #330]: https://github.com/chenxiaolong/RSAF/pull/330
