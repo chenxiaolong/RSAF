@@ -147,6 +147,8 @@ RSAF is dedicated to my cat Meow-Meow, who unexpectedly passed away during the i
 
 ## Contributing
 
+([AI policy](https://github.com/chenxiaolong/chenxiaolong/blob/master/AI_POLICY.md))
+
 Bug fix and translation pull requests are welcome and much appreciated!
 
 If you are interested in implementing a new feature and would like to see it included in RSAF, please open an issue to discuss it first. This is a side project that I work on for fun, so I'm hesitant to add features I won't personally use. I intend for RSAF to be as simple and low-maintenance as possible.
