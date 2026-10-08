@@ -701,7 +701,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
 
         return DocumentsContract.Path(
             if (parentDocumentId == null) {
-                childRemote
+                childRemote.trimEnd(':')
             } else {
                 null
             },
