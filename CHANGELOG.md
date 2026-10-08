@@ -12,6 +12,7 @@
 **NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
 
 * Fix opening the system file manager (DocumentsUI) to a specific directory within an rclone remote ([Issue #343], [PR #344])
+* Update dependencies ([PR #345])
 
 ### Version 4.12
 
@@ -815,3 +816,4 @@
 [PR #335]: https://github.com/chenxiaolong/RSAF/pull/335
 [PR #337]: https://github.com/chenxiaolong/RSAF/pull/337
 [PR #344]: https://github.com/chenxiaolong/RSAF/pull/344
+[PR #345]: https://github.com/chenxiaolong/RSAF/pull/345
