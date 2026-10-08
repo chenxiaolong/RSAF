@@ -3,15 +3,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-@file:OptIn(ExperimentalUnsignedTypes::class)
-
 package com.chiller3.rsaf.settings
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import com.chiller3.rsaf.R
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ErrorDetailsDialog(
     message: String?,

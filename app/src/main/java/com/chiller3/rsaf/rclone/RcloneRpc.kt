@@ -196,7 +196,6 @@ object RcloneRpc {
         val readOnly = data.getBoolean("ReadOnly")
     }
 
-    @Suppress("unused")
     class MetadataInfo(data: JSONObject) {
         val system: Map<String, MetadataHelp> = mutableMapOf<String, MetadataHelp>().apply {
             data.optJSONObject("System")?.let { jsonSystem ->
@@ -238,7 +237,6 @@ object RcloneRpc {
         val metadataInfo = data.optJSONObject("MetadataInfo")?.let { MetadataInfo(it) }
     }
 
-    @Suppress("unused")
     class ProviderOptionExample(data: JSONObject) {
         val value: String = data.getString("Value")
         val help: String = data.getString("Help")

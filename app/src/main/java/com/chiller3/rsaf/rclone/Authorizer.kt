@@ -10,8 +10,6 @@ import com.chiller3.rsaf.RandomUtils
 import com.chiller3.rsaf.binding.rcbridge.RbError
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 
 /**
  * A hacky class that does what `rclone authorize` does.

@@ -36,7 +36,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -198,7 +197,6 @@ private fun tryReveal(text: String, isPassword: Boolean): String {
     return value
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("PrivateResource")
 @Composable
 private fun InteractiveConfigurationContent(

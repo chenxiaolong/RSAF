@@ -31,7 +31,6 @@
     <string name="pref_require_auth_desc">RSAFの設定表示や変更を行う際に、生体認証または画面ロックのPIN/パスワードを要求します。</string>
     <string name="pref_inactivity_timeout_name">無操作タイムアウト</string>
     <plurals name="pref_inactivity_timeout_desc">
-        <item quantity="one">アプリを離れてから %d 秒後にロックします。</item>
         <item quantity="other">アプリを離れてから %d 秒後にロックします。</item>
     </plurals>
     <string name="pref_lock_now_name">今すぐロック</string>
@@ -142,15 +141,12 @@
     <string name="notification_channel_failure_desc">バックグラウンドアップロード中のエラーを通知します</string>
     <string name="notification_keep_alive_title">ファイル操作が進行中</string>
     <plurals name="notification_keep_alive_files_open_desc">
-        <item quantity="one">%d 個のファイルが開いています</item>
         <item quantity="other">%d 個のファイルが開いています</item>
     </plurals>
     <plurals name="notification_keep_alive_files_uploading_desc">
-        <item quantity="one">%d 個のファイルをアップロード中</item>
         <item quantity="other">%d 個のファイルをアップロード中</item>
     </plurals>
     <plurals name="notification_keep_alive_files_pending_desc">
-        <item quantity="one">%d 個のファイルがアップロード待機中</item>
         <item quantity="other">%d 個のファイルがアップロード待機中</item>
     </plurals>
     <string name="notification_keep_alive_cleanup_wait_desc">VFSキャッシュのクリーンアップを待機中</string>

@@ -49,7 +49,6 @@ import com.chiller3.rsaf.binding.rcbridge.RbFile
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
-import com.chiller3.rsaf.rclone.RcloneProvider.Companion.MIME_TYPE_BINARY
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.Executors
