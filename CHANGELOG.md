@@ -7,6 +7,12 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+**NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
+
+* Fix opening the system file manager (DocumentsUI) to a specific directory within an rclone remote ([Issue #343], [PR #344])
+
 ### Version 4.12
 
 **NOTE**: Due to Google's new pricing policy, rclone will be revoking their OAuth client ID soon, which will break Google Drive and Google Photos access. See [Issue #320] for more details.
@@ -596,6 +602,7 @@
 [Issue #320]: https://github.com/chenxiaolong/RSAF/issues/320
 [Issue #326]: https://github.com/chenxiaolong/RSAF/issues/326
 [Issue #333]: https://github.com/chenxiaolong/RSAF/issues/333
+[Issue #343]: https://github.com/chenxiaolong/RSAF/issues/343
 [PR #1]: https://github.com/chenxiaolong/RSAF/pull/1
 [PR #2]: https://github.com/chenxiaolong/RSAF/pull/2
 [PR #3]: https://github.com/chenxiaolong/RSAF/pull/3
@@ -807,3 +814,4 @@
 [PR #332]: https://github.com/chenxiaolong/RSAF/pull/332
 [PR #335]: https://github.com/chenxiaolong/RSAF/pull/335
 [PR #337]: https://github.com/chenxiaolong/RSAF/pull/337
+[PR #344]: https://github.com/chenxiaolong/RSAF/pull/344
