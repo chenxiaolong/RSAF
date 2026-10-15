@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Skip computing filesystem usage info when a system app lists the remotes but doesn't ask for those fields ([PR #348])
+
 ### Version 4.14
 
 * Update rclone to 1.75.2 ([PR #346])
@@ -822,3 +826,4 @@
 [PR #344]: https://github.com/chenxiaolong/RSAF/pull/344
 [PR #345]: https://github.com/chenxiaolong/RSAF/pull/345
 [PR #346]: https://github.com/chenxiaolong/RSAF/pull/346
+[PR #348]: https://github.com/chenxiaolong/RSAF/pull/348
