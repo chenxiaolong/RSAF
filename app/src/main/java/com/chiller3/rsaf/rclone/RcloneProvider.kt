@@ -550,19 +550,24 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
     override fun queryRoots(projection: Array<String>?): Cursor = withParcelableException {
         debugLog("queryRoots(${projection.contentToString()})")
 
-        return MatrixCursor(getRootProjection(projection)).apply {
+        val projection = getRootProjection(projection)
+        val remoteConfigs = RcloneRpc.remoteConfigs
+
+        return MatrixCursor(projection, remoteConfigs.size).apply {
             var flags = ROOT_FLAGS
             if (prefs.pretendLocal) {
                 flags = flags or DocumentsContract.Root.FLAG_LOCAL_ONLY
             }
 
-            for ((remote, config) in RcloneRpc.remoteConfigs) {
+            for ((remote, config) in remoteConfigs) {
                 if (config.hardBlockedOrDefault) {
                     debugLog("Skipping blocked remote: $remote")
                     continue
                 }
 
-                val usage = if (config.reportUsageOrDefault) {
+                val usage = if (config.reportUsageOrDefault
+                        && (DocumentsContract.Root.COLUMN_CAPACITY_BYTES in projection
+                                || DocumentsContract.Root.COLUMN_AVAILABLE_BYTES in projection)) {
                     debugLog("Querying filesystem usage: $remote")
                     try {
                         RcloneRpc.getUsage("$remote:")
@@ -605,11 +610,10 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         enforceNotBlocked(remote, config)
 
         val error = RbError()
+        val entries = Rcbridge.rbDocListDir(parentDocumentId, error)
+            ?: throw error.toException("rbDocListDir")
 
-        return MatrixCursor(getDocumentProjection(projection)).apply {
-            val entries = Rcbridge.rbDocListDir(parentDocumentId, error)
-                ?: throw error.toException("rbDocListDir")
-
+        return MatrixCursor(getDocumentProjection(projection), entries.size().toInt()).apply {
             for (i in 0 until entries.size()) {
                 addRowByDirEntry(newRow(), entries.get(i), config.thumbnailsOrDefault)
             }
@@ -632,7 +636,7 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         val entry = Rcbridge.rbDocStat(documentId, error)
             ?: throw error.toException("rbDocStat")
 
-        return MatrixCursor(getDocumentProjection(projection)).apply {
+        return MatrixCursor(getDocumentProjection(projection), 1).apply {
             addRowByDirEntry(newRow(), entry, config.thumbnailsOrDefault)
         }
     }
