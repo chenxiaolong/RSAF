@@ -11,7 +11,7 @@
 
 * Skip computing filesystem usage info when a system app lists the remotes but doesn't ask for those fields ([PR #348])
 * Update golang to 1.27.3 for [CVE-2026-111943](https://github.com/golang/go/issues/82345) ([PR #349])
-  * Some of emSign's intermediate CA certificates are being distrusted due to a not-yet-disclosed [security incident](https://github.com/certifi/python-certifi/issues/439).
+  * Several of eMudhra's intermediate CA certificates are being distrusted due to [their private keys being trivially discoverable](https://bugzilla.mozilla.org/show_bug.cgi?id=2083449).
 
 ### Version 4.14
 
