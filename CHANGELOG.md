@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.15
 
 * Skip computing filesystem usage info when a system app lists the remotes but doesn't ask for those fields ([PR #348])
 * Update golang to 1.27.3 for [CVE-2026-111943](https://github.com/golang/go/issues/82345) ([PR #349])
