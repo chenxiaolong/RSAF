@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.16
 
 * Limit remote descriptions to 2 lines to prevent excessively long text (like with rclone's S3 backend) ([Issue #351], [PR #352])
 
