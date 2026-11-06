@@ -100,6 +100,7 @@ class AuthorizeService : Service(), Authorizer.AuthorizeListener {
 
                             // Give the client some sort of response so that it knows we exited.
                             if (authorizeCode == null) {
+                                Log.w(TAG, "Did not receive any code response")
                                 onAuthorizeCode("")
                             }
                         } catch (e: Exception) {

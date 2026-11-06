@@ -1357,3 +1357,12 @@ func RbAuthorize(argsNullSep string, errOut *RbError) bool {
 func RbAuthorizeUrl() string {
 	return oauthutil.RedirectLocalhostURL
 }
+
+// Log a message from the golang side. This is needed for the authorization flow
+// due to log buffering. If the cancel message is logged from the Java side, it
+// might appear in logcat before go's log buffers are flushed.
+func RbLog(message string) {
+	// This is intentionally logging at the error level because HarmonyOS
+	// devices seem to only preserve error logs.
+	fs.LogLevelPrint(fs.LogLevelError, nil, message)
+}

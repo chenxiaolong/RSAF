@@ -46,12 +46,6 @@ object Authorizer {
             }
             .drop(2)
 
-    private fun logAsIfGo(msg: String) {
-        // This is intentionally logging at the error level because HarmonyOS devices seem to only
-        // preserve error logs.
-        Log.e(GO_TAG, msg)
-    }
-
     private fun authorizeBlockingLocked(cmd: String, listener: AuthorizeListener) {
         val args = parseCmd(cmd)
 
@@ -65,7 +59,7 @@ object Authorizer {
 
         try {
             val markerNow = randomMarker("start")
-            logAsIfGo(markerNow)
+            Rcbridge.rbLog(markerNow)
 
             val server = Thread {
                 Log.d(TAG, "Starting authorize server for $args")
@@ -169,7 +163,7 @@ object Authorizer {
     }
 
     private fun cancelLogReader() {
-        logAsIfGo(MARKER_CANCEL)
+        Rcbridge.rbLog(MARKER_CANCEL)
     }
 
     private fun cancelServer() {
