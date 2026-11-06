@@ -7,6 +7,10 @@
     to update the actual links at the bottom of the file.
 -->
 
+### Unreleased
+
+* Update rclone to 1.76.0 ([PR #353])
+
 ### Version 4.16
 
 * Limit remote descriptions to 2 lines to prevent excessively long text (like with rclone's S3 backend) ([Issue #351], [PR #352])
@@ -836,3 +840,4 @@
 [PR #348]: https://github.com/chenxiaolong/RSAF/pull/348
 [PR #349]: https://github.com/chenxiaolong/RSAF/pull/349
 [PR #352]: https://github.com/chenxiaolong/RSAF/pull/352
+[PR #353]: https://github.com/chenxiaolong/RSAF/pull/353
