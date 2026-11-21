@@ -7,7 +7,7 @@
     to update the actual links at the bottom of the file.
 -->
 
-### Unreleased
+### Version 4.18
 
 * Move VFS cache directory out of Android's cache directory ([Issue #356], [PR #357])
   * Prevents potential data loss from losing pending uploads if the app cache is cleared, either by the user or by Android
