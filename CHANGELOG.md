@@ -11,6 +11,7 @@
 
 * Move VFS cache directory out of Android's cache directory ([Issue #356], [PR #357])
   * Prevents potential data loss from losing pending uploads if the app cache is cleared, either by the user or by Android
+* Update dependencies ([PR #358])
 
 ### Version 4.17
 
@@ -848,3 +849,4 @@
 [PR #352]: https://github.com/chenxiaolong/RSAF/pull/352
 [PR #353]: https://github.com/chenxiaolong/RSAF/pull/353
 [PR #357]: https://github.com/chenxiaolong/RSAF/pull/357
+[PR #358]: https://github.com/chenxiaolong/RSAF/pull/358
