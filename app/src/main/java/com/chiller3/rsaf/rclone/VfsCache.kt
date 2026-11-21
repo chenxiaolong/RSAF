@@ -32,7 +32,7 @@ object VfsCache {
     fun init(context: Context) {
         appDataDir = context.dataDir
         dataDataDir = File("/data/data", context.packageName)
-        vfsCacheDir = normalizePath(File(context.cacheDir, "rclone/vfs"))
+        vfsCacheDir = normalizePath(File(context.filesDir, "rclone/vfs"))
     }
 
     private fun normalizePath(path: File): File {

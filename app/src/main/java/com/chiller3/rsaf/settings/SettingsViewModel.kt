@@ -250,7 +250,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun addInternalCacheRemote() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val cacheDir = File(getApplication<Application>().cacheDir, "rclone").path
+                val cacheDir = File(getApplication<Application>().filesDir, "rclone").path
 
                 val iq = RcloneRpc.InteractiveConfiguration(INTERNAL_CACHE_REMOTE_NAME)
                 while (true) {

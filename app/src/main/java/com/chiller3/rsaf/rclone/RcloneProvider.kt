@@ -49,6 +49,7 @@ import com.chiller3.rsaf.binding.rcbridge.RbFile
 import com.chiller3.rsaf.binding.rcbridge.Rcbridge
 import com.chiller3.rsaf.extension.toException
 import com.chiller3.rsaf.extension.toSingleLineString
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -453,7 +454,22 @@ class RcloneProvider : DocumentsProvider(), SharedPreferences.OnSharedPreference
         // XDG_CACHE_HOME environment variable to achieve the same effect. Environment variables set
         // in libc's global environ variable are never read by golang, so rcbridge has an envhack
         // package to explicitly copy env vars from C land to Go land.
-        Os.setenv("XDG_CACHE_HOME", context.cacheDir.path, true)
+        Os.setenv("XDG_CACHE_HOME", context.filesDir.path, true)
+
+        // We use filesDir for rclone's cache directory to avoid data loss due to removal of the VFS
+        // cache directory. It may be holding pending uploads. We just need to make sure the legacy
+        // directory gets moved, which is just done on the main thread since a single rename syscall
+        // is fast enough.
+        try {
+            Os.rename(
+                File(context.cacheDir, "rclone").path,
+                File(context.filesDir, "rclone").path,
+            )
+        } catch (e: ErrnoException) {
+            if (e.errno != OsConstants.ENOENT) {
+                Log.w(TAG, "Failed to move legacy cache directory", e)
+            }
+        }
 
         Rcbridge.rbInit()
         RcloneConfig.init(context)
