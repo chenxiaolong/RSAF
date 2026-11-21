@@ -1,12 +1,11 @@
 [versions]
-android-gradle-plugin = "9.5.1"
+android-gradle-plugin = "9.5.2"
 androidx-activity = "1.13.0"
-androidx-biometric = "1.4.0-beta01"
-androidx-compose-bom = "2026.09.00"
-androidx-compose-material3 = "1.5.0-rc01"
+androidx-biometric = "1.4.0-rc01"
+androidx-compose-bom = "2026.11.01"
 androidx-core = "1.19.1"
 androidx-exifinterface = "1.4.2"
-androidx-lifecycle-viewmodel-compose = "2.11.0"
+androidx-lifecycle-viewmodel-compose = "2.11.1"
 androidx-preference = "1.2.1"
 androidx-test-espresso-core = "3.7.0"
 jgit = "7.8.1.202611041320-r"
@@ -20,7 +19,7 @@ tink-android = "1.24.0"
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
 androidx-biometric-compose = { group = "androidx.biometric", name = "biometric-compose", version.ref = "androidx-biometric" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "androidx-compose-material3" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
