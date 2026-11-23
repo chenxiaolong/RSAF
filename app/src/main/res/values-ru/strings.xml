@@ -1,0 +1,173 @@
+<!--
+    SPDX-FileCopyrightText: 2023-2026 Andrew Gunnerson
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<resources>
+    <!-- Preference headers -->
+    <string name="pref_header_permissions">Разрешения</string>
+    <string name="pref_header_remotes">Удаленные хранилища</string>
+    <string name="pref_header_remote">Удаленное хранилище</string>
+    <string name="pref_header_configuration">Конфигурация</string>
+    <string name="pref_header_behavior">Поведение</string>
+    <string name="pref_header_app_lock">Защита приложения</string>
+    <string name="pref_header_advanced">Дополнительно</string>
+    <string name="pref_header_about">О программе</string>
+    <string name="pref_header_debug">Отладка</string>
+
+    <!-- Main preferences -->
+    <string name="pref_inhibit_battery_opt_name">Отключить экономию заряда</string>
+    <string name="pref_inhibit_battery_opt_desc">Необходимо для выгрузки файлов в фоновом режиме.</string>
+    <string name="pref_allow_notifications_name">Разрешить уведомления</string>
+    <string name="pref_allow_notifications_desc">Необходимо для отображения прогресса загрузки файлов в фоновом режиме.</string>
+    <string name="pref_allow_local_network_name">Разрешить доступ к локальной сети</string>
+    <string name="pref_allow_local_network_desc">Необходимо для подключения к устройствам в локальной сети.</string>
+    <string name="pref_add_remote_name">Добавить хранилище</string>
+    <string name="pref_add_remote_desc">Создайте новое подключение к хранилищу rclone.</string>
+    <string name="pref_import_configuration_name">Импорт конфигурации</string>
+    <string name="pref_import_configuration_desc">Импорт существующего файла конфигурации rclone.</string>
+    <string name="pref_export_configuration_name">Экспорт конфигурации</string>
+    <string name="pref_export_configuration_desc">Экспорт текущей конфигурации rclone в файл.</string>
+    <string name="pref_add_file_extension_name">Добавить расширение файла</string>
+    <string name="pref_add_file_extension_desc">Автоматически добавлять расширение файла при его создании.</string>
+    <string name="pref_pretend_local_name">Имитировать локальное хранилище</string>
+    <string name="pref_pretend_local_desc">Представлять хранилища rclone как локальные для совместимости с приложениями, которые работают только с локальными файлами.</string>
+    <string name="pref_local_storage_access_name">Разрешить доступ к локальному хранилищу</string>
+    <string name="pref_local_storage_access_desc">Позволяет составным хранилищам (таким как <tt>crypt</tt>) обращаться к файлам в локальной памяти по пути <tt>/sdcard</tt>.</string>
+    <string name="pref_require_auth_name">Запрашивать аутентификацию</string>
+    <string name="pref_require_auth_desc">Запрашивать биометрические данные или PIN-код/пароль для доступа к настройкам RSAF.</string>
+    <string name="pref_inactivity_timeout_name">Время ожидания</string>
+    <plurals name="pref_inactivity_timeout_desc">
+        <item quantity="one">Блокировать через %d с после закрытия приложения.</item>
+        <item quantity="other">Блокировать через %d с после закрытия приложения.</item>
+    </plurals>
+    <string name="pref_lock_now_name">Заблокировать сейчас</string>
+    <string name="pref_lock_now_desc">Заблокировать немедленно, не дожидаясь автоблокировки.</string>
+    <string name="pref_allow_backup_name">Резервное копирование Android</string>
+    <string name="pref_allow_backup_desc">Разрешать бэкап при сквозном шифровании или прямом переносе на другое устройство. RSAF не может это проверить.</string>
+    <string name="pref_version_name">Версия</string>
+    <string name="pref_verbose_rclone_logs_name">Подробный журнал rclone</string>
+    <string name="pref_verbose_rclone_logs_desc">Внимание: Подробный журнал может содержать конфиденциальную информацию (включая токены аутентификации).</string>
+    <string name="pref_save_logs_name">Сохранить журнал</string>
+    <string name="pref_save_logs_desc">Сохранение журнала logcat в файл. Учтите, что журнал может содержать имена файлов, к которым обращались на удаленном сервере.</string>
+    <string name="pref_add_internal_cache_remote_name">Добавить кэширующее хранилище rclone</string>
+    <string name="pref_add_internal_cache_remote_desc">Создает <tt>alias</tt> на папку кэша rclone. Полезно для отладки VFS.</string>
+
+    <!-- Remote preferences -->
+    <string name="pref_edit_remote_open_name">Открыть хранилище</string>
+    <string name="pref_edit_remote_open_desc">Открыть это хранилище в системном файловом менеджере.</string>
+    <string name="pref_edit_remote_configure_name">Настройка хранилища</string>
+    <string name="pref_edit_remote_configure_desc">Повторно запустить мастер настройки rclone.</string>
+    <string name="pref_edit_remote_rename_name">Переименование хранилища</string>
+    <string name="pref_edit_remote_rename_desc">Измените имя хранилища. Все зависимые хранилища нужно будет обновить вручную.</string>
+    <string name="pref_edit_remote_duplicate_name">Создать копию хранилища</string>
+    <string name="pref_edit_remote_duplicate_desc">Создать копию этого хранилища с теми же настройками.</string>
+    <string name="pref_edit_remote_delete_name">Удаление хранилища</string>
+    <string name="pref_edit_remote_delete_desc">Удалить хранилище из конфигурации.</string>
+    <string name="pref_edit_remote_allow_external_access_name">Доступ для сторонних приложений</string>
+    <string name="pref_edit_remote_allow_external_access_desc">Разрешает доступ сторонним приложениям через системный файловый менеджер. Не требуется, если хранилище служит основой для другого хранилища.</string>
+    <string name="pref_edit_remote_allow_locked_access_name">Доступ если RSAF заблокирован</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_on">Файлы остаются доступны сторонним приложениям с разрешениями, даже когда RSAF заблокировано.</string>
+    <string name="pref_edit_remote_allow_locked_access_desc_off">Когда RSAF заблокировано, файлы скрыты от сторонних приложений, а новые операции с ними заблокированы. Это не влияет на уже открытые файлы.</string>
+    <string name="pref_edit_remote_dynamic_shortcut_name">Ярлыки приложения</string>
+    <string name="pref_edit_remote_dynamic_shortcut_desc">Показывать хранилище при долгом нажатии на значок RSAF.</string>
+    <string name="pref_edit_remote_thumbnails_name">Отображение миниатюр</string>
+    <string name="pref_edit_remote_thumbnails_desc">Разрешить показ миниатюр фото, видео и обложек альбомов. Это увеличить расход мобильного трафика.</string>
+    <string name="pref_edit_remote_report_usage_name">Использование хранилища</string>
+    <string name="pref_edit_remote_report_usage_desc_loading">(Проверка поддержки данных об использовании хранилища…)</string>
+    <string name="pref_edit_remote_report_usage_desc_supported">Сообщает сторонним приложениям информацию о свободном и общем объеме хранилища. Для некоторых типов хранилищ это может значительно замедлить работу приложений при получении списка хранилищ.</string>
+    <string name="pref_edit_remote_report_usage_desc_unsupported">Этот тип хранилища не поддерживает вывод данных об объеме хранилища.</string>
+    <string name="pref_edit_remote_vfs_options_name">Дополнительные параметры VFS</string>
+    <string name="pref_edit_remote_vfs_options_desc">Задание дополнительных опций VFS, поддерживаемых командой <tt>rclone mount</tt>.</string>
+
+    <!-- Alerts -->
+    <string name="action_details">Подробнее</string>
+    <string name="dialog_error_details_title">Подробнее об ошибке</string>
+    <string name="alert_browser_not_found">Веб-браузер недоступен.</string>
+    <string name="alert_documentsui_not_found">Встроенный файловый менеджер Android (DocumentsUI) отключен или недоступен.</string>
+
+    <!-- Main alerts -->
+    <string name="alert_list_remotes_failure">Ошибка получения списка хранилищ</string>
+    <string name="alert_add_remote_success">Добавлено новое хранилище: %1$s</string>
+    <string name="alert_add_remote_partial">Настройка «%1$s» прервана: добавлено частично</string>
+    <string name="alert_import_success">Конфигурация успешно импортирована</string>
+    <string name="alert_import_failure">Не удалось импортировать конфигурацию</string>
+    <string name="alert_import_cancelled">Импорт конфигурации отменён</string>
+    <string name="alert_export_success">Конфигурация успешно экспортирована</string>
+    <string name="alert_export_failure">Не удалось экспортировать конфигурацию</string>
+    <string name="alert_export_cancelled">Экспорт конфигурации отменён</string>
+    <string name="alert_logcat_success">Журнал успешно сохранён в %1$s</string>
+    <string name="alert_logcat_failure">Не удалось сохранить журнал в %1$s</string>
+
+    <!-- Edit remote alerts -->
+    <string name="alert_edit_remote_success">%1$s хранилище обновлено</string>
+    <string name="alert_delete_remote_failure">%1$s ошибка удаления хранилища</string>
+    <string name="alert_rename_remote_failure">Ошибка переименования хранилища %1$s в %2$s</string>
+    <string name="alert_duplicate_remote_failure">Ошибка создания копии хранилища из %1$s в %2$s</string>
+    <string name="alert_set_config_failure">Не удалось настроить параметр «%1$s» для хранилища %2$s</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Разблокировать конфигурацию</string>
+    <string name="biometric_error">Ошибка биометрической аутентификации: %1$s</string>
+    <string name="biometric_error_cancelled">Разблокировка отменена</string>
+    <string name="biometric_ignore">Блокировка пропущена: не настроена блокировка экрана</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_action_back">Назад</string>
+    <string name="dialog_action_next">Далее</string>
+    <string name="dialog_action_authorize">Авторизация</string>
+    <string name="dialog_action_proceed_anyway">Всё равно продолжить</string>
+    <string name="dialog_remote_name_message">Введите название хранилища.</string>
+    <string name="dialog_remote_name_hint">Название хранилища</string>
+    <string name="dialog_add_remote_title">Создать хранилище</string>
+    <string name="dialog_rename_remote_title">Переименовать: %1$s</string>
+    <string name="dialog_duplicate_remote_title">Создать копию: %1$s</string>
+    <string name="dialog_delete_remote_title">Удалить: %1$s</string>
+    <string name="dialog_authorize_title">Ожидание авторизации</string>
+    <string name="dialog_authorize_message_loading">Ожидание запуска веб-сервера rclone.</string>
+    <string name="dialog_authorize_message_url">Откройте ссылку ниже, чтобы разрешить rclone доступ к хранилищу. После прохождения авторизации токен будет автоматически подставлен на предыдущем экране.</string>
+    <string name="dialog_import_password_title">Импорт конфигурации</string>
+    <string name="dialog_import_password_message">Выбранный файл конфигурации зашифрован. Введите пароль расшифровки для его импорта.</string>
+    <string name="dialog_import_password_hint">Пароль расшифровки</string>
+    <string name="dialog_export_password_title">Экспорт конфигурации</string>
+    <string name="dialog_export_password_message">Введите пароль для шифрования файла или оставьте поле пустым для сохранения без шифрования.</string>
+    <string name="dialog_export_password_hint">Пароль шифрования</string>
+    <string name="dialog_export_password_confirm_hint">Подтверждение пароля</string>
+    <string name="dialog_inactivity_timeout_title">Автоблокировка при бездействии</string>
+    <string name="dialog_inactivity_timeout_message">Время (в секундах).</string>
+    <string name="dialog_vfs_cache_deletion_message">Идут загрузки. Их прерывание приведет к удалению файлов из кэша VFS.</string>
+
+    <!-- Interactive configuration -->
+    <string name="ic_title_add_remote">Добавить хранилище: %1$s</string>
+    <string name="ic_title_edit_remote">Редактировать хранилище: %1$s</string>
+    <string name="ic_text_box_helper_required">Поле не должно быть пустым.</string>
+    <string name="ic_text_box_helper_not_required">Значение может оставаться пустым.</string>
+    <string name="ic_header_examples">Примеры значений:</string>
+
+    <!-- VFS options dialog -->
+    <string name="vfs_options_title">Параметры VFS: %1$s</string>
+    <string name="vfs_options_message">Указывайте пользовательские параметры VFS rclone в формате <tt>key=value</tt> (по одному на строку). Ключом является аргумент командной строки без префикса <tt>--</tt>, где все остальные дефисы заменены на символы подчёркивания. Список доступных параметров смотрите <annotation type="rclone_vfs_docs">в документации rclone.</annotation></string>
+    <string name="vfs_options_reload_warning"><b>!!ВНИМАНИЕ!!</b>: для применения изменений требуется перезагрузка VFS. Это прервёт выполняемые операции с файлами в данном хранилище.</string>
+    <string name="vfs_options_save_and_reload">Сохранить и перезагрузить</string>
+    <string name="vfs_options_save_only">Только сохранить</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_keep_alive_name">Фоновые сервисы</string>
+    <string name="notification_channel_keep_alive_desc">Сохраняет процесс активным до завершения работы с файлами или их загрузки.</string>
+    <string name="notification_channel_failure_name">Уведомления об ошибках</string>
+    <string name="notification_channel_failure_desc">Уведомления об ошибках фоновой загрузки</string>
+    <string name="notification_keep_alive_title">Выполняются операции с файлами</string>
+    <plurals name="notification_keep_alive_files_open_desc">
+        <item quantity="one">%d файл открыт</item>
+        <item quantity="other">%d файлов открыто</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_uploading_desc">
+        <item quantity="one">%d загрузка файла</item>
+        <item quantity="other">%d загрузка файлов</item>
+    </plurals>
+    <plurals name="notification_keep_alive_files_pending_desc">
+        <item quantity="one">%d файл ожидает загрузки</item>
+        <item quantity="other">%d файлов ожидают загрузки</item>
+    </plurals>
+    <string name="notification_keep_alive_cleanup_wait_desc">Ожидание очистки кэша VFS</string>
+    <string name="notification_background_upload_failed_title">Не удалось загрузить файл в хранилище</string>
+</resources>
